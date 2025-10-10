@@ -1,7 +1,6 @@
----
-title: Aspect CLI
-sidebar_label: Overview
----
+> [!IMPORTANT]
+> **Maintenance Mode Notice**<br>
+> This repository contains the legacy Go implementation of the Aspect CLI and is now in maintenance mode. It has been superseded by a new Rust-based version available at https://github.com/aspect-build/aspect-cli.
 
 Aspect CLI (`aspect`) is wrapper for [Bazel], built on top of [Bazelisk], that adds additional features and extensibility to the popular polyglot build system from Google.
 
