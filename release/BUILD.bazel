@@ -16,7 +16,7 @@ brew_go_artifacts(
 """,
     bottle_root_url = "https://github.com/aspect-build/aspect-cli-legacy/releases/download/0.0.0-PLACEHOLDER",
     desc = "Correct, fast, usable: choose three",
-    formula_name = "aspect",
+    formula_name = "aspect-legacy",
     homepage = "https://aspect.build",
     license = "Apache-2.0",
     multi_platform_go_binaries = "//release:aspect",
@@ -24,7 +24,7 @@ brew_go_artifacts(
         ":LICENSE",
         ":README.md",
     ],
-    url = "https://github.com/aspect-build",
+    url = "https://github.com/aspect-build/aspect-cli-legacy",
     version_file = "//release:aspect_version_file",
 )
 
