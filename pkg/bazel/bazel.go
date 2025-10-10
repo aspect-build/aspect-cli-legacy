@@ -216,10 +216,6 @@ func (b *bazel) HandleReenteringAspect(streams ioutils.Streams, args []string, a
 	return false, nil
 }
 
-func GetAspectVersions() ([]string, error) {
-	return GetBazelVersions("aspect-build/aspect-cli")
-}
-
 func GetBazelVersions(bazelFork string) ([]string, error) {
 	repos := createRepositories(core.MakeDefaultConfig())
 
