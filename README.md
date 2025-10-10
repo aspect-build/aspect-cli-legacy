@@ -40,7 +40,7 @@ The underlying version of Bazel can be configured in your `.bazelversion` file o
 To install the Aspect CLI on MacOS, you can run
 
 ```sh
-brew install aspect-build/aspect/aspect
+brew install aspect-build/aspect/aspect-legacy
 ```
 
 This installs the `aspect` command and also links it to `bazel`, just like the [Bazelisk] installer does.
