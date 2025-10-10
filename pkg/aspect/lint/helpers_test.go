@@ -23,8 +23,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aspect-build/aspect-cli/pkg/aspect/lint/diagnostic"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/lint/diagnostic"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 	"github.com/spf13/cobra"
 )
 

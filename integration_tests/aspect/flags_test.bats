@@ -48,7 +48,7 @@ EOF
 
 @test 'lock_version flag should prevent downloading and running bazeliskrc version' {
     cat >.bazeliskrc <<'EOF'
-BAZELISK_BASE_URL=https://github.com/aspect-build/aspect-cli/releases/download/
+BAZELISK_BASE_URL=https://github.com/aspect-build/aspect-cli-legacy/releases/download/
 USE_BAZEL_VERSION=aspect/1.2.3
 EOF
 

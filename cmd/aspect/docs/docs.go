@@ -19,8 +19,8 @@ package docs
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/aspect-build/aspect-cli/pkg/aspect/docs"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/docs"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 )
 
 func NewDefaultCmd() *cobra.Command {

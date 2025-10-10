@@ -27,10 +27,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 
-	"github.com/aspect-build/aspect-cli/cmd/aspect/root"
-	"github.com/aspect-build/aspect-cli/pkg/bazel"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
-	"github.com/aspect-build/aspect-cli/pkg/plugin/system"
+	"github.com/aspect-build/aspect-cli-legacy/cmd/aspect/root"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/bazel"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system"
 )
 
 func main() {

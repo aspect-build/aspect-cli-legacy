@@ -32,12 +32,12 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/aspect-build/aspect-cli/bazel/analysis"
-	"github.com/aspect-build/aspect-cli/bazel/flags"
-	"github.com/aspect-build/aspect-cli/pkg/aspecterrors"
-	"github.com/aspect-build/aspect-cli/pkg/bazel/workspace"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils/cache"
+	"github.com/aspect-build/aspect-cli-legacy/bazel/analysis"
+	"github.com/aspect-build/aspect-cli-legacy/bazel/flags"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspecterrors"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/bazel/workspace"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils/cache"
 	"github.com/spf13/cobra"
 
 	"github.com/bazelbuild/bazelisk/config"

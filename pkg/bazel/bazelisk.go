@@ -25,10 +25,10 @@ import (
 	"github.com/bazelbuild/bazelisk/core"
 	"github.com/bazelbuild/bazelisk/httputil"
 
-	"github.com/aspect-build/aspect-cli/buildinfo"
-	"github.com/aspect-build/aspect-cli/pkg/aspect/root/config"
-	"github.com/aspect-build/aspect-cli/pkg/aspecterrors"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/buildinfo"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/root/config"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspecterrors"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 )
 
 const (
@@ -105,10 +105,14 @@ func isBazeliskAspectBootstrap(bazeliskConfig *bazeliskVersionConfig) bool {
 		// aspect/ org is a special case incase a user has a fork of the aspect-cli repo and has a
 		// custom BAZELISK_BASE_URL we can't detect; we generally have it set in all of our
 		// .bazeliskrc examples as best practice even tho it is not strictly needed if you set the
-		// BAZELISK_BASE_URL to https://github.com/aspect-build/aspect-cli/releases/download.
+		// BAZELISK_BASE_URL to https://github.com/aspect-build/aspect-cli-legacy/releases/download.
 		return true
 	}
-	if bazeliskConfig.BazeliskBaseUrl == "https://github.com/aspect-build/aspect-cli/releases/download" {
+	if bazeliskConfig.BazeliskBaseUrl == "https://github.com/aspect-build/aspect-cli-legacy/releases/download" {
+		// GitHub aspect-cli releases
+		return true
+	}
+	if bazeliskConfig.BazeliskBaseUrl == "https://github.com/aspect-build/aspect-cli-legacy/releases/download" {
 		// GitHub aspect-cli releases
 		return true
 	}

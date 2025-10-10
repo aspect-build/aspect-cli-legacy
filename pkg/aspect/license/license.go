@@ -21,8 +21,8 @@ import (
 	_ "embed"
 	"fmt"
 
-	"github.com/aspect-build/aspect-cli/pkg/bazel"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/bazel"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 	"github.com/spf13/cobra"
 )
 

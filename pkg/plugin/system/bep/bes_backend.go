@@ -37,11 +37,11 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	buildeventstream "github.com/aspect-build/aspect-cli/bazel/buildeventstream"
+	buildeventstream "github.com/aspect-build/aspect-cli-legacy/bazel/buildeventstream"
 
-	"github.com/aspect-build/aspect-cli/pkg/aspecterrors"
-	"github.com/aspect-build/aspect-cli/pkg/aspectgrpc"
-	"github.com/aspect-build/aspect-cli/pkg/plugin/system/besproxy"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspecterrors"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspectgrpc"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/besproxy"
 )
 
 // besBackendInterceptorKeyType is a type for the BESBackendInterceptorKey that
@@ -394,7 +394,7 @@ func (bb *besBackend) setupBesUpstreamBackends(ctx context.Context, optionsparse
 		fmt.Fprintf(
 			os.Stderr,
 			"%s --bes_upload_mode nowait_for_upload_complete|fully_async may lead to incomplete BES uploads with Aspect CLI\n\t"+
-				"See: https://github.com/aspect-build/aspect-cli/issues/851\n",
+				"See: https://github.com/aspect-build/aspect-cli-legacy/issues/851\n",
 			color.YellowString("WARNING:"),
 		)
 	}

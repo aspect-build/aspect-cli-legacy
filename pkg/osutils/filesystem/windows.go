@@ -43,11 +43,11 @@ func (f *Filesystem) getAccessTime(workspace fs.FileInfo) time.Duration {
 }
 
 func (f *Filesystem) moveDirectoryToTmp(dir string, name string) (string, error) {
-	// TODO: Add functionality. https://github.com/aspect-build/aspect-cli/issues/196
+	// TODO: Add functionality. https://github.com/aspect-build/aspect-cli-legacy/issues/196
 	return "", nil
 }
 
 func (f *Filesystem) changeDirectoryPermissions(directory string, permissions string) ([]byte, error) {
-	// TODO: Add functionality. https://github.com/aspect-build/aspect-cli/issues/196
+	// TODO: Add functionality. https://github.com/aspect-build/aspect-cli-legacy/issues/196
 	return nil, nil
 }

@@ -30,7 +30,7 @@ Aspect CLI can be installed in an existing Bazel workspace using [Bazelisk].
 > [!NOTE]
 > This approach doesn't provide the `aspect init` command, which has to run outside a Bazel workspace.
 
-From the [OSS releases page](https://github.com/aspect-build/aspect-cli/releases),
+From the [OSS releases page](https://github.com/aspect-build/aspect-cli-legacy/releases),
 copy the `.bazeliskrc` snippet into your `.bazeliskrc` file to install Aspect CLI for all developers in the target repository.
 
 The underlying version of Bazel can be configured in your `.bazelversion` file or the `BAZEL_VERSION` environment variable.
@@ -48,7 +48,7 @@ This installs the `aspect` command and also links it to `bazel`, just like the [
 ### Manual (MacOS / Linux / Windows)
 
 On MacOS and Linux, you can download the Aspect CLI `aspect` binary for your platform on our
-[Releases](https://github.com/aspect-build/aspect-cli/releases) page and add it to your `PATH` manually.
+[Releases](https://github.com/aspect-build/aspect-cli-legacy/releases) page and add it to your `PATH` manually.
 
 Note, if you manually install for MacOS, you can bypass the "Unknown Developer" dialog by running
 `xattr -c $(which aspect)` before launching `aspect`.
@@ -60,7 +60,7 @@ Some are the standard ones you know from Bazel, and others are new, such as `pri
 
 # Need help or having issues?
 
-If you think you've hit a bug please file a [Bug Report](https://github.com/aspect-build/aspect-cli/issues/new/choose).
+If you think you've hit a bug please file a [Bug Report](https://github.com/aspect-build/aspect-cli-legacy/issues/new/choose).
 
 You can also find us on [Bazel Slack](https://slack.bazel.build/) on the #aspect-build channel.
 

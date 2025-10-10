@@ -30,10 +30,10 @@ import (
 	hclog "github.com/hashicorp/go-hclog"
 	goplugin "github.com/hashicorp/go-plugin"
 
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
-	"github.com/aspect-build/aspect-cli/pkg/plugin/sdk/v1alpha4/config"
-	"github.com/aspect-build/aspect-cli/pkg/plugin/sdk/v1alpha4/plugin"
-	"github.com/aspect-build/aspect-cli/pkg/plugin/types"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/sdk/v1alpha4/config"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/sdk/v1alpha4/plugin"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/types"
 )
 
 // A Factory class for constructing plugin instances.

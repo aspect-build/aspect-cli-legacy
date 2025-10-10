@@ -20,10 +20,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aspect-build/aspect-cli/pkg/aspect/root/flags"
-	"github.com/aspect-build/aspect-cli/pkg/bazel"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
-	"github.com/aspect-build/aspect-cli/pkg/plugin/system/bep"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/root/flags"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/bazel"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/bep"
 	"github.com/spf13/cobra"
 )
 

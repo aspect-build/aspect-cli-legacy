@@ -60,11 +60,11 @@ After this, you should be able to merge your changes without any conflicts in th
     ```
 
     > A `v` version prefix is intentionally _not_ included in the release tag so that the GitHub root
-    > download archive `https://github.com/aspect-build/aspect-cli/releases/download` can be used for
+    > download archive `https://github.com/aspect-build/aspect-cli-legacy/releases/download` can be used for
     > Bazelisk installs using `.bazeliskrc`:
     >
     > ```
-    > BAZELISK_BASE_URL=https://github.com/aspect-build/aspect-cli/releases/download
+    > BAZELISK_BASE_URL=https://github.com/aspect-build/aspect-cli-legacy/releases/download
     > USE_BAZEL_VERSION=aspect/xxxx.x.x
     > ```
 

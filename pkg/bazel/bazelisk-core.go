@@ -26,8 +26,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/aspect-build/aspect-cli/buildinfo"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/buildinfo"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 	"github.com/bazelbuild/bazelisk/config"
 	"github.com/bazelbuild/bazelisk/core"
 	"github.com/bazelbuild/bazelisk/platforms"

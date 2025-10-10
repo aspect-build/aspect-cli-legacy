@@ -24,9 +24,9 @@ import (
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/gomega"
 
-	"github.com/aspect-build/aspect-cli/pkg/aspect/clean"
-	"github.com/aspect-build/aspect-cli/pkg/bazel/mock"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/clean"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/bazel/mock"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 )
 
 type confirm struct{}

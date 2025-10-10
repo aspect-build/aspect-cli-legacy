@@ -9,7 +9,7 @@ go_library(
         "run.go",
     ],
     embedsrcs = ["aspect_watch.bzl"],
-    importpath = "github.com/aspect-build/aspect-cli/pkg/aspect/run",
+    importpath = "github.com/aspect-build/aspect-cli-legacy/pkg/aspect/run",
     visibility = ["//visibility:public"],
     deps = [
         "//pkg/aspect/root/flags",

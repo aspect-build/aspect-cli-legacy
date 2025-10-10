@@ -7,11 +7,11 @@
 package buildeventstream
 
 import (
-	action_cache "github.com/aspect-build/aspect-cli/bazel/action_cache"
-	command_line "github.com/aspect-build/aspect-cli/bazel/command_line"
-	failure_details "github.com/aspect-build/aspect-cli/bazel/failure_details"
-	invocation_policy "github.com/aspect-build/aspect-cli/bazel/invocation_policy"
-	packages_metrics "github.com/aspect-build/aspect-cli/bazel/packages_metrics"
+	action_cache "github.com/aspect-build/aspect-cli-legacy/bazel/action_cache"
+	command_line "github.com/aspect-build/aspect-cli-legacy/bazel/command_line"
+	failure_details "github.com/aspect-build/aspect-cli-legacy/bazel/failure_details"
+	invocation_policy "github.com/aspect-build/aspect-cli-legacy/bazel/invocation_policy"
+	packages_metrics "github.com/aspect-build/aspect-cli-legacy/bazel/packages_metrics"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	anypb "google.golang.org/protobuf/types/known/anypb"
@@ -7078,7 +7078,7 @@ const file_bazel_buildeventstream_build_event_stream_proto_rawDesc = "" +
 	"INCOMPLETE\x10\x05\x12\x12\n" +
 	"\x0eREMOTE_FAILURE\x10\x06\x12\x13\n" +
 	"\x0fFAILED_TO_BUILD\x10\a\x12\x1e\n" +
-	"\x1aTOOL_HALTED_BEFORE_TESTING\x10\bB;Z9github.com/aspect-build/aspect-cli/bazel/buildeventstreamb\x06proto3"
+	"\x1aTOOL_HALTED_BEFORE_TESTING\x10\bBBZ@github.com/aspect-build/aspect-cli-legacy/bazel/buildeventstreamb\x06proto3"
 
 var (
 	file_bazel_buildeventstream_build_event_stream_proto_rawDescOnce sync.Once

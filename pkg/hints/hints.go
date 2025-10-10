@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 	"github.com/creack/pty"
 	"golang.org/x/term"
 )

@@ -25,10 +25,10 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
 
-	"github.com/aspect-build/aspect-cli/buildinfo"
-	"github.com/aspect-build/aspect-cli/pkg/aspect/version"
-	bazel_mock "github.com/aspect-build/aspect-cli/pkg/bazel/mock"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/buildinfo"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/version"
+	bazel_mock "github.com/aspect-build/aspect-cli-legacy/pkg/bazel/mock"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 )
 
 const (

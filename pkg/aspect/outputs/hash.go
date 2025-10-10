@@ -33,7 +33,7 @@ import (
 	"strings"
 
 	"github.com/alphadose/haxmap"
-	"github.com/aspect-build/aspect-cli/pkg/bazel"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/bazel"
 	"golang.org/x/mod/sumdb/dirhash"
 
 	concurrently "github.com/tejzpr/ordered-concurrently/v3"

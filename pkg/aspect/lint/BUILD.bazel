@@ -9,7 +9,7 @@ go_library(
         "linthandler.go",
         "sarif.go",
     ],
-    importpath = "github.com/aspect-build/aspect-cli/pkg/aspect/lint",
+    importpath = "github.com/aspect-build/aspect-cli-legacy/pkg/aspect/lint",
     visibility = ["//visibility:public"],
     deps = [
         "//bazel/buildeventstream",

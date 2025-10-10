@@ -24,7 +24,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/aspect-build/aspect-cli/pkg/ioutils/cache"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils/cache"
 	"github.com/bazelbuild/bazelisk/config"
 	"github.com/bazelbuild/bazelisk/httputil"
 	"github.com/fatih/color"

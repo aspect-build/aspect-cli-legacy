@@ -38,8 +38,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/aspect-build/aspect-cli/pkg/bazel"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/bazel"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 	BazelLog "github.com/aspect-build/aspect-gazelle/common/logger"
 )
 

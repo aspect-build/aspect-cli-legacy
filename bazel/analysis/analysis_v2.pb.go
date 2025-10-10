@@ -7,7 +7,7 @@
 package analysis
 
 import (
-	query "github.com/aspect-build/aspect-cli/bazel/query"
+	query "github.com/aspect-build/aspect-cli-legacy/bazel/query"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"

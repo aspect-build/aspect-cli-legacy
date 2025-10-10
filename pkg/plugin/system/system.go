@@ -33,15 +33,15 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"sigs.k8s.io/yaml"
 
-	"github.com/aspect-build/aspect-cli/pkg/aspect/root/config"
-	rootFlags "github.com/aspect-build/aspect-cli/pkg/aspect/root/flags"
-	"github.com/aspect-build/aspect-cli/pkg/aspecterrors"
-	"github.com/aspect-build/aspect-cli/pkg/interceptors"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils/prompt"
-	"github.com/aspect-build/aspect-cli/pkg/plugin/client"
-	"github.com/aspect-build/aspect-cli/pkg/plugin/sdk/v1alpha4/plugin"
-	"github.com/aspect-build/aspect-cli/pkg/plugin/system/bep"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/root/config"
+	rootFlags "github.com/aspect-build/aspect-cli-legacy/pkg/aspect/root/flags"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspecterrors"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/interceptors"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils/prompt"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/client"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/sdk/v1alpha4/plugin"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/bep"
 )
 
 // PluginSystem is the interface that defines all the methods for the aspect CLI

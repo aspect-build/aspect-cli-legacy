@@ -27,9 +27,9 @@ import (
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/gomega"
 
-	"github.com/aspect-build/aspect-cli/pkg/osutils/filesystem"
-	filesystem_mock "github.com/aspect-build/aspect-cli/pkg/osutils/filesystem/mock"
-	stdlib_mock "github.com/aspect-build/aspect-cli/pkg/stdlib/mock"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/osutils/filesystem"
+	filesystem_mock "github.com/aspect-build/aspect-cli-legacy/pkg/osutils/filesystem/mock"
+	stdlib_mock "github.com/aspect-build/aspect-cli-legacy/pkg/stdlib/mock"
 )
 
 func TestDarwinOsUtils(t *testing.T) {

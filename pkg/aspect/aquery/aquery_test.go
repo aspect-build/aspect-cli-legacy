@@ -26,11 +26,11 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
 
-	"github.com/aspect-build/aspect-cli/pkg/aspect/aquery"
-	"github.com/aspect-build/aspect-cli/pkg/aspect/query/shared"
-	query_mock "github.com/aspect-build/aspect-cli/pkg/aspect/query/shared/mock"
-	bazel_mock "github.com/aspect-build/aspect-cli/pkg/bazel/mock"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/aquery"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/query/shared"
+	query_mock "github.com/aspect-build/aspect-cli-legacy/pkg/aspect/query/shared/mock"
+	bazel_mock "github.com/aspect-build/aspect-cli-legacy/pkg/bazel/mock"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 )
 
 func TestQuery(t *testing.T) {

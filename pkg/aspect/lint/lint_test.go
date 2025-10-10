@@ -28,10 +28,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/aspect-build/aspect-cli/pkg/aspect/root/config"
-	rootFlags "github.com/aspect-build/aspect-cli/pkg/aspect/root/flags"
-	bazel_mock "github.com/aspect-build/aspect-cli/pkg/bazel/mock"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/root/config"
+	rootFlags "github.com/aspect-build/aspect-cli-legacy/pkg/aspect/root/flags"
+	bazel_mock "github.com/aspect-build/aspect-cli-legacy/pkg/bazel/mock"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 )
 
 const configContents = `configure:

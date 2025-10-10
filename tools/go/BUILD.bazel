@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "go",
     srcs = ["tools.go"],
-    importpath = "github.com/aspect-build/aspect-cli/tools/go",
+    importpath = "github.com/aspect-build/aspect-cli-legacy/tools/go",
     visibility = ["//visibility:public"],
     deps = [
         "@org_golang_google_genproto_googleapis_api//:api",

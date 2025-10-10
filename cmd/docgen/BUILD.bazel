@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 go_library(
     name = "docgen_lib",
     srcs = ["main.go"],
-    importpath = "github.com/aspect-build/aspect-cli/cmd/docgen",
+    importpath = "github.com/aspect-build/aspect-cli-legacy/cmd/docgen",
     visibility = ["//visibility:private"],
     deps = [
         "//cmd/aspect/root",

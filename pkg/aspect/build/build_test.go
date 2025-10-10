@@ -25,12 +25,12 @@ import (
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/gomega"
 
-	"github.com/aspect-build/aspect-cli/pkg/aspect/build"
-	"github.com/aspect-build/aspect-cli/pkg/aspecterrors"
-	bazel_mock "github.com/aspect-build/aspect-cli/pkg/bazel/mock"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
-	"github.com/aspect-build/aspect-cli/pkg/plugin/system/bep"
-	bep_mock "github.com/aspect-build/aspect-cli/pkg/plugin/system/bep/mock"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/build"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspecterrors"
+	bazel_mock "github.com/aspect-build/aspect-cli-legacy/pkg/bazel/mock"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/bep"
+	bep_mock "github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/bep/mock"
 )
 
 func TestBuild(t *testing.T) {

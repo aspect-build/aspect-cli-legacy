@@ -28,15 +28,15 @@ import (
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/yaml"
 
-	rootFlags "github.com/aspect-build/aspect-cli/pkg/aspect/root/flags"
-	"github.com/aspect-build/aspect-cli/pkg/aspecterrors"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils/prompt"
-	"github.com/aspect-build/aspect-cli/pkg/plugin/client"
-	client_mock "github.com/aspect-build/aspect-cli/pkg/plugin/client/mock"
-	"github.com/aspect-build/aspect-cli/pkg/plugin/sdk/v1alpha4/plugin"
-	plugin_mock "github.com/aspect-build/aspect-cli/pkg/plugin/sdk/v1alpha4/plugin/mock"
-	"github.com/aspect-build/aspect-cli/pkg/plugin/types"
+	rootFlags "github.com/aspect-build/aspect-cli-legacy/pkg/aspect/root/flags"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspecterrors"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils/prompt"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/client"
+	client_mock "github.com/aspect-build/aspect-cli-legacy/pkg/plugin/client/mock"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/sdk/v1alpha4/plugin"
+	plugin_mock "github.com/aspect-build/aspect-cli-legacy/pkg/plugin/sdk/v1alpha4/plugin/mock"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/types"
 )
 
 func createInterceptorCommand() *cobra.Command {

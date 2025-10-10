@@ -20,7 +20,7 @@ So far these languages are supported:
 - Go and Protocol Buffers, thanks to code from [gazelle]
 - Python, thanks to code from [rules_python]
 - JavaScript (including TypeScript)
-- Kotlin (experimental, see https://github.com/aspect-build/aspect-cli/issues/474)
+- Kotlin (experimental, see https://github.com/aspect-build/aspect-cli-legacy/issues/474)
 - Starlark, thanks to code from [bazel-skylib]
 
 configure is based on [gazelle]. We are very grateful to the authors of that software.
@@ -32,7 +32,7 @@ The advantage of configure in Aspect CLI is that you don't need to compile the t
 
 To change the behavior of configure, you add "directives" to your BUILD files, which are comments
 in a special syntax.
-Run 'aspect help directives' or see https://github.com/aspect-build/aspect-cli/blob/main/docs/aspect_configure.md for more info.
+Run 'aspect help directives' or see https://github.com/aspect-build/aspect-cli-legacy/blob/main/docs/aspect_configure.md for more info.
 
 
 ```

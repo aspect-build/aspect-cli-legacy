@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"strings"
 
-	buildeventstream "github.com/aspect-build/aspect-cli/bazel/buildeventstream"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils/prompt"
-	"github.com/aspect-build/aspect-cli/pkg/plugin/sdk/v1alpha4/proto"
+	buildeventstream "github.com/aspect-build/aspect-cli-legacy/bazel/buildeventstream"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils/prompt"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/sdk/v1alpha4/proto"
 )
 
 // Plugin determines how an aspect Plugin should be implemented.

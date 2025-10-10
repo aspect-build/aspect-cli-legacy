@@ -9,7 +9,7 @@ TAG=${GITHUB_REF_NAME}
 cat <<EOF
 ## Install Aspect CLI
 
-See full install instructions in [README.md](https://github.com/aspect-build/aspect-cli/blob/${TAG}/README.md#installation).
+See full install instructions in [README.md](https://github.com/aspect-build/aspect-cli-legacy/blob/${TAG}/README.md#installation).
 
 ### Bazelisk (MacOS / Linux)
 
@@ -17,7 +17,7 @@ Configure [bazelisk](https://github.com/bazelbuild/bazelisk) to use the Aspect C
 by adding the following to \`.bazeliskrc\` in the repository root:
 
 \`\`\`sh
-BAZELISK_BASE_URL=https://github.com/aspect-build/aspect-cli/releases/download
+BAZELISK_BASE_URL=https://github.com/aspect-build/aspect-cli-legacy/releases/download
 USE_BAZEL_VERSION=aspect/${TAG}
 \`\`\`
 

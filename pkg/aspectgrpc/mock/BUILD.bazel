@@ -34,7 +34,7 @@ go_library(
         ":mock_buildv1_source",  # keep
         ":mock_grpc_source",  # keep
     ],
-    importpath = "github.com/aspect-build/aspect-cli/pkg/aspectgrpc/mock",
+    importpath = "github.com/aspect-build/aspect-cli-legacy/pkg/aspectgrpc/mock",
     visibility = ["//:__subpackages__"],
     deps = [
         "//pkg/aspectgrpc",  # keep

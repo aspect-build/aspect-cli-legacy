@@ -6,7 +6,7 @@ go_library(
         "finder.go",
         "not_found_error.go",
     ],
-    importpath = "github.com/aspect-build/aspect-cli/pkg/bazel/workspace",
+    importpath = "github.com/aspect-build/aspect-cli-legacy/pkg/bazel/workspace",
     visibility = ["//visibility:public"],
 )
 

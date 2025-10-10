@@ -21,7 +21,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
 )

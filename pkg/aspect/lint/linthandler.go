@@ -22,8 +22,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/aspect-build/aspect-cli/pkg/aspect/lint/diagnostic"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/lint/diagnostic"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 	"github.com/fatih/color"
 	"github.com/reviewdog/reviewdog/parser"
 	"github.com/spf13/cobra"

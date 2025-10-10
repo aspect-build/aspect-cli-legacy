@@ -17,7 +17,7 @@ go_library(
         "doc.go",
         ":mock_besproxy_source",  # keep
     ],
-    importpath = "github.com/aspect-build/aspect-cli/pkg/plugin/system/besproxy/mock",
+    importpath = "github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/besproxy/mock",
     visibility = ["//:__subpackages__"],
     deps = [
         "//pkg/plugin/system/besproxy",  # keep

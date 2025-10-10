@@ -1,4 +1,4 @@
-module github.com/aspect-build/aspect-cli
+module github.com/aspect-build/aspect-cli-legacy
 
 go 1.24.5
 

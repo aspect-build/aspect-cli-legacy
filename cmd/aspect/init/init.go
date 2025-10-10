@@ -19,10 +19,10 @@ package init
 import (
 	"github.com/spf13/cobra"
 
-	init_ "github.com/aspect-build/aspect-cli/pkg/aspect/init"
-	"github.com/aspect-build/aspect-cli/pkg/aspect/root/flags"
-	"github.com/aspect-build/aspect-cli/pkg/interceptors"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
+	init_ "github.com/aspect-build/aspect-cli-legacy/pkg/aspect/init"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/root/flags"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/interceptors"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 )
 
 func NewDefaultCmd() *cobra.Command {

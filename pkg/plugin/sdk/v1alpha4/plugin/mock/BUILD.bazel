@@ -17,7 +17,7 @@ go_library(
         "doc.go",
         ":mock_plugin_source",  # keep
     ],
-    importpath = "github.com/aspect-build/aspect-cli/pkg/plugin/sdk/v1alpha4/plugin/mock",
+    importpath = "github.com/aspect-build/aspect-cli-legacy/pkg/plugin/sdk/v1alpha4/plugin/mock",
     visibility = ["//visibility:public"],
     deps = [
         "//bazel/buildeventstream",  # keep

@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "telemetry",
     srcs = ["setup.go"],
-    importpath = "github.com/aspect-build/aspect-cli/pkg/telemetry",
+    importpath = "github.com/aspect-build/aspect-cli-legacy/pkg/telemetry",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_spf13_viper//:viper",

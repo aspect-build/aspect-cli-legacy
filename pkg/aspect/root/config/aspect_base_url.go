@@ -17,5 +17,5 @@
 package config
 
 func AspectBaseUrl() string {
-	return "https://github.com/aspect-build/aspect-cli/releases/download"
+	return "https://github.com/aspect-build/aspect-cli-legacy/releases/download"
 }

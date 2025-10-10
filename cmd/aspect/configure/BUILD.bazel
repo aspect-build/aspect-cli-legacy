@@ -6,7 +6,7 @@ go_library(
         "configure.go",
         "go_deps.go",
     ],
-    importpath = "github.com/aspect-build/aspect-cli/cmd/aspect/configure",
+    importpath = "github.com/aspect-build/aspect-cli-legacy/cmd/aspect/configure",
     visibility = ["//visibility:public"],
     deps = [
         "//pkg/aspect/root/flags",

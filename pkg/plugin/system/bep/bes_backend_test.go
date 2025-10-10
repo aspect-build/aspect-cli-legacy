@@ -30,12 +30,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/anypb"
 
-	buildeventstream "github.com/aspect-build/aspect-cli/bazel/buildeventstream"
-	"github.com/aspect-build/aspect-cli/pkg/aspecterrors"
-	grpc_mock "github.com/aspect-build/aspect-cli/pkg/aspectgrpc/mock"
-	"github.com/aspect-build/aspect-cli/pkg/plugin/system/besproxy"
-	besproxy_mock "github.com/aspect-build/aspect-cli/pkg/plugin/system/besproxy/mock"
-	stdlib_mock "github.com/aspect-build/aspect-cli/pkg/stdlib/mock"
+	buildeventstream "github.com/aspect-build/aspect-cli-legacy/bazel/buildeventstream"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspecterrors"
+	grpc_mock "github.com/aspect-build/aspect-cli-legacy/pkg/aspectgrpc/mock"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/besproxy"
+	besproxy_mock "github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/besproxy/mock"
+	stdlib_mock "github.com/aspect-build/aspect-cli-legacy/pkg/stdlib/mock"
 )
 
 func TestSetup(t *testing.T) {

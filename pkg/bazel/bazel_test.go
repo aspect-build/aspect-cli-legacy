@@ -30,7 +30,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 )
 
 var testTmpdir = os.Getenv("TEST_TMPDIR")

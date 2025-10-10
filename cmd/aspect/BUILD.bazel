@@ -3,11 +3,11 @@ load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 go_library(
     name = "aspect_lib",
     srcs = ["main.go"],
-    importpath = "github.com/aspect-build/aspect-cli/cmd/aspect",
+    importpath = "github.com/aspect-build/aspect-cli-legacy/cmd/aspect",
     visibility = [
         "//cli:__pkg__",  # For silo release
         "//cmd:__subpackages__",
-        "//release:__pkg__",  # For https://github.com/aspect-build/aspect-cli release
+        "//release:__pkg__",  # For https://github.com/aspect-build/aspect-cli-legacy release
     ],
     deps = [
         "//cmd/aspect/root",

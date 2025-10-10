@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "cache",
     srcs = ["cache.go"],
-    importpath = "github.com/aspect-build/aspect-cli/pkg/ioutils/cache",
+    importpath = "github.com/aspect-build/aspect-cli-legacy/pkg/ioutils/cache",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_mitchellh_go_homedir//:go-homedir",

@@ -10,7 +10,7 @@ go_library(
         "noable_bool.go",
         "utils.go",
     ],
-    importpath = "github.com/aspect-build/aspect-cli/pkg/aspect/root/flags",
+    importpath = "github.com/aspect-build/aspect-cli-legacy/pkg/aspect/root/flags",
     visibility = ["//visibility:public"],
     deps = [
         "//buildinfo",

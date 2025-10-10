@@ -8,7 +8,7 @@ package proto
 
 import (
 	context "context"
-	buildeventstream "github.com/aspect-build/aspect-cli/bazel/buildeventstream"
+	buildeventstream "github.com/aspect-build/aspect-cli-legacy/bazel/buildeventstream"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -1067,7 +1067,7 @@ const file_pkg_plugin_sdk_v1alpha4_proto_plugin_proto_rawDesc = "" +
 	"\vPostRunHook\x12\x15.proto.PostRunHookReq\x1a\x15.proto.PostRunHookRes\x12)\n" +
 	"\x05Setup\x12\x0f.proto.SetupReq\x1a\x0f.proto.SetupRes2;\n" +
 	"\bPrompter\x12/\n" +
-	"\x03Run\x12\x13.proto.PromptRunReq\x1a\x13.proto.PromptRunResBBZ@github.com/aspect-build/aspect-cli/pkg/plugin/sdk/v1alpha4/protob\x06proto3"
+	"\x03Run\x12\x13.proto.PromptRunReq\x1a\x13.proto.PromptRunResBIZGgithub.com/aspect-build/aspect-cli-legacy/pkg/plugin/sdk/v1alpha4/protob\x06proto3"
 
 var (
 	file_pkg_plugin_sdk_v1alpha4_proto_plugin_proto_rawDescOnce sync.Once

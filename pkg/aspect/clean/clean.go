@@ -31,9 +31,9 @@ import (
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 
-	"github.com/aspect-build/aspect-cli/pkg/bazel"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
-	"github.com/aspect-build/aspect-cli/pkg/osutils/filesystem"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/bazel"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/osutils/filesystem"
 )
 
 const (
@@ -349,7 +349,7 @@ func (runner *Clean) findBazelWorkspaces(
 		// so that we can ask the user if they want to remove a given workspace.
 		if (len(execrootFiles) == 1 && execrootFiles[0].Name() == "DO_NOT_BUILD_HERE") || len(execrootFiles) > 2 {
 			// TODO: Only ask the user if they want to remove unknown workspace once.
-			// https://github.com/aspect-build/aspect-cli/issues/208
+			// https://github.com/aspect-build/aspect-cli-legacy/issues/208
 			workspaceInfo.workspaceName = "Unknown Workspace"
 		} else {
 			for _, execrootFile := range execrootFiles {

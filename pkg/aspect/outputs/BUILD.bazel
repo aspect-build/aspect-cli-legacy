@@ -8,7 +8,7 @@ go_library(
         "outputs.go",
         "paths.go",
     ],
-    importpath = "github.com/aspect-build/aspect-cli/pkg/aspect/outputs",
+    importpath = "github.com/aspect-build/aspect-cli-legacy/pkg/aspect/outputs",
     visibility = ["//visibility:public"],
     deps = [
         "//pkg/bazel",

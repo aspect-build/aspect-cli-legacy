@@ -19,12 +19,12 @@ package fetch
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/aspect-build/aspect-cli/pkg/aspect/fetch"
-	"github.com/aspect-build/aspect-cli/pkg/aspect/root/flags"
-	"github.com/aspect-build/aspect-cli/pkg/bazel"
-	"github.com/aspect-build/aspect-cli/pkg/hints"
-	"github.com/aspect-build/aspect-cli/pkg/interceptors"
-	"github.com/aspect-build/aspect-cli/pkg/ioutils"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/fetch"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/root/flags"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/bazel"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/hints"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/interceptors"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 )
 
 func NewDefaultCmd() *cobra.Command {
