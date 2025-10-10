@@ -7,7 +7,7 @@ set -o errexit -o nounset -o pipefail
 TAG=${GITHUB_REF_NAME}
 
 cat <<EOF
-## Install Aspect CLI
+## Install Aspect CLI (Legacy)
 
 See full install instructions in [README.md](https://github.com/aspect-build/aspect-cli-legacy/blob/${TAG}/README.md#installation).
 
