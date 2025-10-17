@@ -68,8 +68,6 @@ archive_override(
     urls = ["https://github.com/aspect-build/aspect-gazelle/archive/e75afa1f856916a01e7060f9283079cfab8b2a31.tar.gz"],
 )
 
-bazel_dep(name = "gazelle_cc", version = "0.1.0")
-
 # Go modules
 go_deps = use_extension("@bazel_gazelle//:extensions.bzl", "go_deps")
 go_deps.from_file(go_mod = "//:go.mod")
