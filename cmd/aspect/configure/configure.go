@@ -39,6 +39,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"slices"
 	"time"
 
 	"github.com/bazelbuild/bazel-gazelle/language"
@@ -124,6 +125,9 @@ Run 'aspect help directives' or see https://github.com/aspect-build/aspect-cli-l
 	return cmd
 }
 
+// An environment variable to set the full path to the gazelle repo_config
+const GO_REPOSITORY_CONFIG_ENV = "bazel_gazelle_go_repository_config"
+
 func run(ctx context.Context, mode string, exclude []string, watch, useWatchman bool, args []string) error {
 	if watch || useWatchman {
 		cache.SetCacheFactory(watchman.NewWatchmanCache)
@@ -154,12 +158,47 @@ configure:
 		}
 	}
 
-	if watch {
-		// Watch mode has its own run/return/exit-code logic
-		return runConfigureWatch(ctx, v, mode, exclude, args)
+	preArgs := []string{}
+
+	// gazelle --cpuprofile enabled via environment variable.
+	cpuprofile := os.Getenv("GAZELLE_CPUPROFILE")
+	if cpuprofile != "" {
+		preArgs = append(preArgs, "--cpuprofile="+cpuprofile)
 	}
 
-	changed, err := v.Generate(mode, exclude, args)
+	// gazelle --memprofile enabled via environment variable.
+	memprofile := os.Getenv("GAZELLE_MEMPROFILE")
+	if memprofile != "" {
+		preArgs = append(preArgs, "--memprofile="+memprofile)
+	}
+
+	// gazelle --repo_config via environment variable or a discovery mechanism
+	if slices.Contains(v.Languages(), runner.Go) {
+		goConfigPath := os.Getenv(GO_REPOSITORY_CONFIG_ENV)
+		if goConfigPath == "" {
+			p, err := determineGoRepositoryConfigPath()
+			if err != nil {
+				log.Fatalf("ERROR: unable to determine go_repository config path: %v", err)
+			}
+			goConfigPath = p
+		}
+		if goConfigPath != "" {
+			preArgs = append(preArgs, "--repo_config="+goConfigPath)
+		}
+	}
+
+	for _, e := range exclude {
+		preArgs = append(preArgs, "--exclude="+e)
+	}
+
+	args = append(preArgs, args...)
+
+	if watch {
+		// Watch mode has its own run/return/exit-code logic
+		return runConfigureWatch(ctx, v, mode, args)
+	}
+
+	changed, err := v.Generate(mode, args)
 
 	// Unique error codes for:
 	// - internal errors
@@ -185,7 +224,7 @@ configure:
 	return err
 }
 
-func runConfigureWatch(ctx context.Context, v *runner.GazelleRunner, mode string, exclude []string, args []string) error {
+func runConfigureWatch(ctx context.Context, v *runner.GazelleRunner, mode string, args []string) error {
 	abazel := ibp.NewServer()
 
 	// Start listening for a connection immediately.
@@ -200,7 +239,7 @@ func runConfigureWatch(ctx context.Context, v *runner.GazelleRunner, mode string
 
 	// "Launch" the client in the background
 	go func() {
-		v.Watch(abazel.Address(), mode, exclude, args)
+		v.Watch(abazel.Address(), mode, args)
 		close(watchDone)
 	}()
 
@@ -283,16 +322,6 @@ func addCliEnabledLanguages(c *runner.GazelleRunner) {
 
 	viper.SetDefault("configure.languages.go", false)
 	if viper.GetBool("configure.languages.go") {
-		if os.Getenv(runner.GO_REPOSITORY_CONFIG_ENV) == "" {
-			goConfigPath, err := determineGoRepositoryConfigPath()
-			if err != nil {
-				log.Fatalf("ERROR: unable to determine go_repository config path: %v", err)
-			}
-
-			if goConfigPath != "" {
-				os.Setenv(runner.GO_REPOSITORY_CONFIG_ENV, goConfigPath)
-			}
-		}
 		c.AddLanguage(runner.Go)
 	}
 

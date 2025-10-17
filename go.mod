@@ -5,17 +5,17 @@ go 1.24.5
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/alphadose/haxmap v1.4.1
-	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251009224809-e75afa1f8569
-	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251009224809-e75afa1f8569
-	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251009224809-e75afa1f8569
+	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251016221207-401ec720fec9
+	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251016221207-401ec720fec9
+	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251016221207-401ec720fec9
 	github.com/bazelbuild/bazel-gazelle v0.45.1-0.20250924144014-2de7b829fef1
 	github.com/bazelbuild/bazelisk v1.26.0 // NOTE: keep vendored code in sync
-	github.com/bazelbuild/buildtools v0.0.0-20250926132224-6c4b75d79427
+	github.com/bazelbuild/buildtools v0.0.0-20250930140053-2eb4fccefb52
 	github.com/bluekeyes/go-gitdiff v0.7.3
 	github.com/bmatcuk/doublestar/v4 v4.9.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/fatih/color v1.18.0
-	github.com/go-git/go-git/v5 v5.16.2 // indirect
+	github.com/go-git/go-git/v5 v5.16.3 // indirect
 	github.com/golang/mock v1.7.0-rc.1
 	github.com/golang/protobuf v1.5.4
 	github.com/hashicorp/go-hclog v1.6.3
@@ -36,9 +36,9 @@ require (
 	github.com/spf13/viper v1.20.1
 	github.com/tejzpr/ordered-concurrently/v3 v3.0.1
 	github.com/twmb/murmur3 v1.1.8
-	go.starlark.net v0.0.0-20250717191651-336a4b3a6d1d // indirect
+	go.starlark.net v0.0.0-20250906160240-bf296ed553ea // indirect
 	golang.org/x/exp v0.0.0-20250718183923-645b1fa84792 // indirect
-	golang.org/x/mod v0.28.0
+	golang.org/x/mod v0.29.0
 	golang.org/x/sync v0.17.0
 	golang.org/x/tools v0.37.0
 	google.golang.org/genproto v0.0.0-20250603155806-513f23925822
@@ -54,11 +54,11 @@ require (
 	github.com/hay-kot/scaffold v0.6.2-0.20250317013600-8a6092d5e4ff
 	github.com/reviewdog/reviewdog v0.17.4
 	github.com/sourcegraph/go-diff v0.7.0
-	go.opentelemetry.io/otel v1.37.0
+	go.opentelemetry.io/otel v1.38.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.37.0
 	go.opentelemetry.io/otel/sdk v1.37.0
-	go.opentelemetry.io/otel/trace v1.37.0
-	golang.org/x/term v0.35.0
+	go.opentelemetry.io/otel/trace v1.38.0
+	golang.org/x/term v0.36.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250603155806-513f23925822
 	gotest.tools/v3 v3.5.1
 )
@@ -73,11 +73,11 @@ require (
 	github.com/a8m/envsubst v1.4.3 // indirect
 	github.com/alecthomas/chroma/v2 v2.15.0 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
-	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20251001194427-669d53ca49e3 // indirect
+	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20251014061709-74544f572c4b // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
-	github.com/bazel-contrib/rules_python/gazelle v0.0.0-20250921132421-38f2679fcc6c // indirect
+	github.com/bazel-contrib/rules_python/gazelle v0.0.0-20251012075144-43a5acf8cedf // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/catppuccin/go v0.3.0 // indirect
 	github.com/charmbracelet/bubbles v0.21.0 // indirect
@@ -122,7 +122,7 @@ require (
 	github.com/haya14busa/go-sarif v0.0.0-20210102043135-e2c5fed2fa3d // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/itchyny/timefmt-go v0.1.6 // indirect
+	github.com/itchyny/timefmt-go v0.1.7 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
@@ -132,7 +132,7 @@ require (
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect
-	github.com/mikefarah/yq/v4 v4.47.2 // indirect
+	github.com/mikefarah/yq/v4 v4.48.1 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
@@ -161,15 +161,15 @@ require (
 	github.com/yuin/goldmark v1.7.8 // indirect
 	github.com/yuin/goldmark-emoji v1.0.5 // indirect
 	github.com/yuin/gopher-lua v1.1.1 // indirect
-	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
-	go.opentelemetry.io/otel/metric v1.37.0 // indirect
+	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
+	go.opentelemetry.io/otel/metric v1.38.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.42.0 // indirect
-	golang.org/x/net v0.44.0 // indirect
-	golang.org/x/sys v0.36.0 // indirect
-	golang.org/x/text v0.29.0 // indirect
+	golang.org/x/crypto v0.43.0 // indirect
+	golang.org/x/net v0.46.0 // indirect
+	golang.org/x/sys v0.37.0 // indirect
+	golang.org/x/text v0.30.0 // indirect
 	golang.org/x/tools/go/vcs v0.1.0-deprecated // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250528174236-200df99c418a // indirect
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
