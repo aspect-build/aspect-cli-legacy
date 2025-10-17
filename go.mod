@@ -5,9 +5,9 @@ go 1.24.5
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/alphadose/haxmap v1.4.1
-	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251017164258-988113995e29
-	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251017164258-988113995e29
-	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251017164258-988113995e29
+	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251021180727-cf18bbd0dc6d
+	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251021180727-cf18bbd0dc6d
+	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251021180727-cf18bbd0dc6d
 	github.com/bazelbuild/bazel-gazelle v0.45.1-0.20250924144014-2de7b829fef1
 	github.com/bazelbuild/bazelisk v1.26.0 // NOTE: keep vendored code in sync
 	github.com/bazelbuild/buildtools v0.0.0-20250930140053-2eb4fccefb52
@@ -73,7 +73,7 @@ require (
 	github.com/a8m/envsubst v1.4.3 // indirect
 	github.com/alecthomas/chroma/v2 v2.15.0 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
-	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20251014061709-74544f572c4b // indirect
+	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20251021180727-cf18bbd0dc6d // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect

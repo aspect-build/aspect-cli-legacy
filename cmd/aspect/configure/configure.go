@@ -133,7 +133,7 @@ func run(ctx context.Context, mode string, exclude []string, watch, useWatchman 
 		cache.SetCacheFactory(watchman.NewWatchmanCache)
 	}
 
-	v := runner.New()
+	v := runner.New(bazel.WorkspaceFromWd.WorkspaceRoot(), os.Getenv("GAZELLE_PROGRESS") != "")
 
 	addCliEnabledLanguages(v)
 
@@ -198,7 +198,7 @@ configure:
 		return runConfigureWatch(ctx, v, mode, args)
 	}
 
-	changed, err := v.Generate(mode, args)
+	changed, err := v.Generate(runner.UpdateCmd, mode, args)
 
 	// Unique error codes for:
 	// - internal errors
@@ -239,7 +239,7 @@ func runConfigureWatch(ctx context.Context, v *runner.GazelleRunner, mode string
 
 	// "Launch" the client in the background
 	go func() {
-		v.Watch(abazel.Address(), mode, args)
+		v.Watch(abazel.Address(), runner.UpdateCmd, mode, args)
 		close(watchDone)
 	}()
 
