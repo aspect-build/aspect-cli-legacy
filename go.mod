@@ -5,9 +5,9 @@ go 1.24.5
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/alphadose/haxmap v1.4.1
-	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251016221207-401ec720fec9
-	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251016221207-401ec720fec9
-	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251016221207-401ec720fec9
+	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251017164258-988113995e29
+	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251017164258-988113995e29
+	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251017164258-988113995e29
 	github.com/bazelbuild/bazel-gazelle v0.45.1-0.20250924144014-2de7b829fef1
 	github.com/bazelbuild/bazelisk v1.26.0 // NOTE: keep vendored code in sync
 	github.com/bazelbuild/buildtools v0.0.0-20250930140053-2eb4fccefb52
