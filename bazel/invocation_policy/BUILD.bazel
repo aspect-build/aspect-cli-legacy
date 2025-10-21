@@ -2,7 +2,6 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 load("//bazel/go:write_go_generated_source_files.bzl", "write_go_generated_source_files")
-load("//bazel/ts:defs.bzl", "ts_proto_library")
 
 proto_library(
     name = "invocation_policy_proto",
@@ -30,13 +29,5 @@ go_library(
     name = "invocation_policy",
     embed = [":blaze_invocation_policy_go_proto"],
     importpath = "github.com/aspect-build/aspect-cli-legacy/bazel/invocation_policy",
-    visibility = ["//visibility:public"],
-)
-
-ts_proto_library(
-    name = "invocation_policy_proto_ts",
-    gen_connect_es = False,
-    node_modules = "//:node_modules",
-    proto = ":invocation_policy_proto",
     visibility = ["//visibility:public"],
 )
