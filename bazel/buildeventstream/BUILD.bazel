@@ -2,7 +2,6 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 load("//bazel/go:write_go_generated_source_files.bzl", "write_go_generated_source_files")
-load("//bazel/ts:defs.bzl", "ts_proto_library")
 
 proto_library(
     name = "buildeventstream_proto",
@@ -48,22 +47,4 @@ go_library(
     embed = [":buildeventstream_go_proto"],
     importpath = "github.com/aspect-build/aspect-cli-legacy/bazel/buildeventstream",
     visibility = ["//visibility:public"],
-)
-
-ts_proto_library(
-    name = "buildeventstream_proto_ts",
-    files_to_copy = [
-        "build_event_stream_pb.d.ts",
-    ],
-    gen_connect_es = False,
-    node_modules = "//:node_modules",
-    proto = ":buildeventstream_proto",
-    visibility = ["//visibility:public"],
-    deps = [
-        "//bazel/action_cache:bazel_proto_ts",
-        "//bazel/command_line:command_line_proto_ts",
-        "//bazel/failure_details:failure_details_proto_ts",
-        "//bazel/invocation_policy:invocation_policy_proto_ts",
-        "//bazel/packages_metrics:metrics_proto_ts",
-    ],
 )
