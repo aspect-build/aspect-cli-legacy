@@ -33,13 +33,7 @@ npm.npm_translate_lock(
 )
 use_repo(npm, "npm")
 
-rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
-rules_ts_ext.deps(ts_version_from = "//:package.json")
-use_repo(rules_ts_ext, "npm_typescript")
-
 bazel_dep(name = "aspect_rules_lint", version = "1.0.7")
-bazel_dep(name = "aspect_rules_swc", version = "2.3.0")
-bazel_dep(name = "aspect_rules_ts", version = "3.4.0")
 bazel_dep(name = "bazel_features", version = "1.19.0")
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "rules_pkg", version = "1.1.0")
@@ -57,5 +51,3 @@ include("//bazel/include:go.MODULE.bazel")
 include("//bazel/include:llvm.MODULE.bazel")
 
 include("//bazel/include:proto.MODULE.bazel")
-
-include("//bazel/include:python.MODULE.bazel")
