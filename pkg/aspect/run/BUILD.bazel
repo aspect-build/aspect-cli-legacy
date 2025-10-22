@@ -12,6 +12,7 @@ go_library(
     importpath = "github.com/aspect-build/aspect-cli-legacy/pkg/aspect/run",
     visibility = ["//visibility:public"],
     deps = [
+        "//bazel/spawn",
         "//pkg/aspect/root/flags",
         "//pkg/bazel",
         "//pkg/ioutils",
@@ -20,10 +21,12 @@ go_library(
         "@aspect_gazelle_runner//pkg/ibp",
         "@aspect_gazelle_runner//pkg/watchman",
         "@com_github_fatih_color//:color",
+        "@com_github_klauspost_compress//zstd",
         "@com_github_spf13_cobra//:cobra",
         "@io_opentelemetry_go_otel//:otel",
         "@io_opentelemetry_go_otel//attribute",
         "@io_opentelemetry_go_otel_trace//:trace",
+        "@org_golang_google_protobuf//encoding/protodelim",
         "@org_golang_x_sync//errgroup",
     ],
 )
@@ -34,7 +37,9 @@ go_test(
         "changedetector_test.go",
         "run_test.go",
     ],
+    data = glob(["testdata/**"]),
     embed = [":run"],
+    embedsrcs = glob(["testdata/**"]),
     deps = [
         "//pkg/aspecterrors",
         "//pkg/bazel/mock",

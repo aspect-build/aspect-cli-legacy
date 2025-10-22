@@ -1,14 +1,33 @@
+/*
+ * Copyright 2023 Aspect Build Systems, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package run
 
 import (
+	"bytes"
+	_ "embed"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 )
 
 func TestParseExecLog(t *testing.T) {
 	// A execlog containing 2 entries copied from a real build
-	execLog := `
+	execLogJson := `
 {
   "commandArgs": ["external/aspect_bazel_lib~~toolchains~copy_to_directory_darwin_arm64/copy_to_directory", "bazel-out/darwin_arm64-fastbuild/bin/mypkg/pkg_config.json", ""],
   "environmentVariables": [],
@@ -183,13 +202,54 @@ func TestParseExecLog(t *testing.T) {
 		"bazel-out/darwin_arm64-fastbuild/bin/node_modules/.aspect_rules_js/@mycorp+mypkg@0.0.0/node_modules/@mycorp/mypkg/package.json",
 	}
 
-	r, err := parseExecLogInputs(strings.NewReader(execLog))
+	r, err := parseJsonExecLogInputs(strings.NewReader(execLogJson))
 	if err != nil {
 		t.Errorf("Failed to parse exec log: %v", err)
 	}
 
 	if !reflect.DeepEqual(r, expectedInputs) {
 		t.Errorf("Expected execlog %v\n\tgot %v", expectedInputs, r)
+	}
+}
+
+//go:embed testdata/changedetector_test-compact_exec-a.bin
+var execACompressed []byte
+
+//go:embed testdata/changedetector_test-json_exec-a.json
+var execAJson []byte
+
+func TestExecLogCompact(t *testing.T) {
+	r, err := parseCompactExecLogInputs(bytes.NewReader(execACompressed))
+	if err != nil {
+		t.Errorf("Failed to parse compressed exec log: %v", err)
+	}
+
+	slices.Sort(r)
+	if len(r) != 2 {
+		t.Errorf("Expected 2 inputs, got %d", len(r))
+	}
+	if !slices.Equal(r, []string{"bazel-out/darwin-fastbuild/bin/apps/project-x/web/dist/src/index.js", "bazel-out/darwin-fastbuild/bin/apps/project-x/web/dist/src/index.js.map"}) {
+		t.Errorf("Expected inputs to match")
+	}
+}
+
+func TestExecLogJson(t *testing.T) {
+	r, err := parseJsonExecLogInputs(bytes.NewReader(execAJson))
+	if err != nil {
+		t.Errorf("Failed to parse JSON exec log: %v", err)
+	}
+
+	if len(r) != 4 {
+		t.Errorf("Expected 4 inputs, got %d", len(r))
+	}
+
+	// The json log has duplicates, sort and assert both are found
+	slices.Sort(r)
+	if !slices.Equal(r[0:2], []string{"bazel-out/darwin-fastbuild/bin/apps/project-x/web/dist/src/index.js", "bazel-out/darwin-fastbuild/bin/apps/project-x/web/dist/src/index.js"}) {
+		t.Errorf("Expected inputs to match: %v", r[0:2])
+	}
+	if !slices.Equal(r[2:4], []string{"bazel-out/darwin-fastbuild/bin/apps/project-x/web/dist/src/index.js.map", "bazel-out/darwin-fastbuild/bin/apps/project-x/web/dist/src/index.js.map"}) {
+		t.Errorf("Expected inputs to match: %v", r[2:4])
 	}
 }
 
