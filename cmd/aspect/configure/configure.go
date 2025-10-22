@@ -40,10 +40,12 @@ import (
 	"net"
 	"os"
 	"slices"
+	"strconv"
 	"time"
 
 	"github.com/bazelbuild/bazel-gazelle/language"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
 	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/root/flags"
@@ -107,18 +109,18 @@ Run 'aspect help directives' or see https://github.com/aspect-build/aspect-cli-l
 				flags.FlagsInterceptor(ioutils.DefaultStreams),
 			},
 			func(ctx context.Context, cmd *cobra.Command, args []string) error {
-				mode, _ := cmd.Flags().GetString("mode")
-				exclude, _ := cmd.Flags().GetStringSlice("exclude")
-				watch, _ := cmd.Flags().GetBool("watch")
-				watchman, _ := cmd.Flags().GetBool("watchman")
-				progress, _ := cmd.Flags().GetBool("progress")
-				return run(ctx, mode, exclude, progress, watch, watchman, args)
+				return run(ctx, cmd.Flags(), args)
 			},
 		),
 	}
 
+	viper.SetDefault("configure.index", "all")
+	viper.SetDefault("configure.recurse", true)
+
 	// TODO: restrict to only valid values (see https://github.com/spf13/pflag/issues/236)
 	cmd.Flags().String("mode", "fix", "Method for emitting merged BUILD files.\n\tfix: write generated and merged files to disk\n\tprint: print files to stdout\n\tdiff: print a unified diff")
+	cmd.Flags().String("index", viper.GetString("configure.index"), "Type of index to build before running.\n\tall: build a full index of the workspace\n\tnone: do not build an index\n\tlazy: builds index entries on demand")
+	cmd.Flags().Bool("r", viper.GetBool("configure.recurse"), "Recursively update BUILD files in subdirectories")
 	cmd.Flags().StringSlice("exclude", []string{}, "Files to exclude from BUILD generation")
 	cmd.Flags().Bool("watchman", false, "Use the EXPERIMENTAL watchman daemon to watch for changes across 'configure' invocations")
 	cmd.Flags().Bool("watch", false, "Use the EXPERIMENTAL watch mode to watch for changes in the workspace and automatically 'configure' when files change")
@@ -130,7 +132,16 @@ Run 'aspect help directives' or see https://github.com/aspect-build/aspect-cli-l
 // An environment variable to set the full path to the gazelle repo_config
 const GO_REPOSITORY_CONFIG_ENV = "bazel_gazelle_go_repository_config"
 
-func run(ctx context.Context, mode string, exclude []string, progress, watch, useWatchman bool, args []string) error {
+func run(ctx context.Context, flags *pflag.FlagSet, args []string) error {
+	mode, _ := flags.GetString("mode")
+	indexType, _ := flags.GetString("index")
+	recurse, _ := flags.GetBool("r")
+	exclude, _ := flags.GetStringSlice("exclude")
+	watch, _ := flags.GetBool("watch")
+	useWatchman, _ := flags.GetBool("watchman")
+	progress, _ := flags.GetBool("progress")
+
+	// Use watchman caching if either watchman or watch mode is enabled
 	if watch || useWatchman {
 		cache.SetCacheFactory(watchman.NewWatchmanCache)
 	}
@@ -192,6 +203,9 @@ configure:
 	for _, e := range exclude {
 		preArgs = append(preArgs, "--exclude="+e)
 	}
+
+	preArgs = append(preArgs, "-r="+strconv.FormatBool(recurse))
+	preArgs = append(preArgs, "-index="+indexType)
 
 	args = append(preArgs, args...)
 

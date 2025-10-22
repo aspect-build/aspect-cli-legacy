@@ -44,11 +44,16 @@ aspect configure [flags]
 ```
       --exclude strings   Files to exclude from BUILD generation
   -h, --help              help for configure
+      --index string      Type of index to build before running.
+                          	all: build a full index of the workspace
+                          	none: do not build an index
+                          	lazy: builds index entries on demand (default "all")
       --mode string       Method for emitting merged BUILD files.
                           	fix: write generated and merged files to disk
                           	print: print files to stdout
                           	diff: print a unified diff (default "fix")
       --progress          Show progress throughout 'configure' invocation
+      --r                 Recursively update BUILD files in subdirectories (default true)
       --watch             Use the EXPERIMENTAL watch mode to watch for changes in the workspace and automatically 'configure' when files change
       --watchman          Use the EXPERIMENTAL watchman daemon to watch for changes across 'configure' invocations
 ```
