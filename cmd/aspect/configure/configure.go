@@ -235,12 +235,12 @@ func runConfigureWatch(ctx context.Context, v *runner.GazelleRunner, mode string
 	// Close the watch protocol on complete, no matter what the status is
 	defer abazel.Close()
 
-	watchDone := make(chan struct{})
+	watchDone := make(chan error)
 
 	// "Launch" the client in the background
 	go func() {
-		v.Watch(abazel.Address(), runner.UpdateCmd, mode, args)
-		close(watchDone)
+		err := v.Watch(abazel.Address(), runner.UpdateCmd, mode, args)
+		watchDone <- err
 	}()
 
 	// Start the workspace watcher
@@ -256,7 +256,10 @@ func runConfigureWatch(ctx context.Context, v *runner.GazelleRunner, mode string
 	go func() {
 		select {
 		case <-ctx.Done():
-		case <-watchDone:
+		case err := <-watchDone:
+			if err != nil {
+				log.Printf("Watcher exiting due to error: %v", err)
+			}
 		}
 
 		w.Close()
