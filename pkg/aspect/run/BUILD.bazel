@@ -16,6 +16,7 @@ go_library(
         "//pkg/bazel",
         "//pkg/ioutils",
         "//pkg/plugin/system/bep",
+        "@aspect_gazelle//common/logger",
         "@aspect_gazelle_runner//pkg/ibp",
         "@aspect_gazelle_runner//pkg/watchman",
         "@com_github_fatih_color//:color",

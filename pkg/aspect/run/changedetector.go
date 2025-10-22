@@ -1,3 +1,19 @@
+/*
+ * Copyright 2023 Aspect Build Systems, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package run
 
 import (
@@ -13,6 +29,7 @@ import (
 	"slices"
 	"strings"
 
+	logger "github.com/aspect-build/aspect-gazelle/common/logger"
 	"github.com/aspect-build/aspect-gazelle/runner/pkg/ibp"
 )
 
@@ -214,6 +231,8 @@ func (cd *ChangeDetector) detectContext() error {
 
 // Detect changes after an incremental triggered by the source changes.
 func (cd *ChangeDetector) detectChanges(sourceChanges []string) error {
+	logger.Infof("detect changes with %v source changes", len(sourceChanges))
+
 	err := cd.detectContext()
 	if err != nil {
 		return fmt.Errorf("failed to detect context: %w", err)
@@ -227,6 +246,8 @@ func (cd *ChangeDetector) detectChanges(sourceChanges []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to cycle the execlog: %w", err)
 	}
+
+	logger.Infof("detected %d exec log entries", len(execLogEntries))
 
 	for _, execLogEntry := range execLogEntries {
 		// The actual outputs are the files that were actually produced by the action
@@ -277,6 +298,8 @@ func (cd *ChangeDetector) cycleChanges() ibp.SourceInfoMap {
 
 // Cycle reparses execution log to discover inputs
 func (cd *ChangeDetector) cycleExecLog() ([]string, error) {
+	logger.Infof("read execlog: %s", cd.execlogFile.Name())
+
 	execLogFile, err := os.Open(cd.execlogFile.Name())
 	if err != nil {
 		return nil, err
@@ -317,6 +340,8 @@ func (cd *ChangeDetector) parseRunfilesManifest() (*manifestMetadata, error) {
 	}
 
 	manifestPath := fmt.Sprintf("%s.runfiles_manifest", cd.targetExecutablePath)
+
+	logger.Infof("parse runfiles manifest: %s", manifestPath)
 
 	manifestFile, err := os.Open(path.Join(cd.localExecroot, manifestPath))
 	if err != nil {

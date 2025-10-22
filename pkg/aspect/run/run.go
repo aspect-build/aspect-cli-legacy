@@ -52,6 +52,7 @@ import (
 	"github.com/aspect-build/aspect-cli-legacy/pkg/bazel"
 	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/bep"
+	logger "github.com/aspect-build/aspect-gazelle/common/logger"
 	"github.com/aspect-build/aspect-gazelle/runner/pkg/ibp"
 	watcher "github.com/aspect-build/aspect-gazelle/runner/pkg/watchman"
 	"github.com/fatih/color"
@@ -280,6 +281,8 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	if err != nil {
 		return fmt.Errorf("failed to create initial bazel command: %w", err)
 	}
+
+	logger.Infof("initial --watch build: %v", initCmd.Args)
 	if err := initCmd.Run(); err != nil {
 		return fmt.Errorf("initial bazel command failed: %w", err)
 	}
@@ -436,6 +439,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		// actions.
 		//
 		// TODO: delay the command stdout and do not output on quick noops
+		logger.Infof("incremental --watch build: %v", detectCmd.Args)
 		incBuildErr := detectCmd.Run()
 
 		dtErr := changedetect.detectChanges(cs.Paths)
