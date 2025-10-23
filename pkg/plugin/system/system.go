@@ -213,7 +213,7 @@ func (ps *pluginSystem) hasBESPlugins() bool {
 }
 
 func (ps *pluginSystem) createBesSocket(ctx context.Context, cmd *cobra.Command, args []string, next interceptors.RunEContextFn) error {
-	besSocket, err := bep.NewBESSocket(ctx)
+	besSocket, err := bep.NewBESSocket()
 	if err != nil {
 		return fmt.Errorf("failed to create BES socket: %w", err)
 	}
@@ -224,13 +224,13 @@ func (ps *pluginSystem) createBesSocket(ctx context.Context, cmd *cobra.Command,
 		return fmt.Errorf("failed to serve BES socket: %w", err)
 	}
 	defer besSocket.GracefulStop()
-	ctx = bep.InjectBESSocket(ctx, besSocket)
+	ctx = bep.InjectBESInterceptor(ctx, besSocket)
 	return next(ctx, cmd, args)
 }
 
 func (ps *pluginSystem) createBesBackend(ctx context.Context, cmd *cobra.Command, args []string, next interceptors.RunEContextFn) error {
 	// Create the BES backend
-	besBackend := bep.NewBESBackend(ctx)
+	besBackend := bep.NewBESBackend()
 	for node := ps.plugins.head; node != nil; node = node.next {
 		if !node.payload.DisableBESEvents {
 			besBackend.RegisterSubscriber(node.payload.BEPEventCallback, node.payload.MultiThreaded)
@@ -263,7 +263,7 @@ func (ps *pluginSystem) createBesBackend(ctx context.Context, cmd *cobra.Command
 		return fmt.Errorf("failed to run BES backend: %w", err)
 	}
 	defer besBackend.GracefulStop()
-	ctx = bep.InjectBESBackend(ctx, besBackend)
+	ctx = bep.InjectBESInterceptor(ctx, besBackend)
 	return next(ctx, cmd, args)
 }
 

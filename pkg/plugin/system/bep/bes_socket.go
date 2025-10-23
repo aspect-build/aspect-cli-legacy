@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path"
 	"sync"
@@ -34,40 +35,13 @@ import (
 	"google.golang.org/protobuf/encoding/protodelim"
 )
 
-const besSocketInterceptorKey besBackendInterceptorKeyType = 0x00
-
 type BESSocket interface {
+	BESInterceptor
 	Setup() error
-	ServeWait(ctx context.Context) error
-	GracefulStop()
-	Args() []string
-	RegisterSubscriber(callback CallbackFn)
-	Errors() []error
 }
 
-func BESSocketFromContext(ctx context.Context) BESSocket {
-	return ctx.Value(besSocketInterceptorKey).(BESSocket)
-}
-
-func HasBESSocket(ctx context.Context) bool {
-	return ctx.Value(besSocketInterceptorKey) != nil
-}
-
-func BESSocketErrors(ctx context.Context) []error {
-	if !HasBESSocket(ctx) {
-		return []error{}
-	}
-	return BESSocketFromContext(ctx).Errors()
-}
-
-// InjectBESSocket injects the given BESSocket into the context.
-func InjectBESSocket(ctx context.Context, besSocket BESSocket) context.Context {
-	return context.WithValue(ctx, besSocketInterceptorKey, besSocket)
-}
-
-func NewBESSocket(ctx context.Context) (BESSocket, error) {
+func NewBESSocket() (BESSocket, error) {
 	return &besSocket{
-		ctx:         ctx,
 		socketPath:  path.Join(os.TempDir(), fmt.Sprintf("aspect-cli-%v-bes.bin", os.Getpid())),
 		errors:      &aspecterrors.ErrorList{},
 		subscribers: &subscriberList{},
@@ -75,7 +49,6 @@ func NewBESSocket(ctx context.Context) (BESSocket, error) {
 }
 
 type besSocket struct {
-	ctx         context.Context
 	socketPath  string
 	errors      *aspecterrors.ErrorList
 	errorsMutex sync.RWMutex
@@ -177,7 +150,10 @@ func (bb *besSocket) Args() []string {
 	}
 }
 
-func (bb *besSocket) RegisterSubscriber(callback CallbackFn) {
+func (bb *besSocket) RegisterSubscriber(callback CallbackFn, multiThreaded bool) {
+	if !multiThreaded {
+		log.Fatalf("BES subscriber registered without multiThreaded=false, which is not supported by the BES socket implementation")
+	}
 	bb.subscribers.Insert(callback)
 }
 
