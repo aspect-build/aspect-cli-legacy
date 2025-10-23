@@ -111,7 +111,8 @@ Run 'aspect help directives' or see https://github.com/aspect-build/aspect-cli-l
 				exclude, _ := cmd.Flags().GetStringSlice("exclude")
 				watch, _ := cmd.Flags().GetBool("watch")
 				watchman, _ := cmd.Flags().GetBool("watchman")
-				return run(ctx, mode, exclude, watch, watchman, args)
+				progress, _ := cmd.Flags().GetBool("progress")
+				return run(ctx, mode, exclude, progress, watch, watchman, args)
 			},
 		),
 	}
@@ -121,6 +122,7 @@ Run 'aspect help directives' or see https://github.com/aspect-build/aspect-cli-l
 	cmd.Flags().StringSlice("exclude", []string{}, "Files to exclude from BUILD generation")
 	cmd.Flags().Bool("watchman", false, "Use the EXPERIMENTAL watchman daemon to watch for changes across 'configure' invocations")
 	cmd.Flags().Bool("watch", false, "Use the EXPERIMENTAL watch mode to watch for changes in the workspace and automatically 'configure' when files change")
+	cmd.Flags().Bool("progress", false, "Show progress throughout 'configure' invocation")
 
 	return cmd
 }
@@ -128,12 +130,12 @@ Run 'aspect help directives' or see https://github.com/aspect-build/aspect-cli-l
 // An environment variable to set the full path to the gazelle repo_config
 const GO_REPOSITORY_CONFIG_ENV = "bazel_gazelle_go_repository_config"
 
-func run(ctx context.Context, mode string, exclude []string, watch, useWatchman bool, args []string) error {
+func run(ctx context.Context, mode string, exclude []string, progress, watch, useWatchman bool, args []string) error {
 	if watch || useWatchman {
 		cache.SetCacheFactory(watchman.NewWatchmanCache)
 	}
 
-	v := runner.New(bazel.WorkspaceFromWd.WorkspaceRoot(), os.Getenv("GAZELLE_PROGRESS") != "")
+	v := runner.New(bazel.WorkspaceFromWd.WorkspaceRoot(), progress)
 
 	addCliEnabledLanguages(v)
 
