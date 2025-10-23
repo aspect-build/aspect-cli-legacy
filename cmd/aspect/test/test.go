@@ -76,7 +76,7 @@ See 'aspect help target-syntax' for details and examples on how to specify targe
 		RunE: interceptors.Run(
 			[]interceptors.Interceptor{
 				flags.FlagsInterceptor(streams),
-				pluginSystem.BESBackendInterceptor(),
+				pluginSystem.BESPluginInterceptor(),
 				pluginSystem.TestHooksInterceptor(streams),
 			},
 			test.New(streams, hstreams, bzl).Run,

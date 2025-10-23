@@ -41,14 +41,12 @@ import (
 func TestSetup(t *testing.T) {
 	t.Run("fails when netListen fails", func(t *testing.T) {
 		g := NewGomegaWithT(t)
-		ctx := context.Background()
 
 		listenErr := fmt.Errorf("failed listen")
 		besBackend := &besBackend{
 			netListen: func(network, address string) (net.Listener, error) {
 				return nil, listenErr
 			},
-			ctx: ctx,
 		}
 		err := besBackend.Setup()
 
@@ -57,13 +55,11 @@ func TestSetup(t *testing.T) {
 
 	t.Run("succeeds when netListen succeeds", func(t *testing.T) {
 		g := NewGomegaWithT(t)
-		ctx := context.Background()
 
 		besBackend := &besBackend{
 			netListen: func(network, address string) (net.Listener, error) {
 				return nil, nil // It's fine to return nil for net.Listener as it doesn't get called in Setup.
 			},
-			ctx: ctx,
 		}
 		err := besBackend.Setup()
 

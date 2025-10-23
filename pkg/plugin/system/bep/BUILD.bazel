@@ -7,7 +7,9 @@ go_library(
     name = "bep",
     srcs = [
         "bes_backend.go",
-        "bes_socket.go",
+        "bes_config.go",
+        "bes_pipe.go",
+        "interceptor.go",
     ],
     importpath = "github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/bep",
     visibility = ["//visibility:public"],
@@ -24,7 +26,9 @@ go_library(
         "@org_golang_google_grpc//credentials/insecure",
         "@org_golang_google_grpc//status",
         "@org_golang_google_protobuf//encoding/protodelim",
+        "@org_golang_google_protobuf//types/known/anypb",
         "@org_golang_google_protobuf//types/known/emptypb",
+        "@org_golang_google_protobuf//types/known/timestamppb",
         "@org_golang_x_sync//errgroup",
     ],
 )

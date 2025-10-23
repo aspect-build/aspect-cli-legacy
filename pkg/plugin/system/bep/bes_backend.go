@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Aspect Build Systems, Inc.
+ * Copyright 2023 Aspect Build Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,47 +44,13 @@ import (
 	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/besproxy"
 )
 
-// besBackendInterceptorKeyType is a type for the BESBackendInterceptorKey that
-// avoids collisions.
-type besBackendInterceptorKeyType byte
-
-// besBackendInterceptorKey is the key for the injected BES backend into
-// the context.
-const besBackendInterceptorKey besBackendInterceptorKeyType = 0x00
-
 // BESBackend implements a Build Event Protocol backend to be passed to the
 // `bazel build` command so that the Aspect plugins can register as subscribers
 // to the build events.
 type BESBackend interface {
-	Setup(opts ...grpc.ServerOption) error
-	ServeWait(ctx context.Context) error
-	GracefulStop()
+	BESInterceptor
 	Addr() string
-	RegisterBesProxy(ctx context.Context, p besproxy.BESProxy)
-	RegisterSubscriber(callback CallbackFn, multiThreaded bool)
-	Errors() []error
-}
-
-// BESBackendFromContext extracts a BESBackend from the given context. It panics
-// if the context doesn't have a BESBackend set up.
-func BESBackendFromContext(ctx context.Context) BESBackend {
-	return ctx.Value(besBackendInterceptorKey).(BESBackend)
-}
-
-func HasBESBackend(ctx context.Context) bool {
-	return ctx.Value(besBackendInterceptorKey) != nil
-}
-
-func BESErrors(ctx context.Context) []error {
-	if !HasBESBackend(ctx) {
-		return []error{}
-	}
-	return BESBackendFromContext(ctx).Errors()
-}
-
-// InjectBESBackend injects the given BESBackend into the context.
-func InjectBESBackend(ctx context.Context, besBackend BESBackend) context.Context {
-	return context.WithValue(ctx, besBackendInterceptorKey, besBackend)
+	Setup(opts ...grpc.ServerOption) error
 }
 
 // Creates a channel where receiver receives nothing until the
@@ -125,9 +91,11 @@ func bufferUntilReadyChan[T any](in <-chan T, ready <-chan bool) <-chan T {
 	return out
 }
 
+var _ BESBackend = (*besBackend)(nil)
+var _ buildv1.PublishBuildEventServer = (*besBackend)(nil)
+
 type besBackend struct {
 	besProxies    []besproxy.BESProxy
-	ctx           context.Context
 	errors        *aspecterrors.ErrorList
 	errorsMutex   sync.RWMutex
 	grpcDialer    aspectgrpc.Dialer
@@ -141,10 +109,9 @@ type besBackend struct {
 }
 
 // NewBESBackend creates a new Build Event Protocol backend.
-func NewBESBackend(ctx context.Context) BESBackend {
+func NewBESBackend() BESBackend {
 	return &besBackend{
 		besProxies:    []besproxy.BESProxy{},
-		ctx:           ctx,
 		errors:        &aspecterrors.ErrorList{},
 		grpcDialer:    aspectgrpc.NewDialer(),
 		netListen:     net.Listen,
@@ -219,6 +186,10 @@ func (bb *besBackend) Addr() string {
 		Host:   bb.listener.Addr().String(),
 	}
 	return url.String()
+}
+
+func (bb *besBackend) Args() []string {
+	return []string{fmt.Sprintf("--bes_backend=%s", bb.Addr())}
 }
 
 // Errors return the errors produced by the subscriber callback functions.

@@ -45,16 +45,8 @@ func (runner *Coverage) Run(ctx context.Context, cmd *cobra.Command, args []stri
 	bazelCmd := []string{"coverage"}
 	bazelCmd = append(bazelCmd, args...)
 
-	// Currently Bazel only supports a single --bes_backend so adding ours after
-	// any user supplied value will result in our bes_backend taking precedence.
-	// There is a very old & stale issue to add support for multiple BES
-	// backends https://github.com/bazelbuild/bazel/issues/10908. In the future,
-	// we could build this support into the Aspect CLI and post on that issue
-	// that using the Aspect CLI resolves it.
-	if bep.HasBESBackend(ctx) {
-		besBackend := bep.BESBackendFromContext(ctx)
-		besBackendFlag := fmt.Sprintf("--bes_backend=%s", besBackend.Addr())
-		bazelCmd = flags.AddFlagToCommand(bazelCmd, besBackendFlag)
+	if bep.HasBESInterceptor(ctx) {
+		bazelCmd = flags.AddFlagToCommand(bazelCmd, bep.BESInterceptorFromContext(ctx).Args()...)
 	}
 
 	bzlCommandStreams := runner.streams

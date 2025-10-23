@@ -52,15 +52,15 @@ func TestRun(t *testing.T) {
 		besBackend := bep_mock.NewMockBESBackend(ctrl)
 		besBackend.
 			EXPECT().
-			Addr().
-			Return("grpc://127.0.0.1:12345").
+			Args().
+			Return([]string{"--bes_backend=grpc://127.0.0.1:12345"}).
 			Times(1)
 		besBackend.
 			EXPECT().
 			Errors().
 			Times(1)
 
-		ctx := bep.InjectBESBackend(context.Background(), besBackend)
+		ctx := bep.InjectBESInterceptor(context.Background(), besBackend)
 
 		b := run.New(streams, streams, bzl)
 		err := b.Run(ctx, nil, []string{"//..."})
@@ -83,8 +83,8 @@ func TestRun(t *testing.T) {
 		besBackend := bep_mock.NewMockBESBackend(ctrl)
 		besBackend.
 			EXPECT().
-			Addr().
-			Return("grpc://127.0.0.1:12345").
+			Args().
+			Return([]string{"--bes_backend=grpc://127.0.0.1:12345"}).
 			Times(1)
 		besBackend.
 			EXPECT().
@@ -95,7 +95,7 @@ func TestRun(t *testing.T) {
 			}).
 			Times(1)
 
-		ctx := bep.InjectBESBackend(context.Background(), besBackend)
+		ctx := bep.InjectBESInterceptor(context.Background(), besBackend)
 
 		b := run.New(streams, streams, bzl)
 		err := b.Run(ctx, nil, []string{"//..."})
@@ -120,15 +120,15 @@ func TestRun(t *testing.T) {
 		besBackend := bep_mock.NewMockBESBackend(ctrl)
 		besBackend.
 			EXPECT().
-			Addr().
-			Return("grpc://127.0.0.1:12345").
+			Args().
+			Return([]string{"--bes_backend=grpc://127.0.0.1:12345"}).
 			Times(1)
 		besBackend.
 			EXPECT().
 			Errors().
 			Times(1)
 
-		ctx := bep.InjectBESBackend(context.Background(), besBackend)
+		ctx := bep.InjectBESInterceptor(context.Background(), besBackend)
 
 		b := run.New(streams, streams, bzl)
 		err := b.Run(ctx, nil, []string{"//my/runable:target", "--", "myarg"})

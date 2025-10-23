@@ -55,7 +55,7 @@ In addition to flags listed below, flags accepted by the 'bazel build' command a
 		RunE: interceptors.Run(
 			[]interceptors.Interceptor{
 				flags.FlagsInterceptor(streams),
-				pluginSystem.BESSocketInterceptor(),
+				pluginSystem.BESPipeInterceptor(),
 			},
 			lint.New(streams, hstreams, bzl, lintHandlers).Run,
 		),
