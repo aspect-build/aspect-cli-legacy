@@ -51,7 +51,7 @@ type PluginSystem interface {
 	TearDown()
 	RegisterCustomCommands(cmd *cobra.Command, bazelStartupArgs []string) error
 	BESBackendInterceptor() interceptors.Interceptor
-	BESSocketInterceptor() interceptors.Interceptor
+	BESPipeInterceptor() interceptors.Interceptor
 	BuildHooksInterceptor(streams ioutils.Streams) interceptors.Interceptor
 	TestHooksInterceptor(streams ioutils.Streams) interceptors.Interceptor
 	RunHooksInterceptor(streams ioutils.Streams) interceptors.Interceptor
@@ -167,11 +167,11 @@ func (ps *pluginSystem) TearDown() {
 	}
 }
 
-// BESSocketInterceptor always starts a BES backend and injects it into the context.
+// BESPipeInterceptor always starts a BES backend and injects it into the context.
 // Use BESBackendInterceptor to only create the grpc service when there is a known subscriber.
-func (ps *pluginSystem) BESSocketInterceptor() interceptors.Interceptor {
+func (ps *pluginSystem) BESPipeInterceptor() interceptors.Interceptor {
 	return func(ctx context.Context, cmd *cobra.Command, args []string, next interceptors.RunEContextFn) error {
-		return ps.createBesSocket(ctx, cmd, args, next)
+		return ps.createBesPipe(ctx, cmd, args, next)
 	}
 }
 
@@ -179,7 +179,7 @@ func (ps *pluginSystem) BESSocketInterceptor() interceptors.Interceptor {
 // It short-circuits and does nothing in cases where we think there is no subscriber.
 // It gracefully stops the server after the main command is executed.
 //
-// DEPRECATED: use BESSocketInterceptor instead.
+// DEPRECATED: use BESPipeInterceptor instead.
 func (ps *pluginSystem) BESBackendInterceptor() interceptors.Interceptor {
 	return func(ctx context.Context, cmd *cobra.Command, args []string, next interceptors.RunEContextFn) error {
 		// Check if --aspect:force_bes_backend is set. This is primarily used for testing.
@@ -212,19 +212,19 @@ func (ps *pluginSystem) hasBESPlugins() bool {
 	return false
 }
 
-func (ps *pluginSystem) createBesSocket(ctx context.Context, cmd *cobra.Command, args []string, next interceptors.RunEContextFn) error {
-	besSocket, err := bep.NewBESSocket()
+func (ps *pluginSystem) createBesPipe(ctx context.Context, cmd *cobra.Command, args []string, next interceptors.RunEContextFn) error {
+	besPipe, err := bep.NewBESPipe()
 	if err != nil {
-		return fmt.Errorf("failed to create BES socket: %w", err)
+		return fmt.Errorf("failed to create BES pipe: %w", err)
 	}
-	if err := besSocket.Setup(); err != nil {
-		return fmt.Errorf("failed to setup BES socket: %w", err)
+	if err := besPipe.Setup(); err != nil {
+		return fmt.Errorf("failed to setup BES pipe: %w", err)
 	}
-	if err := besSocket.ServeWait(ctx); err != nil {
-		return fmt.Errorf("failed to serve BES socket: %w", err)
+	if err := besPipe.ServeWait(ctx); err != nil {
+		return fmt.Errorf("failed to serve BES pipe: %w", err)
 	}
-	defer besSocket.GracefulStop()
-	ctx = bep.InjectBESInterceptor(ctx, besSocket)
+	defer besPipe.GracefulStop()
+	ctx = bep.InjectBESInterceptor(ctx, besPipe)
 	return next(ctx, cmd, args)
 }
 

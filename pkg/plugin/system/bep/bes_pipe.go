@@ -35,43 +35,43 @@ import (
 	"google.golang.org/protobuf/encoding/protodelim"
 )
 
-type BESSocket interface {
+type BESPipeInterceptor interface {
 	BESInterceptor
 	Setup() error
 }
 
-func NewBESSocket() (BESSocket, error) {
-	return &besSocket{
-		socketPath:  path.Join(os.TempDir(), fmt.Sprintf("aspect-cli-%v-bes.bin", os.Getpid())),
+func NewBESPipe() (BESPipeInterceptor, error) {
+	return &besPipe{
+		bepBinPath:  path.Join(os.TempDir(), fmt.Sprintf("aspect-cli-%v-bes.bin", os.Getpid())),
 		errors:      &aspecterrors.ErrorList{},
 		subscribers: &subscriberList{},
 	}, nil
 }
 
-type besSocket struct {
-	socketPath  string
+type besPipe struct {
+	bepBinPath  string
 	errors      *aspecterrors.ErrorList
 	errorsMutex sync.RWMutex
 	subscribers *subscriberList
 }
 
-var _ BESSocket = (*besSocket)(nil)
+var _ BESPipeInterceptor = (*besPipe)(nil)
 
-func (bb *besSocket) Setup() error {
-	err := syscall.Mknod(bb.socketPath, syscall.S_IFIFO|0666, 0)
+func (bb *besPipe) Setup() error {
+	err := syscall.Mknod(bb.bepBinPath, syscall.S_IFIFO|0666, 0)
 	if err != nil {
-		return fmt.Errorf("failed to create BES socket %s: %w", bb.socketPath, err)
+		return fmt.Errorf("failed to create BES pipe %s: %w", bb.bepBinPath, err)
 	}
 	return nil
 }
 
-func (bb *besSocket) ServeWait(ctx context.Context) error {
+func (bb *besPipe) ServeWait(ctx context.Context) error {
 	go func() {
-		conn, err := os.OpenFile(bb.socketPath, os.O_RDONLY, os.ModeNamedPipe)
+		conn, err := os.OpenFile(bb.bepBinPath, os.O_RDONLY, os.ModeNamedPipe)
 		if err != nil {
 			bb.errorsMutex.Lock()
 			defer bb.errorsMutex.Unlock()
-			bb.errors.Insert(fmt.Errorf("failed to accept connection on BES socket %s: %w", bb.socketPath, err))
+			bb.errors.Insert(fmt.Errorf("failed to accept connection on BES pipe %s: %w", bb.bepBinPath, err))
 			return
 		}
 
@@ -87,7 +87,7 @@ func (bb *besSocket) ServeWait(ctx context.Context) error {
 	return nil
 }
 
-func (bb *besSocket) streamBesEvents(ctx context.Context, r io.Reader) error {
+func (bb *besPipe) streamBesEvents(ctx context.Context, r io.Reader) error {
 	reader := bufio.NewReader(r)
 
 	for {
@@ -125,7 +125,7 @@ func (bb *besSocket) streamBesEvents(ctx context.Context, r io.Reader) error {
 	return nil
 }
 
-func (bb *besSocket) publishBesEvent(event *buildeventstream.BuildEvent) error {
+func (bb *besPipe) publishBesEvent(event *buildeventstream.BuildEvent) error {
 	eg := errgroup.Group{}
 
 	for s := bb.subscribers.head; s != nil; s = s.next {
@@ -140,29 +140,29 @@ func (bb *besSocket) publishBesEvent(event *buildeventstream.BuildEvent) error {
 	return eg.Wait()
 }
 
-func (bb *besSocket) Args() []string {
+func (bb *besPipe) Args() []string {
 	return []string{
 		"--build_event_publish_all_actions",
 		// TODO: when bazel6 dropped
 		// "--build_event_binary_file_upload_mode=fully_async",
 		"--build_event_binary_file",
-		bb.socketPath,
+		bb.bepBinPath,
 	}
 }
 
-func (bb *besSocket) RegisterSubscriber(callback CallbackFn, multiThreaded bool) {
+func (bb *besPipe) RegisterSubscriber(callback CallbackFn, multiThreaded bool) {
 	if !multiThreaded {
-		log.Fatalf("BES subscriber registered without multiThreaded=false, which is not supported by the BES socket implementation")
+		log.Fatalf("BES subscriber registered without multiThreaded=false, which is not supported by the BES pipe implementation")
 	}
 	bb.subscribers.Insert(callback)
 }
 
-func (bb *besSocket) Errors() []error {
+func (bb *besPipe) Errors() []error {
 	bb.errorsMutex.RLock()
 	defer bb.errorsMutex.RUnlock()
 	return bb.errors.Errors()
 }
 
-func (bb *besSocket) GracefulStop() {
-	os.Remove(bb.socketPath)
+func (bb *besPipe) GracefulStop() {
+	os.Remove(bb.bepBinPath)
 }
