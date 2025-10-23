@@ -52,6 +52,7 @@ require (
 	github.com/charmbracelet/huh v0.6.0
 	github.com/creack/pty v1.1.24
 	github.com/hay-kot/scaffold v0.6.2-0.20250317013600-8a6092d5e4ff
+	github.com/klauspost/compress v1.18.1
 	github.com/reviewdog/reviewdog v0.17.4
 	github.com/sourcegraph/go-diff v0.7.0
 	go.opentelemetry.io/otel v1.38.0

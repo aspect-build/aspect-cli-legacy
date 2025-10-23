@@ -29,6 +29,10 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/klauspost/compress/zstd"
+	"google.golang.org/protobuf/encoding/protodelim"
+
+	"github.com/aspect-build/aspect-cli-legacy/bazel/spawn"
 	logger "github.com/aspect-build/aspect-gazelle/common/logger"
 	"github.com/aspect-build/aspect-gazelle/runner/pkg/ibp"
 )
@@ -119,8 +123,20 @@ type ChangeDetector struct {
 //go:embed aspect_watch.bzl
 var ASPECT_WATCH_BZL_CONTENT []byte
 
+// TODO: drop support for json once compact is better tested
+var useJsonExecLog = false
+
+func init() {
+	useJsonExecLog = os.Getenv("ASPECT_WATCH_USE_JSON_EXECLOG") != ""
+}
+
 func newChangeDetector(workspaceDir string, useLegacyReplaceWorkspace bool) (*ChangeDetector, error) {
-	execlog, err := os.CreateTemp(os.TempDir(), fmt.Sprintf("aspect-watch-%v-execlog-*.json", os.Getpid()))
+	ext := "bin"
+	if useJsonExecLog {
+		ext = "json"
+	}
+
+	execlog, err := os.CreateTemp(os.TempDir(), fmt.Sprintf("aspect-watch-%v-execlog-*.%s", os.Getpid(), ext))
 	if err != nil {
 		return nil, err
 	}
@@ -162,8 +178,11 @@ func (cd *ChangeDetector) bazelFlags(trackChanges bool) []string {
 	flags := []string{}
 
 	if trackChanges {
-		// TODO: maybe use a more compact format for better performance?
-		flags = append(flags, "--execution_log_json_file", cd.execlogFile.Name(), "--noexecution_log_sort")
+		if useJsonExecLog {
+			flags = append(flags, "--execution_log_json_file", cd.execlogFile.Name(), "--noexecution_log_sort")
+		} else {
+			flags = append(flags, "--execution_log_compact_file", cd.execlogFile.Name())
+		}
 	}
 
 	injectArgName := "inject_repository"
@@ -247,7 +266,11 @@ func (cd *ChangeDetector) detectChanges(sourceChanges []string) error {
 		return fmt.Errorf("failed to cycle the execlog: %w", err)
 	}
 
-	logger.Infof("detected %d exec log entries", len(execLogEntries))
+	if logger.IsLevelEnabled(logger.TraceLevel) {
+		logger.Tracef("detected %d exec log entries: %v", len(execLogEntries), execLogEntries)
+	} else {
+		logger.Infof("detected %d exec log entries", len(execLogEntries))
+	}
 
 	for _, execLogEntry := range execLogEntries {
 		// The actual outputs are the files that were actually produced by the action
@@ -306,10 +329,14 @@ func (cd *ChangeDetector) cycleExecLog() ([]string, error) {
 	}
 	defer execLogFile.Close()
 
-	return parseExecLogInputs(execLogFile)
+	if useJsonExecLog {
+		return parseJsonExecLogInputs(execLogFile)
+	}
+
+	return parseCompactExecLogInputs(execLogFile)
 }
 
-func parseExecLogInputs(in io.Reader) ([]string, error) {
+func parseJsonExecLogInputs(in io.Reader) ([]string, error) {
 	r := []string{}
 
 	decode := json.NewDecoder(in)
@@ -329,6 +356,52 @@ func parseExecLogInputs(in io.Reader) ([]string, error) {
 	}
 
 	return r, nil
+}
+
+func parseCompactExecLogInputs(in io.Reader) ([]string, error) {
+	zr, err := zstd.NewReader(in)
+	if err != nil {
+		return nil, err
+	}
+	defer zr.Close()
+
+	// Track files and outputs by id
+	filesById := make(map[uint32]string)
+	outputIds := []uint32{}
+	entry := &spawn.ExecLogEntry{}
+
+	r := bufio.NewReader(zr)
+	for {
+		if err := protodelim.UnmarshalFrom(r, entry); err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return nil, err
+		}
+
+		// Track all files by their id
+		if f := entry.GetFile(); f != nil {
+			filesById[entry.Id] = f.GetPath()
+			continue
+		}
+
+		// Record outputs of spawn actions
+		if s := entry.GetSpawn(); s != nil {
+			for _, o := range s.GetOutputs() {
+				outputIds = append(outputIds, o.GetOutputId())
+			}
+		}
+	}
+
+	// Assume all outputIds are potential inputs to the next action
+	inputs := make([]string, 0, len(outputIds))
+	for _, oid := range outputIds {
+		if f, ok := filesById[oid]; ok {
+			inputs = append(inputs, f)
+		}
+	}
+
+	return inputs, nil
 }
 
 // Cycle reparses execution log to discover inputs

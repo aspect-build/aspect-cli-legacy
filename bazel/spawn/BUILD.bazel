@@ -1,0 +1,37 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("//bazel/go:write_go_generated_source_files.bzl", "write_go_generated_source_files")
+
+proto_library(
+    name = "spawn_proto",
+    srcs = ["spawn.proto"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_google_protobuf//:duration_proto",
+        "@com_google_protobuf//:timestamp_proto",
+    ],
+)
+
+go_proto_library(
+    name = "spawn_go_proto",
+    importpath = "github.com/aspect-build/aspect-cli-legacy/bazel/spawn",
+    proto = ":spawn_proto",
+    visibility = ["//visibility:public"],
+)
+
+go_library(
+    name = "spawn",
+    embed = [":spawn_go_proto"],
+    importpath = "github.com/aspect-build/aspect-cli-legacy/bazel/spawn",
+    visibility = ["//visibility:public"],
+)
+
+write_go_generated_source_files(
+    name = "write_pb_go",
+    src = ":spawn_go_proto",
+    output_files = [
+        "spawn.pb.go",
+    ],
+    visibility = ["//bazel:__pkg__"],
+)
