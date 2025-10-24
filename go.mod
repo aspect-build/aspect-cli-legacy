@@ -5,9 +5,9 @@ go 1.24.5
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/alphadose/haxmap v1.4.1
-	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251021180727-cf18bbd0dc6d
-	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251021180727-cf18bbd0dc6d
-	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251021180727-cf18bbd0dc6d
+	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251023224130-1859933dc67e
+	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251023224130-1859933dc67e
+	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251023224130-1859933dc67e
 	github.com/bazelbuild/bazel-gazelle v0.45.1-0.20250924144014-2de7b829fef1
 	github.com/bazelbuild/bazelisk v1.26.0 // NOTE: keep vendored code in sync
 	github.com/bazelbuild/buildtools v0.0.0-20250930140053-2eb4fccefb52
@@ -43,7 +43,7 @@ require (
 	golang.org/x/tools v0.37.0
 	google.golang.org/genproto v0.0.0-20250603155806-513f23925822
 	google.golang.org/grpc v1.73.0
-	google.golang.org/protobuf v1.36.9
+	google.golang.org/protobuf v1.36.10
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	sigs.k8s.io/yaml v1.4.0
 )
@@ -64,7 +64,12 @@ require (
 	gotest.tools/v3 v3.5.1
 )
 
-require github.com/sagikazarmark/locafero v0.7.0 // indirect
+require (
+	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20251023224130-1859933dc67e // indirect
+	github.com/bazel-contrib/rules_jvm v0.30.0 // indirect
+	github.com/google/btree v1.1.3 // indirect
+	github.com/sagikazarmark/locafero v0.7.0 // indirect
+)
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
@@ -74,7 +79,7 @@ require (
 	github.com/a8m/envsubst v1.4.3 // indirect
 	github.com/alecthomas/chroma/v2 v2.15.0 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
-	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20251021180727-cf18bbd0dc6d // indirect
+	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20251023224130-1859933dc67e // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
