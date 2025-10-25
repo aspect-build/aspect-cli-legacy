@@ -7,7 +7,9 @@ go_library(
     name = "bep",
     srcs = [
         "bes_backend.go",
-        "bes_socket.go",
+        "bes_config.go",
+        "bes_pipe.go",
+        "interceptor.go",
     ],
     importpath = "github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/bep",
     visibility = ["//visibility:public"],
