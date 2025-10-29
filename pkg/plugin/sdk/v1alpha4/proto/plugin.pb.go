@@ -30,6 +30,7 @@ type BEPEventCallbackReq struct {
 	state          protoimpl.MessageState       `protogen:"open.v1"`
 	Event          *buildeventstream.BuildEvent `protobuf:"bytes,1,opt,name=event,proto3" json:"event,omitempty"`
 	SequenceNumber int64                        `protobuf:"varint,2,opt,name=sequence_number,json=sequenceNumber,proto3" json:"sequence_number,omitempty"`
+	InvocationId   string                       `protobuf:"bytes,3,opt,name=invocation_id,json=invocationId,proto3" json:"invocation_id,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -76,6 +77,13 @@ func (x *BEPEventCallbackReq) GetSequenceNumber() int64 {
 		return x.SequenceNumber
 	}
 	return 0
+}
+
+func (x *BEPEventCallbackReq) GetInvocationId() string {
+	if x != nil {
+		return x.InvocationId
+	}
+	return ""
 }
 
 type BEPEventCallbackRes struct {
@@ -1000,10 +1008,11 @@ var File_pkg_plugin_sdk_v1alpha4_proto_plugin_proto protoreflect.FileDescriptor
 
 const file_pkg_plugin_sdk_v1alpha4_proto_plugin_proto_rawDesc = "" +
 	"\n" +
-	"*pkg/plugin/sdk/v1alpha4/proto/plugin.proto\x12\x05proto\x1a/bazel/buildeventstream/build_event_stream.proto\"t\n" +
+	"*pkg/plugin/sdk/v1alpha4/proto/plugin.proto\x12\x05proto\x1a/bazel/buildeventstream/build_event_stream.proto\"\x99\x01\n" +
 	"\x13BEPEventCallbackReq\x124\n" +
 	"\x05event\x18\x01 \x01(\v2\x1e.build_event_stream.BuildEventR\x05event\x12'\n" +
-	"\x0fsequence_number\x18\x02 \x01(\x03R\x0esequenceNumber\"\x15\n" +
+	"\x0fsequence_number\x18\x02 \x01(\x03R\x0esequenceNumber\x12#\n" +
+	"\rinvocation_id\x18\x03 \x01(\tR\finvocationId\"\x15\n" +
 	"\x13BEPEventCallbackRes\"O\n" +
 	"\bSetupReq\x12\x1e\n" +
 	"\n" +

@@ -28,7 +28,7 @@ import (
 
 // Plugin determines how an aspect Plugin should be implemented.
 type Plugin interface {
-	BEPEventCallback(event *buildeventstream.BuildEvent, sn int64) error
+	BEPEventCallback(event *buildeventstream.BuildEvent, sn int64, invocationId string) error
 	CustomCommands() ([]*Command, error)
 	PostBuildHook(
 		isInteractiveMode bool,
@@ -88,7 +88,7 @@ func (*Base) Setup(*SetupConfig) error {
 }
 
 // BEPEventCallback satisfies Plugin.BEPEventCallback.
-func (*Base) BEPEventCallback(*buildeventstream.BuildEvent, int64) error {
+func (*Base) BEPEventCallback(*buildeventstream.BuildEvent, int64, string) error {
 	return nil
 }
 

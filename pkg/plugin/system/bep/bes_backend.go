@@ -212,7 +212,7 @@ func (bb *besBackend) RegisterBesProxy(ctx context.Context, p besproxy.BESProxy)
 
 // CallbackFn is the signature for the callback function used by the subscribers
 // of the Build Event Protocol events.
-type CallbackFn func(*buildeventstream.BuildEvent, int64) error
+type CallbackFn func(*buildeventstream.BuildEvent, int64, string) error
 
 // RegisterSubscriber registers a new subscriber callback function to the
 // Build Event Protocol events.
@@ -285,7 +285,7 @@ func (bb *besBackend) SendEventsToSubscribers(c <-chan *buildv1.PublishBuildTool
 				}
 				s := subscribers.head
 				for s != nil {
-					if err := s.callback(buildEvent, req.GetOrderedBuildEvent().GetSequenceNumber()); err != nil {
+					if err := s.callback(buildEvent, req.GetOrderedBuildEvent().GetSequenceNumber(), req.GetOrderedBuildEvent().GetStreamId().GetInvocationId()); err != nil {
 						bb.errorsMutex.Lock()
 						bb.errors.Insert(err)
 						bb.errorsMutex.Unlock()
