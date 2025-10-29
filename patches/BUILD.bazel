@@ -3,8 +3,10 @@ load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
 exports_files(glob(["**/*.patch"]))
 
 write_source_files(
-    name = "orion_patches",
+    name = "gazelle_patches",
     files = {
+        "gazelle-branded.patch": "@aspect_gazelle_runner//patches:bazelbuild_bazel-gazelle_aspect-cli.patch",
         "gazelle-gitignore.patch": "@aspect_gazelle_runner//pkg/git:gazelle-gitignore.patch",
+        "gazelle-watchman.patch": "@aspect_gazelle_runner//patches:bazelbuild_bazel-gazelle_aspect-watchman.patch",
     },
 )

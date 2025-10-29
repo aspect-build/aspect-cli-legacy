@@ -5,10 +5,10 @@ go 1.24.5
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/alphadose/haxmap v1.4.1
-	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251023224130-1859933dc67e
-	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251023224130-1859933dc67e
-	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251023224130-1859933dc67e
-	github.com/bazelbuild/bazel-gazelle v0.45.1-0.20250924144014-2de7b829fef1
+	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251029222723-4a3c2d2f2d03
+	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251029222723-4a3c2d2f2d03
+	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251029222723-4a3c2d2f2d03
+	github.com/bazelbuild/bazel-gazelle v0.46.0-rc2
 	github.com/bazelbuild/bazelisk v1.26.0 // NOTE: keep vendored code in sync
 	github.com/bazelbuild/buildtools v0.0.0-20250930140053-2eb4fccefb52
 	github.com/bluekeyes/go-gitdiff v0.7.3
@@ -20,23 +20,18 @@ require (
 	github.com/golang/protobuf v1.5.4
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.6.1
-	github.com/itchyny/gojq v0.12.18-0.20251005142832-e46d0344f209 // indirect
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/msolo/jsonr v0.0.0-20231023064044-62fbfc3a0313 // indirect
 	github.com/onsi/gomega v1.38.2
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
-	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/reviewdog/errorformat v0.0.0-20240608101709-1d3280ed6bd4
 	github.com/rs/zerolog v1.34.0
-	github.com/smacker/go-tree-sitter v0.0.0-20240827094217-dd81d9e9be82 // indirect
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.20.1
 	github.com/tejzpr/ordered-concurrently/v3 v3.0.1
 	github.com/twmb/murmur3 v1.1.8
-	go.starlark.net v0.0.0-20250906160240-bf296ed553ea // indirect
 	golang.org/x/exp v0.0.0-20250718183923-645b1fa84792 // indirect
 	golang.org/x/mod v0.29.0
 	golang.org/x/sync v0.17.0
@@ -65,13 +60,6 @@ require (
 )
 
 require (
-	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20251023224130-1859933dc67e // indirect
-	github.com/bazel-contrib/rules_jvm v0.30.0 // indirect
-	github.com/google/btree v1.1.3 // indirect
-	github.com/sagikazarmark/locafero v0.7.0 // indirect
-)
-
-require (
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/EngFlow/gazelle_cc v0.1.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
@@ -79,7 +67,6 @@ require (
 	github.com/a8m/envsubst v1.4.3 // indirect
 	github.com/alecthomas/chroma/v2 v2.15.0 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
-	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20251023224130-1859933dc67e // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
@@ -128,6 +115,7 @@ require (
 	github.com/haya14busa/go-sarif v0.0.0-20210102043135-e2c5fed2fa3d // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/itchyny/gojq v0.12.18-0.20251005142832-e46d0344f209 // indirect
 	github.com/itchyny/timefmt-go v0.1.7 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
@@ -150,12 +138,15 @@ require (
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pjbgf/sha1cd v0.4.0 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/psanford/memfs v0.0.0-20241019191636-4ef911798f9b // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect; indirect	github.com/sagikazarmark/locafero v0.9.0 // indirect
+	github.com/sagikazarmark/locafero v0.7.0 // indirect
 	github.com/sahilm/fuzzy v0.1.1 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/skeema/knownhosts v1.3.1 // indirect
+	github.com/smacker/go-tree-sitter v0.0.0-20240827094217-dd81d9e9be82 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.12.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
@@ -169,6 +160,7 @@ require (
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel/metric v1.38.0 // indirect
+	go.starlark.net v0.0.0-20250906160240-bf296ed553ea // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
