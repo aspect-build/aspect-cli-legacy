@@ -48,6 +48,7 @@ type BESPipeInterceptor interface {
 
 const besEventGlobalTimeoutDuration = 5 * time.Minute
 const besEventThrottleDuration = 50 * time.Millisecond
+const gracePeriodDuration = 2 * time.Second
 
 func NewBESPipe(buildId, invocationId string) (BESPipeInterceptor, error) {
 	return &besPipe{
@@ -57,6 +58,8 @@ func NewBESPipe(buildId, invocationId string) (BESPipeInterceptor, error) {
 
 		besBuildId:      buildId,
 		besInvocationId: invocationId,
+		streamCancels:   make(map[besproxy.BESProxy]context.CancelFunc),
+		wg:              &sync.WaitGroup{},
 	}, nil
 }
 
@@ -69,12 +72,15 @@ type besPipe struct {
 	besBuildId      string
 	besInvocationId string
 	besProxies      []besproxy.BESProxy
+	streamCancels   map[besproxy.BESProxy]context.CancelFunc
+
+	wg *sync.WaitGroup
 }
 
 var _ BESPipeInterceptor = (*besPipe)(nil)
 
 func (bb *besPipe) Setup() error {
-	err := syscall.Mknod(bb.bepBinPath, syscall.S_IFIFO|0666, 0)
+	err := syscall.Mknod(bb.bepBinPath, syscall.S_IFIFO|0o666, 0)
 	if err != nil {
 		return fmt.Errorf("failed to create BES pipe %s: %w", bb.bepBinPath, err)
 	}
@@ -86,21 +92,20 @@ func (bb *besPipe) RegisterBesProxy(ctx context.Context, p besproxy.BESProxy) {
 
 	bb.sendInitialLifecycleEvents(ctx, p)
 
-	err := p.PublishBuildToolEventStream(ctx, grpc.WaitForReady(false))
+	streamCtx, streamCancel := context.WithCancel(context.Background())
+	bb.streamCancels[p] = streamCancel
+
+	err := p.PublishBuildToolEventStream(streamCtx, grpc.WaitForReady(false))
 	if err != nil {
 		// If we fail to create the build event stream to a proxy then print out an error but don't fail the GRPC call
 		fmt.Fprintf(os.Stderr, "Error creating build event stream to %v: %s\n", p.Host(), err.Error())
+		streamCancel()
+		return
 	}
 
 	// Run a goroutine to recv ACKs from the grpc stream
 	go func() {
 		for {
-			select {
-			case <-ctx.Done():
-				return
-			default:
-			}
-
 			// If the proxy is not healthy, break out of the loop
 			if !p.Healthy() {
 				break
@@ -137,15 +142,6 @@ func (bb *besPipe) sendFinalLifecycleEvents(ctx context.Context, p besproxy.BESP
 	p.PublishLifecycleEvent(ctx, lifecycleRequest(bb.besBuildId, bb.besInvocationId, 2, &buildv1.BuildEvent{
 		Event: &buildv1.BuildEvent_InvocationAttemptFinished_{},
 	}))
-
-	// https://github.com/bazelbuild/bazel/blob/198c4c8aae1b5ef3d202f602932a99ce19707fc4/src/main/java/com/google/devtools/build/lib/buildeventservice/client/BuildEventServiceProtoUtil.java#L108
-	p.PublishLifecycleEvent(ctx, lifecycleRequest(bb.besBuildId, bb.besInvocationId, 2, &buildv1.BuildEvent{
-		Event: &buildv1.BuildEvent_BuildFinished_{
-			BuildFinished: &buildv1.BuildEvent_BuildFinished{
-				// TODO: need status
-			},
-		},
-	}))
 }
 
 func lifecycleRequest(buildId, invocationId string, sequenceNumber int64, event *buildv1.BuildEvent) *buildv1.PublishLifecycleEventRequest {
@@ -163,7 +159,9 @@ func lifecycleRequest(buildId, invocationId string, sequenceNumber int64, event 
 }
 
 func (bb *besPipe) ServeWait(ctx context.Context) error {
+	bb.wg.Add(1)
 	go func() {
+		defer bb.wg.Done()
 		conn, err := os.OpenFile(bb.bepBinPath, os.O_RDONLY, os.ModeNamedPipe)
 		if err != nil {
 			bb.errorsMutex.Lock()
@@ -193,32 +191,36 @@ func (bb *besPipe) ServeWait(ctx context.Context) error {
 			if err := p.CloseSend(); err != nil {
 				fmt.Fprintf(os.Stderr, "Error closing build event stream to %v: %s\n", p.Host(), err.Error())
 			}
+
+			bb.streamCancels[p]()
 		}
 	}()
 	return nil
 }
 
-func (bb *besPipe) streamBesEvents(ctx context.Context, r io.Reader) error {
-	reader := bufio.NewReader(r)
+func (bb *besPipe) streamBesEvents(ctx context.Context, conn *os.File) error {
+	reader := bufio.NewReader(conn)
+
+	go func() {
+		<-ctx.Done()
+		if err := conn.SetReadDeadline(time.Now().Add(gracePeriodDuration)); err != nil {
+			fmt.Fprintf(os.Stderr, "failed to set read deadline after context done: %s\n", err.Error())
+		}
+	}()
 
 	// Manually manage a sequence ID for the events
 	seqId := int64(0)
 
 	besEventGlobalTimeout := time.After(besEventGlobalTimeoutDuration)
 	for {
-		select {
-		case <-ctx.Done():
-			return nil
-		default:
-		}
-
 		event := buildeventstream.BuildEvent{}
 
 		if err := protodelim.UnmarshalFrom(reader, &event); err != nil {
+			if errors.Is(err, os.ErrDeadlineExceeded) {
+				return fmt.Errorf("timeout reached while waiting for BES events")
+			}
 			if errors.Is(err, io.EOF) {
 				select {
-				case <-ctx.Done():
-					return ctx.Err()
 				case <-besEventGlobalTimeout:
 					return fmt.Errorf("timeout reached while waiting for BES events")
 				case <-time.After(besEventThrottleDuration):
@@ -242,6 +244,9 @@ func (bb *besPipe) streamBesEvents(ctx context.Context, r io.Reader) error {
 			break
 		}
 	}
+
+	// Clear read deadline
+	conn.SetReadDeadline(time.Time{})
 
 	return nil
 }
@@ -321,5 +326,7 @@ func (bb *besPipe) Errors() []error {
 }
 
 func (bb *besPipe) GracefulStop() {
+	bb.wg.Wait()
+
 	os.Remove(bb.bepBinPath)
 }

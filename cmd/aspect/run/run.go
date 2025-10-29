@@ -80,8 +80,8 @@ directory of the process. You'd typically do this at the very beginning of the p
 		RunE: interceptors.Run(
 			[]interceptors.Interceptor{
 				flags.FlagsInterceptor(streams),
-				pluginSystem.BESPluginInterceptor(),
 				pluginSystem.RunHooksInterceptor(streams),
+				pluginSystem.BESPluginInterceptor(),
 			},
 			run.New(streams, hstreams, bzl).Run,
 		),
