@@ -362,7 +362,7 @@ func TestPublishBuildToolEventStream(t *testing.T) {
 		var anyBuildEvent anypb.Any
 		anyBuildEvent.MarshalFrom(buildEvent)
 		event := &buildv1.BuildEvent{Event: &buildv1.BuildEvent_BazelEvent{BazelEvent: &anyBuildEvent}}
-		streamId := &buildv1.StreamId{BuildId: "1"}
+		streamId := &buildv1.StreamId{BuildId: "1", InvocationId: "1bdca2c1-fa12-4097-b538-4707ce8fe50d"}
 		orderedBuildEvent := &buildv1.OrderedBuildEvent{
 			StreamId:       streamId,
 			SequenceNumber: 1,
@@ -398,23 +398,26 @@ func TestPublishBuildToolEventStream(t *testing.T) {
 		}
 		close(besBackend.ready)
 		var calledSubscriber1, calledSubscriber2, calledSubscriber3 bool
-		besBackend.RegisterSubscriber(func(evt *buildeventstream.BuildEvent, sn int64) error {
+		besBackend.RegisterSubscriber(func(evt *buildeventstream.BuildEvent, sn int64, invocationId string) error {
 			// g.Expect(evt).To(Equal(buildEvent))
 			g.Expect(sn).To(Equal(orderedBuildEvent.SequenceNumber))
+			g.Expect(invocationId).To(Equal(orderedBuildEvent.StreamId.InvocationId))
 			calledSubscriber1 = true
 			return nil
 		}, false)
 		expectedSubscriber2Err := fmt.Errorf("error from subscriber 2")
-		besBackend.RegisterSubscriber(func(evt *buildeventstream.BuildEvent, sn int64) error {
+		besBackend.RegisterSubscriber(func(evt *buildeventstream.BuildEvent, sn int64, invocationId string) error {
 			// g.Expect(evt).To(Equal(buildEvent))
 			g.Expect(sn).To(Equal(orderedBuildEvent.SequenceNumber))
+			g.Expect(invocationId).To(Equal(orderedBuildEvent.StreamId.InvocationId))
 			calledSubscriber2 = true
 			return expectedSubscriber2Err
 		}, false)
 		expectedSubscriber3Err := fmt.Errorf("error from subscriber 3")
-		besBackend.RegisterSubscriber(func(evt *buildeventstream.BuildEvent, sn int64) error {
+		besBackend.RegisterSubscriber(func(evt *buildeventstream.BuildEvent, sn int64, invocationId string) error {
 			// g.Expect(evt).To(Equal(buildEvent))
 			g.Expect(sn).To(Equal(orderedBuildEvent.SequenceNumber))
+			g.Expect(invocationId).To(Equal(orderedBuildEvent.StreamId.InvocationId))
 			calledSubscriber3 = true
 			return expectedSubscriber3Err
 		}, false)
