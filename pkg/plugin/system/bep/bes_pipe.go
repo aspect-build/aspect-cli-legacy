@@ -58,7 +58,6 @@ func NewBESPipe(buildId, invocationId string) (BESPipeInterceptor, error) {
 
 		besBuildId:      buildId,
 		besInvocationId: invocationId,
-		streamCancels:   make(map[besproxy.BESProxy]context.CancelFunc),
 		wg:              &sync.WaitGroup{},
 	}, nil
 }
@@ -72,7 +71,6 @@ type besPipe struct {
 	besBuildId      string
 	besInvocationId string
 	besProxies      []besproxy.BESProxy
-	streamCancels   map[besproxy.BESProxy]context.CancelFunc
 
 	wg *sync.WaitGroup
 }
@@ -92,14 +90,10 @@ func (bb *besPipe) RegisterBesProxy(ctx context.Context, p besproxy.BESProxy) {
 
 	bb.sendInitialLifecycleEvents(ctx, p)
 
-	streamCtx, streamCancel := context.WithCancel(context.Background())
-	bb.streamCancels[p] = streamCancel
-
-	err := p.PublishBuildToolEventStream(streamCtx, grpc.WaitForReady(false))
+	err := p.PublishBuildToolEventStream(ctx, grpc.WaitForReady(false))
 	if err != nil {
 		// If we fail to create the build event stream to a proxy then print out an error but don't fail the GRPC call
 		fmt.Fprintf(os.Stderr, "Error creating build event stream to %v: %s\n", p.Host(), err.Error())
-		streamCancel()
 		return
 	}
 
@@ -191,8 +185,6 @@ func (bb *besPipe) ServeWait(ctx context.Context) error {
 			if err := p.CloseSend(); err != nil {
 				fmt.Fprintf(os.Stderr, "Error closing build event stream to %v: %s\n", p.Host(), err.Error())
 			}
-
-			bb.streamCancels[p]()
 		}
 	}()
 	return nil
