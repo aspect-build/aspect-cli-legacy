@@ -295,12 +295,19 @@ func (bb *besPipe) publishBesEvent(seqId int64, event *buildeventstream.BuildEve
 }
 
 func (bb *besPipe) Args() []string {
-	return []string{
+	args := []string{
 		"--build_event_publish_all_actions",
-		"--build_event_binary_file_upload_mode=wait_for_upload_complete",
 		"--build_event_binary_file",
 		bb.bepBinPath,
 	}
+
+	// Also add wait_for_upload_complete flag if the bes pipe was explicitly requested.
+	// NOTE: this is explicitly not the default behavior to avoid breaking changes in bazel6
+	if os.Getenv("ASPECT_BEP_USE_PIPE") != "" {
+		args = append(args, "--build_event_binary_file_upload_mode=wait_for_upload_complete")
+	}
+
+	return args
 }
 
 func (bb *besPipe) RegisterSubscriber(callback CallbackFn, multiThreaded bool) {
