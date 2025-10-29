@@ -301,7 +301,6 @@ func (bb *besPipe) publishBesEvent(seqId int64, event *buildeventstream.BuildEve
 
 func (bb *besPipe) Args() []string {
 	args := []string{
-		"--build_event_publish_all_actions",
 		"--build_event_binary_file",
 		bb.bepBinPath,
 	}
