@@ -80,8 +80,8 @@ The target pattern may be further filtered using the flag
 		RunE: interceptors.Run(
 			[]interceptors.Interceptor{
 				flags.FlagsInterceptor(streams),
-				pluginSystem.BESBackendInterceptor(),
 				pluginSystem.BuildHooksInterceptor(streams),
+				pluginSystem.BESPluginInterceptor(),
 			},
 			build.New(streams, hstreams, bzl).Run,
 		),

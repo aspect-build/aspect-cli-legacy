@@ -27,8 +27,6 @@ import (
 	buildv1 "google.golang.org/genproto/googleapis/devtools/build/v1"
 )
 
-const proxyChannelBufferSize = 10000
-
 // BESProxy implements a Build Event Protocol backend to be passed to the
 // `bazel build` command so that the Aspect plugins can register as subscribers
 // to the build events.

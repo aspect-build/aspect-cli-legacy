@@ -23,10 +23,12 @@ import (
 	"math"
 	"os"
 	"reflect"
+	"slices"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
@@ -42,6 +44,7 @@ import (
 	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/client"
 	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/sdk/v1alpha4/plugin"
 	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/bep"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/besproxy"
 )
 
 // PluginSystem is the interface that defines all the methods for the aspect CLI
@@ -50,8 +53,12 @@ type PluginSystem interface {
 	Configure(streams ioutils.Streams, pluginsConfig interface{}) error
 	TearDown()
 	RegisterCustomCommands(cmd *cobra.Command, bazelStartupArgs []string) error
-	BESBackendInterceptor() interceptors.Interceptor
-	BESSocketInterceptor() interceptors.Interceptor
+	// Create an Interceptor for plugins if necessary.
+	// The interceptor may use a BES backend or binary-file to receive build event stream depending
+	// on system configuration.
+	BESPluginInterceptor() interceptors.Interceptor
+	// An Interceptor always created and always using a binary-file.
+	BESPipeInterceptor() interceptors.Interceptor
 	BuildHooksInterceptor(streams ioutils.Streams) interceptors.Interceptor
 	TestHooksInterceptor(streams ioutils.Streams) interceptors.Interceptor
 	RunHooksInterceptor(streams ioutils.Streams) interceptors.Interceptor
@@ -167,20 +174,18 @@ func (ps *pluginSystem) TearDown() {
 	}
 }
 
-// BESSocketInterceptor always starts a BES backend and injects it into the context.
-// Use BESBackendInterceptor to only create the grpc service when there is a known subscriber.
-func (ps *pluginSystem) BESSocketInterceptor() interceptors.Interceptor {
+// BESPipeInterceptor always starts a BES backend and injects it into the context.
+// Use BESInterceptor to only create the grpc service when there is a known subscriber.
+func (ps *pluginSystem) BESPipeInterceptor() interceptors.Interceptor {
 	return func(ctx context.Context, cmd *cobra.Command, args []string, next interceptors.RunEContextFn) error {
-		return ps.createBesSocket(ctx, cmd, args, next)
+		return ps.createBesInterceptor(ctx, cmd, args, true, next)
 	}
 }
 
-// BESBackendInterceptor sometimes starts a BES backend and injects it into the context.
+// BESPluginInterceptor sometimes starts a BES backend or binary-file and injects it into the context.
 // It short-circuits and does nothing in cases where we think there is no subscriber.
 // It gracefully stops the server after the main command is executed.
-//
-// DEPRECATED: use BESSocketInterceptor instead.
-func (ps *pluginSystem) BESBackendInterceptor() interceptors.Interceptor {
+func (ps *pluginSystem) BESPluginInterceptor() interceptors.Interceptor {
 	return func(ctx context.Context, cmd *cobra.Command, args []string, next interceptors.RunEContextFn) error {
 		// Check if --aspect:force_bes_backend is set. This is primarily used for testing.
 		forceBesBackend, err := cmd.Root().Flags().GetBool(rootFlags.AspectForceBesBackendFlagName)
@@ -198,7 +203,9 @@ func (ps *pluginSystem) BESBackendInterceptor() interceptors.Interceptor {
 			fmt.Fprintf(os.Stderr, "Forcing creation of BES backend\n")
 		}
 
-		return ps.createBesBackend(ctx, cmd, args, next)
+		usePipe := os.Getenv("ASPECT_BEP_USE_PIPE") != ""
+
+		return ps.createBesInterceptor(ctx, cmd, args, usePipe, next)
 	}
 }
 
@@ -212,30 +219,107 @@ func (ps *pluginSystem) hasBESPlugins() bool {
 	return false
 }
 
-func (ps *pluginSystem) createBesSocket(ctx context.Context, cmd *cobra.Command, args []string, next interceptors.RunEContextFn) error {
-	besSocket, err := bep.NewBESSocket(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to create BES socket: %w", err)
+func determineBuildId(args []string) string {
+	return uuid.NewString()
+}
+
+func determineInvocationId(args []string) string {
+	invocationId := ""
+	for _, arg := range args {
+		if strings.HasPrefix(arg, "--invocation_id=") {
+			invocationId = strings.TrimPrefix(arg, "--invocation_id=")
+		}
 	}
-	if err := besSocket.Setup(); err != nil {
-		return fmt.Errorf("failed to setup BES socket: %w", err)
+	// Default to random UUID if not provided on the CLI
+	if invocationId == "" {
+		invocationId = uuid.NewString()
 	}
-	if err := besSocket.ServeWait(ctx); err != nil {
-		return fmt.Errorf("failed to serve BES socket: %w", err)
+	return invocationId
+}
+
+func removeLastBesBackend(args []string) ([]string, string) {
+	// Find the last --bes_backend
+	lastBackend := -1
+	for idx, arg := range args {
+		if strings.HasPrefix(arg, "--bes_backend=") {
+			lastBackend = idx
+		}
 	}
-	defer besSocket.GracefulStop()
-	ctx = bep.InjectBESSocket(ctx, besSocket)
+
+	// The "last --bes_backend" is expected to be the aspect rosetta grpc backend
+	if lastBackend == -1 {
+		panic("No --bes_backend found to pipe last BES events to")
+	}
+
+	backend := strings.TrimPrefix(args[lastBackend], "--bes_backend=")
+	if !strings.HasPrefix(backend, "grpc://") {
+		panic("Only grpc:// BES backends are supported for piping last BES events, received: " + backend)
+	}
+
+	// Remove + return the last bes_backend
+	return slices.Delete(args, lastBackend, lastBackend+1), backend
+}
+
+func (ps *pluginSystem) createBesInterceptor(ctx context.Context, cmd *cobra.Command, args []string, usePipe bool, next interceptors.RunEContextFn) error {
+	var besInterceptor bep.BESInterceptor
+	var err error
+
+	if usePipe {
+		besInterceptor, err = setupBesPipe(args)
+		if err != nil {
+			return err
+		}
+	} else {
+		besInterceptor, err = setupBesBackend()
+		if err != nil {
+			return err
+		}
+	}
+
+	// Start the BES backend
+	if err := besInterceptor.ServeWait(ctx); err != nil {
+		return fmt.Errorf("failed to run BES backend: %w", err)
+	}
+	defer besInterceptor.GracefulStop()
+
+	for node := ps.plugins.head; node != nil; node = node.next {
+		if !node.payload.DisableBESEvents {
+			besInterceptor.RegisterSubscriber(node.payload.BEPEventCallback, node.payload.MultiThreaded)
+		}
+	}
+
+	if os.Getenv("ASPECT_BEP_WRITE_LAST_VIA_PIPE") != "" {
+		newArgs, lastBackend := removeLastBesBackend(args)
+
+		besProxy := besproxy.NewBesProxy(lastBackend, map[string]string{})
+		if err := besProxy.Connect(); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to connect to build event stream backend %s: %s", lastBackend, err.Error())
+		} else {
+			besInterceptor.RegisterBesProxy(ctx, besProxy)
+		}
+
+		args = newArgs
+	}
+
+	ctx = bep.InjectBESInterceptor(ctx, besInterceptor)
 	return next(ctx, cmd, args)
 }
 
-func (ps *pluginSystem) createBesBackend(ctx context.Context, cmd *cobra.Command, args []string, next interceptors.RunEContextFn) error {
-	// Create the BES backend
-	besBackend := bep.NewBESBackend(ctx)
-	for node := ps.plugins.head; node != nil; node = node.next {
-		if !node.payload.DisableBESEvents {
-			besBackend.RegisterSubscriber(node.payload.BEPEventCallback, node.payload.MultiThreaded)
-		}
+func setupBesPipe(args []string) (bep.BESPipeInterceptor, error) {
+	buildId := determineBuildId(args)
+	invocationId := determineInvocationId(args)
+	besPipe, err := bep.NewBESPipe(buildId, invocationId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create BES pipe: %w", err)
 	}
+	if err := besPipe.Setup(); err != nil {
+		return nil, fmt.Errorf("failed to setup BES pipe: %w", err)
+	}
+	return besPipe, nil
+}
+
+func setupBesBackend() (bep.BESInterceptor, error) {
+	besBackend := bep.NewBESBackend()
 	opts := []grpc.ServerOption{
 		// Bazel doesn't seem to set a maximum send message size, therefore
 		// we match the default send message for Go, which should be enough
@@ -253,18 +337,10 @@ func (ps *pluginSystem) createBesBackend(ctx context.Context, cmd *cobra.Command
 
 	// Setup the BES backend grpc server
 	if err := besBackend.Setup(opts...); err != nil {
-		return fmt.Errorf("failed to run BES backend: %w", err)
+		return nil, fmt.Errorf("failed to run BES backend: %w", err)
 	}
 
-	// Start the BES backend
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
-	defer cancel()
-	if err := besBackend.ServeWait(ctx); err != nil {
-		return fmt.Errorf("failed to run BES backend: %w", err)
-	}
-	defer besBackend.GracefulStop()
-	ctx = bep.InjectBESBackend(ctx, besBackend)
-	return next(ctx, cmd, args)
+	return besBackend, nil
 }
 
 // BuildHooksInterceptor returns an interceptor that runs the pre and post-build

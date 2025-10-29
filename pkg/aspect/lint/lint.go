@@ -259,16 +259,12 @@ lint:
 
 	besCompleted := make(chan struct{}, 1)
 
-	// Currently Bazel only supports a single --bes_backend so adding ours after
-	// any user supplied value will result in our bes_backend taking precedence.
-	// There is a very old & stale issue to add support for multiple BES
-	// backends https://github.com/bazelbuild/bazel/issues/10908. In the future,
-	// we could build this support into the Aspect CLI and post on that issue
-	// that using the Aspect CLI resolves it.
 	var lintBEPHandler *LintBEPHandler
-	if bep.HasBESSocket(ctx) {
-		besBackend := bep.BESSocketFromContext(ctx)
-		bazelCmd = flags.AddFlagToCommand(bazelCmd, besBackend.Args()...)
+
+	// Setup BES subscriber to capture lint results
+	if bep.HasBESInterceptor(ctx) {
+		besInterceptor := bep.BESInterceptorFromContext(ctx)
+		bazelCmd = flags.AddFlagToCommand(bazelCmd, besInterceptor.Args()...)
 
 		workingDirectory, err := os.Getwd()
 		if err != nil {
@@ -281,7 +277,7 @@ lint:
 		}
 
 		lintBEPHandler = newLintBEPHandler(workspaceRoot, besCompleted)
-		besBackend.RegisterSubscriber(lintBEPHandler.bepEventCallback)
+		besInterceptor.RegisterSubscriber(lintBEPHandler.bepEventCallback, false)
 	}
 
 	if postTerminateArgs != nil {
@@ -317,7 +313,7 @@ lint:
 	}
 
 	// Check for subscriber errors
-	subscriberErrors := bep.BESSocketErrors(ctx)
+	subscriberErrors := bep.BESErrors(ctx)
 	if len(subscriberErrors) > 0 {
 		for _, err := range subscriberErrors {
 			fmt.Fprintf(runner.streams.Stderr, "Error: failed to run lint command: %v\n", err)
