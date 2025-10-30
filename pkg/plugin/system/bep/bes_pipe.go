@@ -228,7 +228,7 @@ func (bb *besPipe) streamBesEvents(ctx context.Context, conn *os.File) error {
 
 		seqId++
 
-		if err := bb.publishBesEvent(seqId, bb.besInvocationId, &event); err != nil {
+		if err := bb.publishBesEvent(seqId, &event); err != nil {
 			return fmt.Errorf("failed to publish BES event: %w", err)
 		}
 
@@ -243,13 +243,17 @@ func (bb *besPipe) streamBesEvents(ctx context.Context, conn *os.File) error {
 	return nil
 }
 
-func (bb *besPipe) publishBesEvent(seqId int64, invocationId string, event *buildeventstream.BuildEvent) error {
+func (bb *besPipe) publishBesEvent(seqId int64, event *buildeventstream.BuildEvent) error {
 	eg := errgroup.Group{}
 
 	for s := bb.subscribers.head; s != nil; s = s.next {
 		cb := s.callback
 		eg.Go(
 			func() error {
+				var invocationId string
+				if os.Getenv("ASPECT_BEP_WRITE_LAST_VIA_PIPE") != "" {
+					invocationId = bb.besInvocationId
+				}
 				return cb(event, seqId, invocationId)
 			},
 		)
