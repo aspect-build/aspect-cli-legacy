@@ -1,5 +1,0 @@
-filegroup(
-    name = "golden_files",
-    srcs = glob(["*"]),
-    visibility = ["//pkg/aspect/lint:__pkg__"],
-)
