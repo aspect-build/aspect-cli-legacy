@@ -5,10 +5,10 @@ go 1.24.5
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/alphadose/haxmap v1.4.1
-	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251030042747-8e32503a9ac1
-	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251030042747-8e32503a9ac1
-	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251030042747-8e32503a9ac1
-	github.com/bazelbuild/bazel-gazelle v0.46.0-rc2
+	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251031000201-3b24c7fb6b28
+	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251031000201-3b24c7fb6b28
+	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251031000201-3b24c7fb6b28
+	github.com/bazelbuild/bazel-gazelle v0.46.0
 	github.com/bazelbuild/bazelisk v1.27.0 // NOTE: keep vendored code in sync
 	github.com/bazelbuild/buildtools v0.0.0-20250930140053-2eb4fccefb52
 	github.com/bluekeyes/go-gitdiff v0.7.3
@@ -57,6 +57,14 @@ require (
 	golang.org/x/term v0.36.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250603155806-513f23925822
 	gotest.tools/v3 v3.5.1
+)
+
+require (
+	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20251007231102-88e4ec95608b // indirect
+	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20251007231102-88e4ec95608b // indirect
+	github.com/bazel-contrib/rules_jvm v0.30.0 // indirect
+	github.com/google/btree v1.1.3 // indirect
+	github.com/msolo/jsonr v0.0.0-20231023064044-62fbfc3a0313 // indirect
 )
 
 require (
@@ -160,7 +168,7 @@ require (
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel/metric v1.38.0 // indirect
-	go.starlark.net v0.0.0-20250906160240-bf296ed553ea // indirect
+	go.starlark.net v0.0.0-20251029211736-7849196f18cf // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
