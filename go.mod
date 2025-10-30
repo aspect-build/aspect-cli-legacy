@@ -9,7 +9,7 @@ require (
 	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251030042747-8e32503a9ac1
 	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251030042747-8e32503a9ac1
 	github.com/bazelbuild/bazel-gazelle v0.46.0-rc2
-	github.com/bazelbuild/bazelisk v1.26.0 // NOTE: keep vendored code in sync
+	github.com/bazelbuild/bazelisk v1.27.0 // NOTE: keep vendored code in sync
 	github.com/bazelbuild/buildtools v0.0.0-20250930140053-2eb4fccefb52
 	github.com/bluekeyes/go-gitdiff v0.7.3
 	github.com/bmatcuk/doublestar/v4 v4.9.1 // indirect
