@@ -116,6 +116,7 @@ Run 'aspect help directives' or see https://github.com/aspect-build/aspect-cli-l
 
 	viper.SetDefault("configure.index", "all")
 	viper.SetDefault("configure.recurse", true)
+	viper.SetDefault("configure.progress", false)
 
 	// TODO: restrict to only valid values (see https://github.com/spf13/pflag/issues/236)
 	cmd.Flags().String("mode", "fix", "Method for emitting merged BUILD files.\n\tfix: write generated and merged files to disk\n\tprint: print files to stdout\n\tdiff: print a unified diff")
@@ -124,7 +125,7 @@ Run 'aspect help directives' or see https://github.com/aspect-build/aspect-cli-l
 	cmd.Flags().StringSlice("exclude", []string{}, "Files to exclude from BUILD generation")
 	cmd.Flags().Bool("watchman", false, "Use the EXPERIMENTAL watchman daemon to watch for changes across 'configure' invocations")
 	cmd.Flags().Bool("watch", false, "Use the EXPERIMENTAL watch mode to watch for changes in the workspace and automatically 'configure' when files change")
-	cmd.Flags().Bool("progress", false, "Show progress throughout 'configure' invocation")
+	cmd.Flags().Bool("progress", viper.GetBool("configure.progress"), "Show progress throughout 'configure' invocation")
 
 	return cmd
 }
