@@ -39,6 +39,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"path"
 	"slices"
 	"strconv"
 	"time"
@@ -328,7 +329,12 @@ func changesetToCycle(cs *watchman.ChangeSet) ibp.SourceInfoMap {
 	si := &ibp.SourceInfo{IsSource: &b}
 	changes := make(ibp.SourceInfoMap, len(cs.Paths))
 	for _, p := range cs.Paths {
-		changes[p] = si
+		// Determine if the change is a deletion vs regular change
+		if _, err := os.Stat(path.Join(cs.Root, p)); err != nil {
+			changes[p] = nil
+		} else {
+			changes[p] = si
+		}
 	}
 	return changes
 }
