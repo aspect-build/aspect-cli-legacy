@@ -33,7 +33,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
-	"sigs.k8s.io/yaml"
+	"gopkg.in/yaml.v3"
 
 	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/root/config"
 	rootFlags "github.com/aspect-build/aspect-cli-legacy/pkg/aspect/root/flags"

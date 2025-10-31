@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Aspect Build Systems, Inc.
+ * Copyright 2023 Aspect Build Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import (
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
-	"sigs.k8s.io/yaml"
+	"gopkg.in/yaml.v3"
 
 	rootFlags "github.com/aspect-build/aspect-cli-legacy/pkg/aspect/root/flags"
 	"github.com/aspect-build/aspect-cli-legacy/pkg/aspecterrors"
