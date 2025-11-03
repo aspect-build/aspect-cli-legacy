@@ -207,7 +207,11 @@ func (bb *besPipe) streamBesEvents(ctx context.Context, conn *os.File) error {
 	for {
 		event := buildeventstream.BuildEvent{}
 
-		if err := protodelim.UnmarshalFrom(reader, &event); err != nil {
+		opts := protodelim.UnmarshalOptions{
+			MaxSize: 32 * 1024 * 1024, // 32 MB max; we have observed 17 MB BES events in the wild
+		}
+
+		if err := opts.UnmarshalFrom(reader, &event); err != nil {
 			if errors.Is(err, os.ErrDeadlineExceeded) {
 				return fmt.Errorf("timeout reached while waiting for BES events")
 			}
