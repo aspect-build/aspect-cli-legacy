@@ -418,6 +418,8 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			return fmt.Errorf("failed to enter build state: %w", err)
 		}
 
+		logger.Debugf("watchman detected changes: %v", cs.Paths)
+
 		// The command to detect changes in the run target.
 		detectCmd, err := createBazelScriptCmd(false, true)
 		if err != nil {
@@ -445,6 +447,8 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			// Output a basic warning and resume waiting for changes.
 			fmt.Printf("%s incremental bazel build command failed: %v\n", color.YellowString("WARNING:"), incBuildErr)
 		} else if changes := changedetect.cycleChanges(); len(changes) > 0 {
+			logger.Infof("Cycle changes: %v", changes)
+
 			// For now just rerun the target, beware that RunCommand does not yield until
 			// the subprocess exists.
 			fmt.Printf("%s Found %d changes, rebuilding the target.\n", color.GreenString("INFO:"), len(changes))
