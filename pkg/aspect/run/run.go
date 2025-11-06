@@ -410,7 +410,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			return fmt.Errorf("failed to get next event: %w", err)
 		}
 
-		_, st := runner.tracer.Start(pcctx, "Run.Subscribe.Trigger")
+		_, watchTrace := runner.tracer.Start(pcctx, "Run.Subscribe.WatchEvent")
 
 		// Enter into the build state to discard supirious changes caused by Bazel reading the
 		// inputs which leads to their atime to change.
@@ -426,6 +426,9 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			return fmt.Errorf("failed to create bazel detect command: %w", err)
 		}
 
+		_, rebuildTrace := runner.tracer.Start(pcctx, "Run.Subscribe.Build", trace.WithAttributes(
+			traceAttr.StringSlice("command", detectCmd.Args),
+		))
 		// Something has changed, but we have no idea if it affects our target.
 		// Normally we'd want to perform a cquery to determine if it affects but
 		// that is too costly especially in larger monorepos. So instead we rebuild
@@ -435,6 +438,8 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		// TODO: delay the command stdout and do not output on quick noops
 		logger.Infof("incremental --watch build: %v", detectCmd.Args)
 		incBuildErr := detectCmd.Run()
+
+		rebuildTrace.End()
 
 		dtErr := changedetect.detectChanges(cs.Paths)
 		if dtErr != nil {
@@ -453,9 +458,13 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			// the subprocess exists.
 			fmt.Printf("%s Found %d changes, rebuilding the target.\n", color.GreenString("INFO:"), len(changes))
 
+			_, cycleTrace := runner.tracer.Start(pcctx, "Run.Subscribe.Cycle")
+
 			if err := incrementalProtocol.Cycle(changes); err != nil {
 				return fmt.Errorf("failed to report cycle events: %w", err)
 			}
+
+			cycleTrace.End()
 
 			// TODO: if we want to support ibazel livereload then we need to report changes.
 		} else {
@@ -467,7 +476,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			return fmt.Errorf("failed to enter build state: %w", err)
 		}
 
-		st.End()
+		watchTrace.End()
 	}
 
 	return nil
