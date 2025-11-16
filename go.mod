@@ -4,10 +4,10 @@ go 1.24.9
 
 require (
 	github.com/alphadose/haxmap v1.4.1
-	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251031225502-e67fd7a1f121
-	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251031225502-e67fd7a1f121
-	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251031225502-e67fd7a1f121
-	github.com/bazelbuild/bazel-gazelle v0.46.0
+	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251115024249-7cad566bc683
+	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251115024249-7cad566bc683
+	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251115024249-7cad566bc683
+	github.com/bazelbuild/bazel-gazelle v0.47.0
 	github.com/bazelbuild/bazelisk v1.27.0 // NOTE: keep vendored code in sync
 	github.com/bazelbuild/buildtools v0.0.0-20250930140053-2eb4fccefb52
 	github.com/bluekeyes/go-gitdiff v0.8.1
@@ -38,10 +38,10 @@ require (
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.38.0
 	go.opentelemetry.io/otel/sdk v1.38.0
 	go.opentelemetry.io/otel/trace v1.38.0
-	golang.org/x/mod v0.29.0
-	golang.org/x/sync v0.17.0
-	golang.org/x/term v0.36.0
-	golang.org/x/tools v0.38.0
+	golang.org/x/mod v0.30.0
+	golang.org/x/sync v0.18.0
+	golang.org/x/term v0.37.0
+	golang.org/x/tools v0.39.0
 	google.golang.org/genproto v0.0.0-20251029180050-ab9386a59fda
 	google.golang.org/genproto/googleapis/api v0.0.0-20251029180050-ab9386a59fda
 	google.golang.org/grpc v1.76.0
@@ -59,8 +59,8 @@ require (
 	github.com/a8m/envsubst v1.4.3 // indirect
 	github.com/alecthomas/chroma/v2 v2.20.0 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
-	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20251031225502-e67fd7a1f121 // indirect
-	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20251031225502-e67fd7a1f121 // indirect
+	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20251115024249-7cad566bc683 // indirect
+	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20251115024249-7cad566bc683 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
@@ -163,11 +163,11 @@ require (
 	go.opentelemetry.io/otel/metric v1.38.0 // indirect
 	go.starlark.net v0.0.0-20251029211736-7849196f18cf // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.43.0 // indirect
+	golang.org/x/crypto v0.44.0 // indirect
 	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546 // indirect
-	golang.org/x/net v0.46.0 // indirect
-	golang.org/x/sys v0.37.0 // indirect
-	golang.org/x/text v0.30.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
 	golang.org/x/tools/go/vcs v0.1.0-deprecated // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251029180050-ab9386a59fda // indirect
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
