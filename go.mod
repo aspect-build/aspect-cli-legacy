@@ -1,6 +1,6 @@
 module github.com/aspect-build/aspect-cli-legacy
 
-go 1.24.9
+go 1.26.1
 
 require (
 	github.com/alphadose/haxmap v1.4.1

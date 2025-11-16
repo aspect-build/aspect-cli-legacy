@@ -28,7 +28,13 @@ def multi_platform_binaries(name, embed, prefix = "", **kwargs):
             "//platforms/config:macos_aarch64": "{}{}-darwin_arm64".format(prefix, name),
             "//platforms/config:macos_x86_64": "{}{}-darwin_amd64".format(prefix, name),
         }),
-        gc_linkopts = ["-s", "-w"],
+        gc_linkopts = ["-s", "-w"] + select({
+            # lld defaults to PIE on Linux; Go objects are not PIC, so disable PIE for CGo linking.
+            # -extldflags must be a separate element so rules_go merges it with the toolchain's flags.
+            "//platforms/config:linux_aarch64": ["-extldflags", "-no-pie"],
+            "//platforms/config:linux_x86_64": ["-extldflags", "-no-pie"],
+            "//conditions:default": [],
+        }),
         embed = embed,
         cgo = True,
         visibility = ["//visibility:public"],
