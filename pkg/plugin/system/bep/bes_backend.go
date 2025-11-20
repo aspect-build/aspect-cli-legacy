@@ -26,6 +26,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -527,15 +528,42 @@ func (bb *besBackend) PublishBuildToolEventStream(
 	// Goroutine to forward to build event to BES proxies
 	eg.Go(func() error {
 		for fwd := range fwdChanRead {
+			egFwd := errgroup.Group{}
+
 			for _, bp := range bb.besProxies {
-				if !bp.Healthy() {
-					continue
-				}
-				err := bp.Send(fwd)
-				if err != nil {
-					// If we fail to send to a proxy then print out an error but don't fail the GRPC call
-					fmt.Fprintf(os.Stderr, "Error sending build event to %v: %s\n", bp.Host(), err.Error())
-				}
+				bp := bp // capture
+				egFwd.Go(func() error {
+					if !bp.Healthy() {
+						return nil
+					}
+
+					// Channel for Send result
+					sendCh := make(chan error, 1)
+
+					// Run Send in goroutine
+					go func() {
+						err := bp.Send(fwd)
+						sendCh <- err
+					}()
+
+					// Wait for Send or timeout
+					select {
+					case err := <-sendCh:
+						if err != nil {
+							fmt.Fprintf(os.Stderr, "Error sending build event to %v: %s\n", bp.Host(), err.Error())
+							bp.MarkUnhealthy()
+						}
+						return nil
+					case <-time.After(besSendTimeout):
+						fmt.Fprintf(os.Stderr, "Timeout sending build event to %v: marking unhealthy\n", bp.Host())
+						bp.MarkUnhealthy()
+						return nil
+					}
+				})
+			}
+
+			if err := egFwd.Wait(); err != nil {
+				// Optionally handle errors from sends, but since we log inside, perhaps no need to propagate
 			}
 		}
 		for _, bp := range bb.besProxies {

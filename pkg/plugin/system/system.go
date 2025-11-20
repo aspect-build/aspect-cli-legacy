@@ -204,6 +204,9 @@ func (ps *pluginSystem) BESPluginInterceptor() interceptors.Interceptor {
 		}
 
 		usePipe := os.Getenv("ASPECT_BEP_USE_PIPE") != ""
+		if forceBesBackend {
+			fmt.Fprintf(os.Stderr, "Using BES pipe\n")
+		}
 
 		return ps.createBesInterceptor(ctx, cmd, args, usePipe, next)
 	}
@@ -290,7 +293,7 @@ func (ps *pluginSystem) createBesInterceptor(ctx context.Context, cmd *cobra.Com
 
 	if os.Getenv("ASPECT_BEP_WRITE_LAST_VIA_PIPE") != "" {
 		newArgs, lastBackend := removeLastBesBackend(args)
-
+		fmt.Fprintf(os.Stderr, "Forwarding BES stream to %s\n", lastBackend)
 		besProxy := besproxy.NewBesProxy(lastBackend, map[string]string{})
 		if err := besProxy.Connect(); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to connect to build event stream backend %s: %s", lastBackend, err.Error())

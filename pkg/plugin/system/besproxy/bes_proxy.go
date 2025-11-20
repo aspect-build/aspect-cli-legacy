@@ -27,6 +27,8 @@ import (
 	buildv1 "google.golang.org/genproto/googleapis/devtools/build/v1"
 )
 
+const maxStreamErrors = 5
+
 // BESProxy implements a Build Event Protocol backend to be passed to the
 // `bazel build` command so that the Aspect plugins can register as subscribers
 // to the build events.
@@ -38,6 +40,7 @@ type BESProxy interface {
 	PublishLifecycleEvent(ctx context.Context, req *buildv1.PublishLifecycleEventRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	StreamCreated() bool
 	Healthy() bool
+	MarkUnhealthy()
 	Recv() (*buildv1.PublishBuildToolEventStreamResponse, error)
 	Send(req *buildv1.PublishBuildToolEventStreamRequest) error
 }
@@ -135,7 +138,7 @@ func (bp *besProxy) CloseSend() error {
 func (bp *besProxy) trackError(err error) error {
 	if err != nil {
 		bp.hadError++
-		if bp.hadError == 5 {
+		if bp.hadError == maxStreamErrors {
 			fmt.Printf("stream to %s is marked unhealthy, taking out of rotation.", bp.host)
 		}
 	}
@@ -143,5 +146,10 @@ func (bp *besProxy) trackError(err error) error {
 }
 
 func (bp *besProxy) Healthy() bool {
-	return bp.hadError < 5 && bp.stream != nil
+	return bp.hadError < maxStreamErrors && bp.stream != nil
+}
+
+func (bp *besProxy) MarkUnhealthy() {
+	bp.hadError = maxStreamErrors
+	fmt.Printf("stream to %s is marked unhealthy, taking out of rotation.", bp.host)
 }
