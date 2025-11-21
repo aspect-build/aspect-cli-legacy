@@ -49,6 +49,7 @@ type BESPipeInterceptor interface {
 const besEventGlobalTimeoutDuration = 5 * time.Minute
 const besEventThrottleDuration = 50 * time.Millisecond
 const gracePeriodDuration = 2 * time.Second
+const besSendTimeout = 1 * time.Minute
 
 func NewBESPipe(buildId, invocationId string) (BESPipeInterceptor, error) {
 	return &besPipe{
@@ -71,6 +72,9 @@ type besPipe struct {
 	besBuildId      string
 	besInvocationId string
 	besProxies      []besproxy.BESProxy
+
+	// Track whether we have already unlinked the pipe due to backend failure
+	pipeAborted sync.Once
 
 	wg *sync.WaitGroup
 }
@@ -116,6 +120,8 @@ func (bb *besPipe) RegisterBesProxy(ctx context.Context, p besproxy.BESProxy) {
 				break
 			}
 		}
+		// When the ACK goroutine exits (usually because of error), check if we should abort the pipe
+		bb.maybeAbortPipeBecauseNoHealthyBackends()
 	}()
 }
 
@@ -156,6 +162,13 @@ func (bb *besPipe) ServeWait(ctx context.Context) error {
 	bb.wg.Add(1)
 	go func() {
 		defer bb.wg.Done()
+
+		// If the overall context is cancelled, abort the pipe immediately
+		go func() {
+			<-ctx.Done()
+			bb.maybeAbortPipeBecauseNoHealthyBackends()
+		}()
+
 		conn, err := os.OpenFile(bb.bepBinPath, os.O_RDONLY, os.ModeNamedPipe)
 		if err != nil {
 			bb.errorsMutex.Lock()
@@ -163,10 +176,7 @@ func (bb *besPipe) ServeWait(ctx context.Context) error {
 			bb.errors.Insert(fmt.Errorf("failed to accept connection on BES pipe %s: %w", bb.bepBinPath, err))
 			return
 		}
-
-		defer func() {
-			conn.Close()
-		}()
+		defer conn.Close()
 
 		if err := bb.streamBesEvents(ctx, conn); err != nil {
 			bb.errorsMutex.Lock()
@@ -175,6 +185,7 @@ func (bb *besPipe) ServeWait(ctx context.Context) error {
 			return
 		}
 
+		// Normal completion path
 		for _, p := range bb.besProxies {
 			if !p.Healthy() {
 				continue
@@ -188,6 +199,32 @@ func (bb *besPipe) ServeWait(ctx context.Context) error {
 		}
 	}()
 	return nil
+}
+
+// maybeAbortPipeBecauseNoHealthyBackends unlinks the FIFO if all backends are unhealthy.
+// This gives Bazel a broken pipe → it aborts the upload and exits.
+func (bb *besPipe) maybeAbortPipeBecauseNoHealthyBackends() {
+	if len(bb.besProxies) == 0 {
+		return
+	}
+
+	var anyHealthy bool
+	for _, p := range bb.besProxies {
+		if p.Healthy() {
+			anyHealthy = true
+			break
+		}
+	}
+	if anyHealthy {
+		return
+	}
+
+	bb.pipeAborted.Do(func() {
+		fmt.Fprintf(os.Stderr, "All BES backends are unhealthy — unlinking pipe %s\n", bb.bepBinPath)
+		if err := syscall.Unlink(bb.bepBinPath); err != nil && !os.IsNotExist(err) {
+			fmt.Fprintf(os.Stderr, "failed to unlink BES pipe %s: %v\n", bb.bepBinPath, err)
+		}
+	})
 }
 
 func (bb *besPipe) streamBesEvents(ctx context.Context, conn *os.File) error {
@@ -285,14 +322,35 @@ func (bb *besPipe) publishBesEvent(seqId int64, event *buildeventstream.BuildEve
 		}
 
 		for _, p := range bb.besProxies {
-			eg.Go(
-				func() error {
-					if err := p.Send(grpcEvent); err != nil {
-						fmt.Fprintf(os.Stderr, "Error sending BES event to %v: %s\n", p.Host(), err.Error())
+			p := p // capture
+			eg.Go(func() error {
+				if !p.Healthy() {
+					return nil
+				}
+
+				// Channel for Send result
+				sendCh := make(chan error, 1)
+
+				// Run Send in goroutine
+				go func() {
+					err := p.Send(grpcEvent)
+					sendCh <- err
+				}()
+
+				// Wait for Send or timeout
+				select {
+				case err := <-sendCh:
+					if err != nil {
+						p.MarkUnhealthy()
+						bb.maybeAbortPipeBecauseNoHealthyBackends()
 					}
 					return nil
-				},
-			)
+				case <-time.After(besSendTimeout):
+					p.MarkUnhealthy()
+					bb.maybeAbortPipeBecauseNoHealthyBackends()
+					return nil
+				}
+			})
 		}
 	}
 
