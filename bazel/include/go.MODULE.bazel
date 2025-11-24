@@ -17,7 +17,8 @@ single_version_override(
     patches = [
         "//patches:gazelle-branded.patch",
         "//patches:gazelle-gitignore.patch",
-        "//patches:gazelle-watchman.patch",
+        # Disabled due to https://github.com/aspect-build/aspect-gazelle/issues/140
+        # "//patches:gazelle-watchman.patch",
     ],
 )
 
@@ -70,7 +71,8 @@ go_deps.module_override(
     patches = [
         "//patches:gazelle-branded.patch",
         "//patches:gazelle-gitignore.patch",
-        "//patches:gazelle-watchman.patch",
+        # Disabled due to https://github.com/aspect-build/aspect-gazelle/issues/140
+        # "//patches:gazelle-watchman.patch",
     ],
     path = "github.com/bazelbuild/bazel-gazelle",
 )
