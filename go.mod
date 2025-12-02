@@ -4,9 +4,9 @@ go 1.24.9
 
 require (
 	github.com/alphadose/haxmap v1.4.1
-	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251125002441-c2ee3832d425
-	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251125002441-c2ee3832d425
-	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251125002441-c2ee3832d425
+	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251202183129-b53abc0af39f
+	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251202183129-b53abc0af39f
+	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251202183129-b53abc0af39f
 	github.com/bazelbuild/bazel-gazelle v0.47.0
 	github.com/bazelbuild/bazelisk v1.27.0 // NOTE: keep vendored code in sync
 	github.com/bazelbuild/buildtools v0.0.0-20251112105957-8e68360eeafa
@@ -52,7 +52,7 @@ require (
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
-	github.com/EngFlow/gazelle_cc v0.1.0 // indirect
+	github.com/EngFlow/gazelle_cc v0.4.0 // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.3.0 // indirect
