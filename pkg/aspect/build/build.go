@@ -153,7 +153,7 @@ func (runner *Build) buildWatch(ctx context.Context, bazelCmd []string, streams 
 		fmt.Printf("Initial Build Failed: %v", err)
 	}
 
-	for _, err := range w.Subscribe(ctx, "aspect-build-watch") {
+	for _, err := range w.Subscribe(ctx, watchman.DeferState{DeferWithinState: "aspect-build-watch"}) {
 		if err != nil {
 			// Break the subscribe iteration if the context is done or if the watcher is closed.
 			if errors.Is(err, context.Canceled) || errors.Is(err, net.ErrClosed) {

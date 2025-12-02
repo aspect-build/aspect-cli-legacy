@@ -400,7 +400,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	}
 
 	// Subscribe to further changes
-	for cs, err := range w.Subscribe(pcctx, "aspect-run-watch") {
+	for cs, err := range w.Subscribe(pcctx, watcher.DeferState{DeferWithinState: "aspect-run-watch"}) {
 		if err != nil {
 			// Break the subscribe iteration if the context is done or if the watcher is closed.
 			if errors.Is(err, context.Canceled) || errors.Is(err, net.ErrClosed) {
