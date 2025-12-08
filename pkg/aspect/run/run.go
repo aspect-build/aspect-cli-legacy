@@ -274,11 +274,16 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		return fmt.Errorf("failed to create initial bazel command: %w", err)
 	}
 
+	_, initTraceSpan := runner.tracer.Start(pcctx, "Run.Subscribe.Build", trace.WithAttributes(
+		traceAttr.StringSlice("command", initCmd.Args),
+	))
+
 	logger.Infof("initial --watch build: %v", initCmd.Args)
 	if err := initCmd.Run(); err != nil {
 		return fmt.Errorf("initial bazel command failed: %w", err)
 	}
 	initCmd = nil
+	initTraceSpan.End()
 
 	// Detect the context of the run target after this initial build.
 	if err := changedetect.detectContext(); err != nil {
