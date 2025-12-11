@@ -59,6 +59,7 @@ import (
 	"github.com/spf13/cobra"
 	"go.opentelemetry.io/otel"
 	traceAttr "go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/sync/errgroup"
 )
@@ -444,6 +445,9 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		logger.Infof("incremental --watch build: %v", detectCmd.Args)
 		incBuildErr := detectCmd.Run()
 
+		if incBuildErr != nil {
+			rebuildTrace.SetStatus(codes.Error, incBuildErr.Error())
+		}
 		rebuildTrace.End()
 
 		dtErr := changedetect.detectChanges(cs.Paths)
