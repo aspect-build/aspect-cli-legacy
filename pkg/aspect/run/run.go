@@ -415,7 +415,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			return fmt.Errorf("failed to get next event: %w", err)
 		}
 
-		_, watchTrace := runner.tracer.Start(pcctx, "Run.Subscribe.WatchEvent")
+		tctx, watchTrace := runner.tracer.Start(pcctx, "Run.Subscribe.WatchEvent")
 
 		// Enter into the build state to discard supirious changes caused by Bazel reading the
 		// inputs which leads to their atime to change.
@@ -431,7 +431,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			return fmt.Errorf("failed to create bazel detect command: %w", err)
 		}
 
-		_, rebuildTrace := runner.tracer.Start(pcctx, "Run.Subscribe.Build", trace.WithAttributes(
+		_, rebuildTrace := runner.tracer.Start(tctx, "Run.Subscribe.Build", trace.WithAttributes(
 			traceAttr.StringSlice("command", detectCmd.Args),
 		))
 		// Something has changed, but we have no idea if it affects our target.
@@ -463,7 +463,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			// the subprocess exists.
 			fmt.Printf("%s Found %d changes, rebuilding the target.\n", color.GreenString("INFO:"), len(changes))
 
-			_, cycleTrace := runner.tracer.Start(pcctx, "Run.Subscribe.Cycle")
+			_, cycleTrace := runner.tracer.Start(tctx, "Run.Subscribe.Cycle")
 
 			if err := incrementalProtocol.Cycle(changes); err != nil {
 				return fmt.Errorf("failed to report cycle events: %w", err)
