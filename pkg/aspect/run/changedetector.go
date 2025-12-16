@@ -20,7 +20,6 @@ import (
 	"bufio"
 	"crypto/sha256"
 	_ "embed"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -123,20 +122,8 @@ type ChangeDetector struct {
 //go:embed aspect_watch.bzl
 var ASPECT_WATCH_BZL_CONTENT []byte
 
-// TODO: drop support for json once compact is better tested
-var useJsonExecLog = false
-
-func init() {
-	useJsonExecLog = os.Getenv("ASPECT_WATCH_USE_JSON_EXECLOG") != ""
-}
-
 func newChangeDetector(workspaceDir string, useLegacyReplaceWorkspace bool) (*ChangeDetector, error) {
-	ext := "bin"
-	if useJsonExecLog {
-		ext = "json"
-	}
-
-	execlog, err := os.CreateTemp(os.TempDir(), fmt.Sprintf("aspect-watch-%v-execlog-*.%s", os.Getpid(), ext))
+	execlog, err := os.CreateTemp(os.TempDir(), fmt.Sprintf("aspect-watch-%v-execlog-*.bin", os.Getpid()))
 	if err != nil {
 		return nil, err
 	}
@@ -178,11 +165,7 @@ func (cd *ChangeDetector) bazelFlags(trackChanges bool) []string {
 	flags := []string{}
 
 	if trackChanges {
-		if useJsonExecLog {
-			flags = append(flags, "--execution_log_json_file", cd.execlogFile.Name(), "--noexecution_log_sort")
-		} else {
-			flags = append(flags, "--execution_log_compact_file", cd.execlogFile.Name())
-		}
+		flags = append(flags, "--execution_log_compact_file", cd.execlogFile.Name())
 	}
 
 	injectArgName := "inject_repository"
@@ -329,33 +312,7 @@ func (cd *ChangeDetector) cycleExecLog() ([]string, error) {
 	}
 	defer execLogFile.Close()
 
-	if useJsonExecLog {
-		return parseJsonExecLogInputs(execLogFile)
-	}
-
 	return parseCompactExecLogInputs(execLogFile)
-}
-
-func parseJsonExecLogInputs(in io.Reader) ([]string, error) {
-	r := []string{}
-
-	decode := json.NewDecoder(in)
-
-	// collect the inputs
-	for decode.More() {
-		entry := ExecLogEntry{}
-		if err := decode.Decode(&entry); err != nil {
-			return nil, err
-		}
-
-		r = append(r, entry.ListedOutputs...)
-
-		for _, output := range entry.Outputs {
-			r = append(r, output.Path)
-		}
-	}
-
-	return r, nil
 }
 
 func parseCompactExecLogInputs(in io.Reader) ([]string, error) {

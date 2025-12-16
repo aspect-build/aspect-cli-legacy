@@ -41,7 +41,6 @@ go_test(
     data = glob(["testdata/**"]),
     embed = [":run"],
     embedsrcs = [
-        "testdata/changedetector_test-json_exec-a.json",
         "testdata/changedetector_test-compact_exec-a.bin",
     ],
     deps = [
