@@ -45,6 +45,7 @@ import (
 	"github.com/aspect-build/aspect-cli-legacy/pkg/bazel"
 	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/bep"
+	logger "github.com/aspect-build/aspect-gazelle/common/logger"
 	"github.com/aspect-build/aspect-gazelle/runner/pkg/watchman"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -145,7 +146,7 @@ func (runner *Test) testWatch(ctx context.Context, bazelCmd []string, streams io
 		fmt.Printf("Initial Build Failed: %v", err)
 	}
 
-	for _, err := range w.Subscribe(ctx, watchman.DeferState{DeferWithinState: "aspect-test-watch"}) {
+	for cs, err := range w.Subscribe(ctx, watchman.DeferState{DeferWithinState: "aspect-test-watch"}) {
 		if err != nil {
 			// Break the subscribe iteration if the context is done or if the watcher is closed.
 			if errors.Is(err, context.Canceled) || errors.Is(err, net.ErrClosed) {
@@ -160,6 +161,8 @@ func (runner *Test) testWatch(ctx context.Context, bazelCmd []string, streams io
 		if err := w.StateEnter("aspect-test-watch"); err != nil {
 			return fmt.Errorf("failed to enter build state: %w", err)
 		}
+
+		logger.Debugf("watchman detected changes: %v", cs.Paths)
 
 		err := runner.bzl.RunCommand(streams, nil, bazelCmd...)
 		if err != nil {
