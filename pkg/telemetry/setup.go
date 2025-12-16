@@ -18,46 +18,59 @@ package telemetry
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/spf13/viper"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/resource"
-	"go.opentelemetry.io/otel/sdk/trace"
+	sdkTrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 
+	// "go.opentelemetry.io/collector/exporter/otlphttpexporter"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 )
 
 const (
 	outputFileEnv = "ASPECT_OTEL_OUT"
+	endpointEnv   = "ASPECT_OTEL_ENDPOINT"
 )
 
 /**
  * Configure global OpenTelemetry settings for the CLI.
  */
 func StartSession(ctx context.Context) func() {
-	des, err := setupOTelFile(ctx)
-	if err != nil {
-		panic(err)
-	}
-	if des == nil {
-		return func() {}
-	}
-	return des
-}
-
-func setupOTelFile(ctx context.Context) (func(), error) {
 	telemetryOutFile := os.Getenv(outputFileEnv)
 	if telemetryOutFile == "" {
 		telemetryOutFile = viper.GetString("telemetry.output")
 	}
-
-	// No telemetry output configured
-	if telemetryOutFile == "" {
-		return nil, nil
+	if telemetryOutFile != "" {
+		des, err := setupOTelFileTracer(ctx, telemetryOutFile)
+		if err != nil {
+			panic(err)
+		}
+		return des
 	}
 
+	telemetryEndpoint := os.Getenv(endpointEnv)
+	if telemetryEndpoint == "" {
+		telemetryEndpoint = viper.GetString("telemetry.endpoint")
+	}
+	if telemetryEndpoint != "" {
+		des, err := setupOTelOTLP(ctx, telemetryEndpoint)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Sending telemetry to OTLP server at %s\n", telemetryEndpoint)
+		return des
+	}
+
+	// No telemetry configured
+	return func() {}
+}
+
+func setupOTelTracer(ctx context.Context, tracer sdkTrace.SpanExporter) (func(), error) {
 	r, err := resource.Merge(
 		resource.Default(),
 		resource.NewWithAttributes(
@@ -69,6 +82,19 @@ func setupOTelFile(ctx context.Context) (func(), error) {
 		return nil, err
 	}
 
+	tp := sdkTrace.NewTracerProvider(
+		sdkTrace.WithBatcher(tracer),
+		sdkTrace.WithResource(r),
+	)
+
+	otel.SetTracerProvider(tp)
+
+	return func() {
+		tp.Shutdown(ctx)
+	}, nil
+}
+
+func setupOTelFileTracer(ctx context.Context, telemetryOutFile string) (func(), error) {
 	f, err := os.OpenFile(telemetryOutFile, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return nil, err
@@ -79,14 +105,24 @@ func setupOTelFile(ctx context.Context) (func(), error) {
 		return nil, err
 	}
 
-	tp := trace.NewTracerProvider(
-		trace.WithBatcher(exp),
-		trace.WithResource(r),
+	return setupOTelTracer(ctx, exp)
+}
+
+func setupOTelOTLP(ctx context.Context, telemetryEndpoint string) (func(), error) {
+	exp, err := otlptracehttp.New(
+		ctx,
+		otlptracehttp.WithEndpoint(telemetryEndpoint),
 	)
+	if err != nil {
+		panic(err)
+	}
 
-	otel.SetTracerProvider(tp)
+	// exp, err := otlphttpexporter.NewFactory().CreateTraces(ctx, nil, otlphttpexporter.WithEndpoint(telemetryEndpoint))
 
-	return func() {
-		tp.Shutdown(ctx)
-	}, nil
+	startErr := exp.Start(ctx)
+	if startErr != nil {
+		return nil, startErr
+	}
+
+	return setupOTelTracer(ctx, exp)
 }
