@@ -9,7 +9,7 @@ require (
 	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251202183129-b53abc0af39f
 	github.com/bazelbuild/bazel-gazelle v0.47.0
 	github.com/bazelbuild/bazelisk v1.27.0 // NOTE: keep vendored code in sync
-	github.com/bazelbuild/buildtools v0.0.0-20251112105957-8e68360eeafa
+	github.com/bazelbuild/buildtools v0.0.0-20251209115752-d171b38a20c7
 	github.com/bluekeyes/go-gitdiff v0.8.1
 	github.com/charmbracelet/huh v0.8.0
 	github.com/creack/pty v1.1.24
@@ -19,7 +19,7 @@ require (
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.6.1
 	github.com/hay-kot/scaffold v0.11.0
-	github.com/klauspost/compress v1.18.1
+	github.com/klauspost/compress v1.18.2
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/mitchellh/go-homedir v1.1.0
@@ -59,8 +59,8 @@ require (
 	github.com/a8m/envsubst v1.4.3 // indirect
 	github.com/alecthomas/chroma/v2 v2.20.0 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
-	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20251125002441-c2ee3832d425 // indirect
-	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20251125002441-c2ee3832d425 // indirect
+	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20251202183129-b53abc0af39f // indirect
+	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20251202183129-b53abc0af39f // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
