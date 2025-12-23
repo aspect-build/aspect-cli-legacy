@@ -35,6 +35,7 @@ require (
 	github.com/tejzpr/ordered-concurrently/v3 v3.0.1
 	github.com/twmb/murmur3 v1.1.8
 	go.opentelemetry.io/otel v1.39.0
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.39.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.39.0
 	go.opentelemetry.io/otel/sdk v1.39.0
 	go.opentelemetry.io/otel/trace v1.39.0
@@ -43,8 +44,8 @@ require (
 	golang.org/x/term v0.38.0
 	golang.org/x/tools v0.40.0
 	google.golang.org/genproto v0.0.0-20251029180050-ab9386a59fda
-	google.golang.org/genproto/googleapis/api v0.0.0-20251029180050-ab9386a59fda
-	google.golang.org/grpc v1.76.0
+	google.golang.org/genproto/googleapis/api v0.0.0-20251202230838-ff82c1b0f217
+	google.golang.org/grpc v1.77.0
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools/v3 v3.5.2
@@ -69,6 +70,7 @@ require (
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/bmatcuk/doublestar/v4 v4.9.1 // indirect
 	github.com/catppuccin/go v0.3.0 // indirect
+	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/bubbles v0.21.1-0.20250623103423-23b8fd6302d7 // indirect
 	github.com/charmbracelet/bubbletea v1.3.10 // indirect
@@ -111,7 +113,8 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/css v1.0.1 // indirect
-	github.com/hashicorp/go-version v1.7.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3 // indirect
+	github.com/hashicorp/go-version v1.8.0 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/haya14busa/go-checkstyle v0.0.0-20170303121022-5e9d09f51fa1 // indirect
 	github.com/haya14busa/go-sarif v0.0.0-20240630170108-a3ba8d79599f // indirect
@@ -161,7 +164,9 @@ require (
 	github.com/yuin/goldmark-emoji v1.0.6 // indirect
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.39.0 // indirect
 	go.opentelemetry.io/otel/metric v1.39.0 // indirect
+	go.opentelemetry.io/proto/otlp v1.9.0 // indirect
 	go.starlark.net v0.0.0-20251109183026-be02852a5e1f // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.3 // indirect
@@ -171,7 +176,7 @@ require (
 	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
 	golang.org/x/tools/go/vcs v0.1.0-deprecated // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20251029180050-ab9386a59fda // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
