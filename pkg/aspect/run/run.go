@@ -203,6 +203,9 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	w := watcher.NewWatchman(runner.bzl.WorkspaceRoot())
 	wInit := errgroup.Group{}
 	wInit.Go(func() error {
+		_, t := runner.tracer.Start(pcctx, "Watchman.Start")
+		defer t.End()
+
 		if err := w.Start(); err != nil {
 			return fmt.Errorf("failed to start the watcher: %w", err)
 		}
@@ -275,7 +278,9 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		return fmt.Errorf("failed to create initial bazel command: %w", err)
 	}
 
-	_, initTraceSpan := runner.tracer.Start(pcctx, "Run.Subscribe.Build", trace.WithAttributes(
+	initCtx, initTrace := runner.tracer.Start(pcctx, "Run.Init", trace.WithAttributes())
+
+	_, initBuildTrace := runner.tracer.Start(initCtx, "Run.Build", trace.WithAttributes(
 		traceAttr.StringSlice("command", initCmd.Args),
 	))
 
@@ -284,7 +289,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		return fmt.Errorf("initial bazel command failed: %w", err)
 	}
 	initCmd = nil
-	initTraceSpan.End()
+	initBuildTrace.End()
 
 	// Detect the context of the run target after this initial build.
 	if err := changedetect.detectContext(); err != nil {
@@ -371,6 +376,8 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	}
 
 	// Init() with the full runfiles list
+	_, initCycleTrace := runner.tracer.Start(initCtx, "Run.Cycle")
+
 	initRunfiles, initRunfielsErr := changedetect.loadFullSourceInfo()
 	if initRunfielsErr != nil {
 		return fmt.Errorf("failed to load initial runfiles: %w", initRunfielsErr)
@@ -379,6 +386,9 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	if initErr != nil {
 		return fmt.Errorf("failed to initialize watch protocol: %w", initErr)
 	}
+
+	initCycleTrace.End()
+	initTrace.End()
 
 	// Send an 'Exit' message to the child process when the context completes in case
 	// the context was cancelled due to the cli being shutdown.
@@ -432,7 +442,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			return fmt.Errorf("failed to create bazel detect command: %w", err)
 		}
 
-		_, rebuildTrace := runner.tracer.Start(tctx, "Run.Subscribe.Build", trace.WithAttributes(
+		_, rebuildTrace := runner.tracer.Start(tctx, "Run.Build", trace.WithAttributes(
 			traceAttr.StringSlice("command", detectCmd.Args),
 		))
 		// Something has changed, but we have no idea if it affects our target.
@@ -467,7 +477,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			// the subprocess exists.
 			fmt.Printf("%s Found %d changes, rebuilding the target.\n", color.GreenString("INFO:"), len(changes))
 
-			_, cycleTrace := runner.tracer.Start(tctx, "Run.Subscribe.Cycle")
+			_, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
 
 			if err := incrementalProtocol.Cycle(changes); err != nil {
 				return fmt.Errorf("failed to report cycle events: %w", err)
