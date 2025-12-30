@@ -63,7 +63,9 @@ func NewBESPipe(buildId, invocationId string) (BESPipeInterceptor, error) {
 }
 
 type besPipe struct {
-	bepBinPath  string
+	bepBinPath   string
+	bepBinOpened bool
+
 	errors      *aspecterrors.ErrorList
 	errorsMutex sync.RWMutex
 	subscribers *subscriberList
@@ -162,6 +164,9 @@ func (bb *besPipe) ServeWait(ctx context.Context) error {
 	go func() {
 		defer bb.wg.Done()
 
+		// This is a BLOCKING call that will wait for the file to have readable data.
+		// If no bazel process is launched or the bazel process does not write to the
+		// pipe, this will block indefinitely.
 		conn, err := os.OpenFile(bb.bepBinPath, os.O_RDONLY, os.ModeNamedPipe)
 		if err != nil {
 			bb.errorsMutex.Lock()
@@ -170,6 +175,9 @@ func (bb *besPipe) ServeWait(ctx context.Context) error {
 			return
 		}
 		defer conn.Close()
+
+		// Mark that the pipe has been opened to ensure shutdown waits for writes to finish
+		bb.bepBinOpened = true
 
 		if err := bb.streamBesEvents(ctx, conn); err != nil {
 			bb.errorsMutex.Lock()
@@ -369,7 +377,9 @@ func (bb *besPipe) Errors() []error {
 }
 
 func (bb *besPipe) GracefulStop() {
-	bb.wg.Wait()
+	if bb.bepBinOpened {
+		bb.wg.Wait()
+	}
 
 	os.Remove(bb.bepBinPath)
 }

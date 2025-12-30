@@ -101,3 +101,9 @@ EOF
     refute_output --partial "bazel-bin/shell.AspectRulesLintShellCheck.out.exit_code"
     refute_output --partial "bazel-bin/shell.AspectRulesLintShellCheck.patch"
 }
+
+@test 'aspect lint with no config should fail' {
+    echo '' >.aspect/cli/config.yaml
+    run aspect lint //:all
+    assert_failure
+}
