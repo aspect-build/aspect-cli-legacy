@@ -166,23 +166,22 @@ func (runner *Linter) Run(ctx context.Context, cmd *cobra.Command, args []string
 	}
 
 	if len(linters) == 0 {
-		fmt.Fprintf(runner.streams.Stdout, `No aspects enabled for linting.
+		return fmt.Errorf(`No aspects enabled for linting.
 		
 Add a section like the following to your .aspect/cli/config.yaml:
 
 lint:
   aspects:
-    - //tools:lint.bzl%%eslint
-`)
-		return nil
+    - //tools:lint.bzl%%eslint`)
 	}
 
 	lintAspectsArg, _ := cmd.Flags().GetStringSlice("lint:aspects")
 	finalLinters := flagUtils.ParseSet(linters, lintAspectsArg)
 	if len(finalLinters) == 0 {
-		fmt.Fprintf(runner.streams.Stdout, "No aspects enabled for linting after filtering\n")
-		return nil
-	} else if !slices.Equal(linters, finalLinters) {
+		return fmt.Errorf("No aspects enabled for linting after filtering")
+	}
+
+	if !slices.Equal(linters, finalLinters) {
 		fmt.Fprintf(runner.streams.Stdout, "Linting using a modified list of lint aspects:\n\t%s\n", strings.Join(finalLinters, "\n\t"))
 	}
 
