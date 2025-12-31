@@ -2,8 +2,8 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-CORE_VERSION = "1.11.0"  # March 26th 2024
-ASSERT_VERSION = "2.1.0"  # October 22 2022
+CORE_VERSION = "1.13.0"
+ASSERT_VERSION = "2.2.4"
 SUPPORT_VERSION = "9bf10e876dd6b624fe44423f0b35e064225f7556"  # August 26, 2023
 FILES_VERSION = "048aa4c595d4a103d6ec3518ead9e071efc019e2"  # August 25, 2023
 MOCK_VERSION = "48fce74482a4d2bb879b904ccab31b6bc98e3224"  # May 3, 2021
@@ -14,12 +14,14 @@ def bats_dependencies():
 
     http_archive(
         name = "bats_core",
-        integrity = "sha256-rv8J/ciwyIswh8md4Az1STVtei9qaeP87F4Ohh0vkGM=",
+        integrity = "sha256-qF4SuIKCcaFSszjKgQmqI0k7V5UJh8jm3/l7pJJ3L/M=",
         urls = [
             "https://github.com/bats-core/bats-core/archive/v{}.tar.gz".format(CORE_VERSION),
         ],
         strip_prefix = "bats-core-{}".format(CORE_VERSION),
         build_file_content = """
+load("@rules_shell//shell:sh_library.bzl", "sh_library")
+
 sh_library(
     name = "bats_core",
     srcs = glob([
@@ -41,10 +43,12 @@ sh_library(
         urls = [
             "https://github.com/bats-core/bats-assert/archive/v{}.tar.gz".format(ASSERT_VERSION),
         ],
-        integrity = "sha256-mMo7aF+LiZPkjsBXVl5uKrzFQQNO1bDoHxkVBWggN/0=",
+        integrity = "sha256-4wXfIMTDbLpFcOEPHNgk77GucdiLXvR0VQeB6+4EGS8=",
         strip_prefix = "bats-assert-{}".format(ASSERT_VERSION),
         add_prefix = "bats-assert",
         build_file_content = """
+load("@rules_shell//shell:sh_library.bzl", "sh_library")
+
 sh_library(
     name = "bats_assert",
     srcs = glob([
@@ -72,6 +76,8 @@ sh_library(
         strip_prefix = "bats-file-{}".format(FILES_VERSION),
         add_prefix = "bats-file",
         build_file_content = """
+load("@rules_shell//shell:sh_library.bzl", "sh_library")
+
 sh_library(
     name = "bats_file",
     srcs = glob([
@@ -99,6 +105,8 @@ sh_library(
         strip_prefix = "bats-support-{}".format(SUPPORT_VERSION),
         add_prefix = "bats-support",
         build_file_content = """
+load("@rules_shell//shell:sh_library.bzl", "sh_library")
+
 sh_library(
     name = "bats_support",
     srcs = glob([
@@ -125,6 +133,8 @@ sh_library(
         strip_prefix = "bats-mock-{}".format(MOCK_VERSION),
         add_prefix = "bats-mock",
         build_file_content = """
+load("@rules_shell//shell:sh_library.bzl", "sh_library")
+
 sh_library(
     name = "bats_mock",
     srcs = glob([
@@ -149,6 +159,8 @@ sh_library(
         strip_prefix = "bats-detik-{}".format(DETIK_VERSION),
         add_prefix = "bats-detik",
         build_file_content = """
+load("@rules_shell//shell:sh_library.bzl", "sh_library")
+
 sh_library(
     name = "bats_detik",
     srcs = [
