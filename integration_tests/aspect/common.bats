@@ -6,7 +6,7 @@ aspect() {
     # but the configured path is only writable by specific users which we can't run as within the sandbox.
     # these system wide flag affect the output path of the bazel-in-bazel that is run inside the tests leading to errors.
     # NOTE: the output files left by bazel-in-bazel should be discarded as they are not part of the action.
-    "$TEST_SRCDIR/$TEST_WORKSPACE/cmd/aspect/aspect_/aspect" --aspect:nosystem_config --nosystem_rc --nohome_rc "$@"
+    "$TEST_SRCDIR/$TEST_WORKSPACE/cmd/aspect/aspect_/aspect" --aspect:nosystem_config --batch --nosystem_rc --nohome_rc "$@"
 }
 
 aspect_vanilla() {
