@@ -48,7 +48,6 @@ type BESPipeInterceptor interface {
 
 const besEventGlobalTimeoutDuration = 5 * time.Minute
 const besEventThrottleDuration = 50 * time.Millisecond
-const gracePeriodDuration = 2 * time.Second
 const besSendTimeout = 1 * time.Minute
 
 func NewBESPipe(buildId, invocationId string) (BESPipeInterceptor, error) {
@@ -163,12 +162,6 @@ func (bb *besPipe) ServeWait(ctx context.Context) error {
 	go func() {
 		defer bb.wg.Done()
 
-		// If the overall context is cancelled, abort the pipe immediately
-		go func() {
-			<-ctx.Done()
-			bb.maybeAbortPipeBecauseNoHealthyBackends()
-		}()
-
 		conn, err := os.OpenFile(bb.bepBinPath, os.O_RDONLY, os.ModeNamedPipe)
 		if err != nil {
 			bb.errorsMutex.Lock()
@@ -229,13 +222,6 @@ func (bb *besPipe) maybeAbortPipeBecauseNoHealthyBackends() {
 
 func (bb *besPipe) streamBesEvents(ctx context.Context, conn *os.File) error {
 	reader := bufio.NewReader(conn)
-
-	go func() {
-		<-ctx.Done()
-		if err := conn.SetReadDeadline(time.Now().Add(gracePeriodDuration)); err != nil {
-			fmt.Fprintf(os.Stderr, "failed to set read deadline after context done: %s\n", err.Error())
-		}
-	}()
 
 	// Manually manage a sequence ID for the events
 	seqId := int64(0)
