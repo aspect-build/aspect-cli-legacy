@@ -477,7 +477,35 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			// the subprocess exists.
 			fmt.Printf("%s Found %d changes, rebuilding the target.\n", color.GreenString("INFO:"), len(changes))
 
-			_, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
+			cyclceCtx, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
+
+			// Convert watch protocol traces to otel spans under the Run.Cycle span.
+			go func() {
+				traces := make(map[string]trace.Span)
+				for {
+					select {
+					case <-cyclceCtx.Done():
+						return
+					case t := <-incrementalProtocol.Trace():
+						if t.Type == "the end" {
+							if span, ok := traces[t.ID]; ok {
+								span.End()
+								delete(traces, t.ID)
+							}
+						} else {
+							_, span := runner.tracer.Start(cyclceCtx, t.Type, trace.WithAttributes(
+								... t.Attributes ...
+							))
+							traces[t.ID] = span
+						}
+					}
+				}
+
+				for id, span := range traces {
+					logger.Warnf("trace %s was not ended properly", id)
+					span.End()
+				}
+			}()
 
 			if err := incrementalProtocol.Cycle(changes); err != nil {
 				return fmt.Errorf("failed to report cycle events: %w", err)
