@@ -17,7 +17,7 @@ const gitTags = execSync('git tag');
 if (gitTags.length > 0) {
     // Follows https://blog.aspect.build/versioning-releases-from-a-monorepo
     const monorepo_version = execSync(
-        `git describe --tags --long --match="[0-9][0-9][0-9][0-9].[0-9][0-9]"`,
+        `git describe --tags --long --match="2[0-9][0-9][0-9].[1-9]" --match="2[0-9][0-9][0-9].[1-5][0-9]"`,
         { encoding: 'utf-8' }
     )
         .replace('-', '.')
