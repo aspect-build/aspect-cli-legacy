@@ -99,6 +99,7 @@ type besBackend struct {
 	besProxies    []besproxy.BESProxy
 	errors        *aspecterrors.ErrorList
 	errorsMutex   sync.RWMutex
+	once          sync.Once
 	grpcDialer    aspectgrpc.Dialer
 	grpcServer    aspectgrpc.Server
 	listener      net.Listener
@@ -451,10 +452,12 @@ func (bb *besBackend) PublishBuildToolEventStream(
 						// Received options event, setup bes upstream backends based off commandline arguments bazel reported.
 						// setup upstream backends async to prevent bazel client from waiting for upstream bes connections.
 						eg.Go(func() error {
-							err = bb.setupBesUpstreamBackends(egCtx, event.GetOptionsParsed())
-							if err != nil {
-								fmt.Fprintf(os.Stderr, "Error setting up BES upstream backends: %s\n", err.Error())
-							}
+							bb.once.Do(func() {
+								err := bb.setupBesUpstreamBackends(egCtx, event.GetOptionsParsed())
+								if err != nil {
+									fmt.Fprintf(os.Stderr, "Error setting up BES upstream backends: %s\n", err.Error())
+								}
+							})
 							return nil
 						})
 					}
