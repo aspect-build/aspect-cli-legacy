@@ -415,8 +415,10 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		return wErr
 	}
 
+	watchState := fmt.Sprintf("aspect-run-watch-%d", os.Getpid())
+
 	// Subscribe to further changes
-	for cs, err := range w.Subscribe(pcctx, watcher.DeferState{DeferWithinState: "aspect-run-watch"}) {
+	for cs, err := range w.Subscribe(pcctx, watcher.DeferState{DeferWithinState: watchState}) {
 		if err != nil {
 			// Break the subscribe iteration if the context is done or if the watcher is closed.
 			if errors.Is(err, context.Canceled) || errors.Is(err, net.ErrClosed) {
@@ -430,7 +432,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 
 		// Enter into the build state to discard supirious changes caused by Bazel reading the
 		// inputs which leads to their atime to change.
-		if err := w.StateEnter("aspect-run-watch"); err != nil {
+		if err := w.StateEnter(watchState); err != nil {
 			return fmt.Errorf("failed to enter build state: %w", err)
 		}
 
@@ -491,7 +493,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		}
 
 		// Leave the build state and fast forward the subscription clock.
-		if err := w.StateLeave("aspect-run-watch"); err != nil {
+		if err := w.StateLeave(watchState); err != nil {
 			return fmt.Errorf("failed to enter build state: %w", err)
 		}
 
