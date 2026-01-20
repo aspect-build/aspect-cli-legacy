@@ -294,7 +294,9 @@ func runConfigureWatch(ctx context.Context, v *runner.GazelleRunner, mode string
 		return fmt.Errorf("no connection to incremental protocol")
 	}
 
-	for cs, err := range w.Subscribe(ctx, watchman.DropState{DropWithinState: "aspect-configure-watch"}) {
+	watchState := fmt.Sprintf("aspect-configure-watch-%d", os.Getpid())
+
+	for cs, err := range w.Subscribe(ctx, watchman.DropState{DropWithinState: watchState}) {
 		if err != nil {
 			// Break the subscribe iteration if the context is done or if the watcher is closed.
 			if errors.Is(err, context.Canceled) || errors.Is(err, net.ErrClosed) {
@@ -306,7 +308,7 @@ func runConfigureWatch(ctx context.Context, v *runner.GazelleRunner, mode string
 
 		// Enter into the build state to discard supirious changes caused by Bazel reading the
 		// inputs which leads to their atime to change.
-		if err := w.StateEnter("aspect-configure-watch"); err != nil {
+		if err := w.StateEnter(watchState); err != nil {
 			return fmt.Errorf("failed to enter build state: %w", err)
 		}
 
@@ -315,7 +317,7 @@ func runConfigureWatch(ctx context.Context, v *runner.GazelleRunner, mode string
 		}
 
 		// Leave the build state and fast forward the subscription clock.
-		if err := w.StateLeave("aspect-configure-watch"); err != nil {
+		if err := w.StateLeave(watchState); err != nil {
 			return fmt.Errorf("failed to enter build state: %w", err)
 		}
 	}

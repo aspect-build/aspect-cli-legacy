@@ -146,7 +146,9 @@ func (runner *Test) testWatch(ctx context.Context, bazelCmd []string, streams io
 		fmt.Printf("Initial Build Failed: %v", err)
 	}
 
-	for cs, err := range w.Subscribe(ctx, watchman.DeferState{DeferWithinState: "aspect-test-watch"}) {
+	watchState := fmt.Sprintf("aspect-test-watch-%d", os.Getpid())
+
+	for cs, err := range w.Subscribe(ctx, watchman.DeferState{DeferWithinState: watchState}) {
 		if err != nil {
 			// Break the subscribe iteration if the context is done or if the watcher is closed.
 			if errors.Is(err, context.Canceled) || errors.Is(err, net.ErrClosed) {
@@ -158,7 +160,7 @@ func (runner *Test) testWatch(ctx context.Context, bazelCmd []string, streams io
 
 		// Enter into the build state to discard supirious changes caused by Bazel reading the
 		// inputs which leads to their atime to change.
-		if err := w.StateEnter("aspect-test-watch"); err != nil {
+		if err := w.StateEnter(watchState); err != nil {
 			return fmt.Errorf("failed to enter build state: %w", err)
 		}
 
@@ -170,7 +172,7 @@ func (runner *Test) testWatch(ctx context.Context, bazelCmd []string, streams io
 		}
 
 		// Leave the build state and fast forward the subscription clock.
-		if err := w.StateLeave("aspect-test-watch"); err != nil {
+		if err := w.StateLeave(watchState); err != nil {
 			return fmt.Errorf("failed to exit build state: %w", err)
 		}
 	}
