@@ -4,9 +4,9 @@ go 1.24.9
 
 require (
 	github.com/alphadose/haxmap v1.4.1
-	github.com/aspect-build/aspect-gazelle/common v0.0.0-20260121040226-b0a499912eef
-	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20260121040226-b0a499912eef
-	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20260121040226-b0a499912eef
+	github.com/aspect-build/aspect-gazelle/common v0.0.0-20260121053443-0c3464adfec2
+	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20260121053443-0c3464adfec2
+	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20260121053443-0c3464adfec2
 	github.com/bazelbuild/bazel-gazelle v0.47.0
 	github.com/bazelbuild/bazelisk v1.27.0 // NOTE: keep vendored code in sync
 	github.com/bazelbuild/buildtools v0.0.0-20260119084900-9bdafcfba839
@@ -59,7 +59,6 @@ require (
 	github.com/a8m/envsubst v1.4.3 // indirect
 	github.com/alecthomas/chroma/v2 v2.20.0 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
-	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20260121040226-b0a499912eef // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
@@ -175,7 +174,8 @@ require (
 )
 
 require (
-	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20251115024249-7cad566bc683 // indirect
+	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20260121053443-0c3464adfec2 // indirect
+	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20260121053443-0c3464adfec2 // indirect
 	github.com/bazel-contrib/rules_jvm v0.31.1 // indirect
 	github.com/bufbuild/rules_buf v0.5.2 // indirect
 	github.com/google/btree v1.1.3 // indirect
