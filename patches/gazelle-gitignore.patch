@@ -1,5 +1,5 @@
 diff --git a/walk/config.go b/walk/config.go
-index 53dcabe..a678127 100644
+index 53dcabe..759d538 100644
 --- a/walk/config.go
 +++ b/walk/config.go
 @@ -58,6 +58,12 @@ type walkConfig struct {
@@ -15,7 +15,28 @@ index 53dcabe..a678127 100644
  }
  
  const (
-@@ -79,6 +85,18 @@ func (wc *walkConfig) clone() *walkConfig {
+@@ -69,6 +75,20 @@ func getWalkConfig(c *config.Config) *walkConfig {
+ 	return c.Exts[walkName].(*walkConfig)
+ }
+ 
++// PATCH(gitignore) ---
++func getGitProcessor(c *config.Config) func(string, string, interface{}) (func(string, bool) bool, interface{}) {
++	ext, hasExt := c.Exts["__aspect:gitignoreProcessor"]
++	if !hasExt || ext == nil {
++		return nil
++	}
++	m, isExt := ext.(func(string, string, interface{}) (func(string, bool) bool, interface{}))
++	if !isExt {
++		return nil
++	}
++	return m
++	// END PATCH(gitignore) ---
++}
++
+ func (wc *walkConfig) clone() *walkConfig {
+ 	wcCopy := *wc
+ 	// Trim cap of exclude and follow. We may append to these slices in multiple
+@@ -79,6 +99,18 @@ func (wc *walkConfig) clone() *walkConfig {
  	return &wcCopy
  }
  
@@ -34,7 +55,7 @@ index 53dcabe..a678127 100644
  func (wc *walkConfig) isExcludedDir(p string) bool {
  	return path.Base(p) == ".git" || wc.ignoreFilter.isDirectoryIgnored(p) || matchAnyGlob(wc.excludes, p)
  }
-@@ -139,7 +157,8 @@ func (cr *Configurer) CheckFlags(_ *flag.FlagSet, c *config.Config) error {
+@@ -139,7 +171,8 @@ func (cr *Configurer) CheckFlags(_ *flag.FlagSet, c *config.Config) error {
  }
  
  func (*Configurer) KnownDirectives() []string {
@@ -44,7 +65,7 @@ index 53dcabe..a678127 100644
  }
  
  func (cr *Configurer) Configure(c *config.Config, rel string, f *rule.File) {
-@@ -196,6 +215,9 @@ func configureForWalk(parent *walkConfig, rel string, f *rule.File) *walkConfig
+@@ -196,6 +229,9 @@ func configureForWalk(parent *walkConfig, rel string, f *rule.File) *walkConfig
  					log.Printf("the ignore directive does not take any arguments. Did you mean to use gazelle:exclude instead? in //%s '# gazelle:ignore %s'", f.Pkg, d.Value)
  				}
  				wc.ignore = true
@@ -55,7 +76,7 @@ index 53dcabe..a678127 100644
  		}
  	}
 diff --git a/walk/dirinfo.go b/walk/dirinfo.go
-index d240e02..26106ec 100644
+index d240e02..893ba3e 100644
 --- a/walk/dirinfo.go
 +++ b/walk/dirinfo.go
 @@ -69,6 +69,19 @@ func (w *walker) loadDirInfo(rel string) (DirInfo, error) {
@@ -64,7 +85,7 @@ index d240e02..26106ec 100644
  	info.config = configureForWalk(parentConfig, rel, info.File)
 +
 +	// PATCH(gitignore) ---
-+	if gitignoreProcessor, ok := w.rootConfig.Exts["__aspect:gitignoreProcessor"].(func(string, string, interface{}) (func(string, bool) bool, interface{})); ok && gitignoreProcessor != nil {
++	if gitignoreProcessor := getGitProcessor(w.rootConfig); gitignoreProcessor != nil {
 +		// Process any new .gitignore files
 +		for _, entry := range entries {
 +			if entry.Name() == ".gitignore" {
