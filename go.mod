@@ -4,12 +4,12 @@ go 1.24.9
 
 require (
 	github.com/alphadose/haxmap v1.4.1
-	github.com/aspect-build/aspect-gazelle/common v0.0.0-20251202183129-b53abc0af39f
-	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20251202183129-b53abc0af39f
-	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20251202183129-b53abc0af39f
+	github.com/aspect-build/aspect-gazelle/common v0.0.0-20260121040226-b0a499912eef
+	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20260121040226-b0a499912eef
+	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20260121040226-b0a499912eef
 	github.com/bazelbuild/bazel-gazelle v0.47.0
 	github.com/bazelbuild/bazelisk v1.27.0 // NOTE: keep vendored code in sync
-	github.com/bazelbuild/buildtools v0.0.0-20251209115752-d171b38a20c7
+	github.com/bazelbuild/buildtools v0.0.0-20260119084900-9bdafcfba839
 	github.com/bluekeyes/go-gitdiff v0.8.1
 	github.com/charmbracelet/huh v0.8.0
 	github.com/creack/pty v1.1.24
@@ -23,7 +23,7 @@ require (
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/onsi/gomega v1.38.2
+	github.com/onsi/gomega v1.39.0
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/reviewdog/errorformat v0.0.0-20250320004447-223c26dbe212
 	github.com/reviewdog/reviewdog v0.17.4
@@ -38,10 +38,10 @@ require (
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.39.0
 	go.opentelemetry.io/otel/sdk v1.39.0
 	go.opentelemetry.io/otel/trace v1.39.0
-	golang.org/x/mod v0.31.0
+	golang.org/x/mod v0.32.0
 	golang.org/x/sync v0.19.0
-	golang.org/x/term v0.38.0
-	golang.org/x/tools v0.40.0
+	golang.org/x/term v0.39.0
+	golang.org/x/tools v0.41.0
 	google.golang.org/genproto v0.0.0-20251029180050-ab9386a59fda
 	google.golang.org/genproto/googleapis/api v0.0.0-20251029180050-ab9386a59fda
 	google.golang.org/grpc v1.76.0
@@ -52,22 +52,20 @@ require (
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
-	github.com/EngFlow/gazelle_cc v0.4.0 // indirect
+	github.com/EngFlow/gazelle_cc v0.5.0 // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.3.0 // indirect
 	github.com/a8m/envsubst v1.4.3 // indirect
 	github.com/alecthomas/chroma/v2 v2.20.0 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
-	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20251202183129-b53abc0af39f // indirect
-	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20251202183129-b53abc0af39f // indirect
+	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20260121040226-b0a499912eef // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
-	github.com/bazel-contrib/rules_jvm v0.31.1 // indirect
 	github.com/bazel-contrib/rules_python/gazelle v0.0.0-20251012075144-43a5acf8cedf // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
-	github.com/bmatcuk/doublestar/v4 v4.9.1 // indirect
+	github.com/bmatcuk/doublestar/v4 v4.9.2 // indirect
 	github.com/catppuccin/go v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/bubbles v0.21.1-0.20250623103423-23b8fd6302d7 // indirect
@@ -107,7 +105,6 @@ require (
 	github.com/goccy/go-yaml v1.18.0 // indirect
 	github.com/gofrs/flock v0.13.0 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
-	github.com/google/btree v1.1.3 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/css v1.0.1 // indirect
@@ -162,17 +159,24 @@ require (
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel/metric v1.39.0 // indirect
-	go.starlark.net v0.0.0-20251109183026-be02852a5e1f // indirect
+	go.starlark.net v0.0.0-20260102030733-3fee463870c9 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.3 // indirect
-	golang.org/x/crypto v0.46.0 // indirect
+	golang.org/x/crypto v0.47.0 // indirect
 	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546 // indirect
-	golang.org/x/net v0.48.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
-	golang.org/x/text v0.32.0 // indirect
+	golang.org/x/net v0.49.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/tools/go/vcs v0.1.0-deprecated // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251029180050-ab9386a59fda // indirect
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+)
+
+require (
+	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20251115024249-7cad566bc683 // indirect
+	github.com/bazel-contrib/rules_jvm v0.31.1 // indirect
+	github.com/bufbuild/rules_buf v0.5.2 // indirect
+	github.com/google/btree v1.1.3 // indirect
 )
