@@ -124,7 +124,7 @@ func (runner *Run) Run(ctx context.Context, cmd *cobra.Command, args []string) (
 
 	var err error
 	if !watch {
-		err = runner.runCommand(ctx, bazelCmd, bzlCommandStreams)
+		err = runner.runBazelCommand(ctx, bazelCmd, bzlCommandStreams)
 	} else {
 		err = runner.runWatch(ctx, bazelCmd, bzlCommandStreams)
 	}
@@ -143,13 +143,30 @@ func (runner *Run) Run(ctx context.Context, cmd *cobra.Command, args []string) (
 	return err
 }
 
-func (runner *Run) runCommand(ctx context.Context, bazelCmd []string, bzlCommandStreams ioutils.Streams) error {
-	ctx, t := runner.tracer.Start(ctx, "Run", trace.WithAttributes(
+func (runner *Run) runBazelCommand(ctx context.Context, bazelCmd []string, bzlCommandStreams ioutils.Streams) error {
+	_, t := runner.tracer.Start(ctx, "Run", trace.WithAttributes(
 		traceAttr.StringSlice("command", bazelCmd),
 	))
 	defer t.End()
 
-	return runner.bzl.RunCommand(bzlCommandStreams, nil, bazelCmd...)
+	err := runner.bzl.RunCommand(bzlCommandStreams, nil, bazelCmd...)
+	if err != nil {
+		t.SetStatus(codes.Error, err.Error())
+	}
+	return err
+}
+
+func (runner *Run) runCmd(c context.Context, initCmd *exec.Cmd, spanName string) error {
+	_, runTrace := runner.tracer.Start(c, spanName, trace.WithAttributes(
+		traceAttr.StringSlice("command", initCmd.Args),
+	))
+
+	err := initCmd.Run()
+	if err != nil {
+		runTrace.SetStatus(codes.Error, err.Error())
+	}
+	runTrace.End()
+	return err
 }
 
 func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandStreams ioutils.Streams) error {
@@ -280,16 +297,13 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 
 	initCtx, initTrace := runner.tracer.Start(pcctx, "Run.Init", trace.WithAttributes())
 
-	_, initBuildTrace := runner.tracer.Start(initCtx, "Run.Build", trace.WithAttributes(
-		traceAttr.StringSlice("command", initCmd.Args),
-	))
-
 	logger.Infof("initial --watch build: %v", initCmd.Args)
-	if err := initCmd.Run(); err != nil {
+
+	err = runner.runCmd(pcctx, initCmd, "Run.Subscribe.Build")
+	if err != nil {
 		return fmt.Errorf("initial bazel command failed: %w", err)
 	}
 	initCmd = nil
-	initBuildTrace.End()
 
 	// Detect the context of the run target after this initial build.
 	if err := changedetect.detectContext(); err != nil {
@@ -444,9 +458,6 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			return fmt.Errorf("failed to create bazel detect command: %w", err)
 		}
 
-		_, rebuildTrace := runner.tracer.Start(tctx, "Run.Build", trace.WithAttributes(
-			traceAttr.StringSlice("command", detectCmd.Args),
-		))
 		// Something has changed, but we have no idea if it affects our target.
 		// Normally we'd want to perform a cquery to determine if it affects but
 		// that is too costly especially in larger monorepos. So instead we rebuild
@@ -455,12 +466,8 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		//
 		// TODO: delay the command stdout and do not output on quick noops
 		logger.Infof("incremental --watch build: %v", detectCmd.Args)
-		incBuildErr := detectCmd.Run()
 
-		if incBuildErr != nil {
-			rebuildTrace.SetStatus(codes.Error, incBuildErr.Error())
-		}
-		rebuildTrace.End()
+		incBuildErr := runner.runCmd(tctx, detectCmd, "Run.Subscribe.Build")
 
 		dtErr := changedetect.detectChanges(cs.Paths)
 		if dtErr != nil {
