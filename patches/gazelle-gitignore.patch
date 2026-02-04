@@ -1,5 +1,5 @@
 diff --git a/walk/config.go b/walk/config.go
-index 53dcabe..a678127 100644
+index 53dcabe..b60bed5 100644
 --- a/walk/config.go
 +++ b/walk/config.go
 @@ -58,6 +58,12 @@ type walkConfig struct {
@@ -10,7 +10,7 @@ index 53dcabe..a678127 100644
 +	// PATCH(gitignore) ---
 +	isGitIgnoreDisabled bool
 +	gitIgnoreData       interface{}
-+	isGitIgnoredExt     func(string, bool) bool
++	isGitIgnoredExt     func([]string, bool) bool
 +	// END PATCH(gitignore) ---
  }
  
@@ -27,7 +27,7 @@ index 53dcabe..a678127 100644
 +	if wc.isGitIgnoredExt == nil {
 +		return false
 +	}
-+	return wc.isGitIgnoredExt(p, isDir)
++	return wc.isGitIgnoredExt(strings.Split(p, "/"), isDir)
 +	// END PATCH(gitignore) ---
 +}
 +
@@ -55,10 +55,10 @@ index 53dcabe..a678127 100644
  		}
  	}
 diff --git a/walk/dirinfo.go b/walk/dirinfo.go
-index d2f989b..a20f9ac 100644
+index d2f989b..d993a44 100644
 --- a/walk/dirinfo.go
 +++ b/walk/dirinfo.go
-@@ -69,6 +69,19 @@ func (w *walker) loadDirInfo(rel string) (DirInfo, error) {
+@@ -69,6 +69,24 @@ func (w *walker) loadDirInfo(rel string) (DirInfo, error) {
  	}
  
  	info.config = configureForWalk(parentConfig, rel, info.File)
@@ -68,7 +68,12 @@ index d2f989b..a20f9ac 100644
 +		// Process any new .gitignore files
 +		for _, entry := range entries {
 +			if entry.Name() == ".gitignore" {
-+				info.config.isGitIgnoredExt, info.config.gitIgnoreData = w.gitignoreProcessor(w.rootConfig.RepoRoot, filepath.Join(rel, entry.Name()), parentConfig.gitIgnoreData)
++				gitignorePath := rel
++				if gitignorePath != "" {
++					gitignorePath += "/"
++				}
++				gitignorePath += entry.Name()
++				info.config.isGitIgnoredExt, info.config.gitIgnoreData = w.gitignoreProcessor(w.rootConfig.RepoRoot, gitignorePath, parentConfig.gitIgnoreData)
 +				break
 +			}
 +		}
@@ -78,7 +83,7 @@ index d2f989b..a20f9ac 100644
  	if info.config.isExcludedDir(rel) {
  		// Build file excludes the current directory. Ignore contents.
  		entries = nil
-@@ -77,6 +90,13 @@ func (w *walker) loadDirInfo(rel string) (DirInfo, error) {
+@@ -77,6 +95,13 @@ func (w *walker) loadDirInfo(rel string) (DirInfo, error) {
  	for _, e := range entries {
  		entryRel := path.Join(rel, e.Name())
  		e = maybeResolveSymlink(info.config, dir, entryRel, e)
@@ -93,7 +98,7 @@ index d2f989b..a20f9ac 100644
  			info.Subdirs = append(info.Subdirs, e.Name())
  		} else if !e.IsDir() && !info.config.isExcludedFile(entryRel) {
 diff --git a/walk/walk.go b/walk/walk.go
-index 0e59bcf..7adedea 100644
+index 0e59bcf..ae1f513 100644
 --- a/walk/walk.go
 +++ b/walk/walk.go
 @@ -310,6 +310,10 @@ type walker struct {
@@ -102,7 +107,7 @@ index 0e59bcf..7adedea 100644
  	errs []error
 +
 +	// PATCH(gitignore) ---
-+	gitignoreProcessor func(string, string, interface{}) (func(string, bool) bool, interface{})
++	gitignoreProcessor func(string, string, interface{}) (func([]string, bool) bool, interface{})
 +	// END-PATCH(gitignore) ---
  }
  
@@ -113,7 +118,7 @@ index 0e59bcf..7adedea 100644
  
 +	// PATCH(gitignore) ---
 +	if ext, hasExt := c.Exts["__aspect:gitignoreProcessor"]; hasExt {
-+		w.gitignoreProcessor = ext.(func(string, string, interface{}) (func(string, bool) bool, interface{}))
++		w.gitignoreProcessor = ext.(func(string, string, interface{}) (func([]string, bool) bool, interface{}))
 +	}
 +	// END-PATCH(gitignore) ---
 +
