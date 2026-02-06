@@ -396,7 +396,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	if initRunfielsErr != nil {
 		return fmt.Errorf("failed to load initial runfiles: %w", initRunfielsErr)
 	}
-	initErr := incrementalProtocol.Init(initRunfiles)
+	initErr := incrementalProtocol.Init(ibp.WatchScope_Runfiles, initRunfiles)
 	if initErr != nil {
 		return fmt.Errorf("failed to initialize watch protocol: %w", initErr)
 	}
@@ -430,6 +430,11 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	}
 
 	watchState := fmt.Sprintf("aspect-run-watch-%d", os.Getpid())
+
+	// If the client declared the watching of sources via IBP
+	// TODO: other methods of declaring watching sources? tags on targets succh as formatters?
+	watchRunfilesChanges := incrementalProtocol.WatchingScope(ibp.WatchScope_Runfiles)
+	watchSourceChanges := incrementalProtocol.WatchingScope(ibp.WatchScope_Sources)
 
 	// Subscribe to further changes
 	for cs, err := range w.Subscribe(pcctx, watcher.DeferState{DeferWithinState: watchState}) {
@@ -479,7 +484,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			// Assume a temporary compilation error, assume an appopriate error message was outputted by the run command.
 			// Output a basic warning and resume waiting for changes.
 			fmt.Printf("%s incremental bazel build command failed: %v\n", color.YellowString("WARNING:"), incBuildErr)
-		} else if changes := changedetect.cycleChanges(); len(changes) > 0 {
+		} else if changes := changedetect.cycleChanges(); len(changes) > 0 && watchRunfilesChanges {
 			logger.Infof("Cycle changes: %v", changes)
 
 			// For now just rerun the target, beware that RunCommand does not yield until
@@ -488,13 +493,30 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 
 			_, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
 
-			if err := incrementalProtocol.Cycle(changes); err != nil {
+			if err := incrementalProtocol.Cycle(ibp.WatchScope_Runfiles, changes); err != nil {
 				return fmt.Errorf("failed to report cycle events: %w", err)
 			}
 
 			cycleTrace.End()
 
 			// TODO: if we want to support ibazel livereload then we need to report changes.
+		} else if watchSourceChanges {
+			logger.Infof("Cycle source changes: %v", cs.Paths)
+
+			changes := make(map[string]*ibp.SourceInfo)
+			for _, changedSource := range cs.Paths {
+				changes[changedSource] = &ibp.SourceInfo{
+					IsSource: toJsonBoolPtr(true),
+				}
+			}
+
+			_, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
+
+			if err := incrementalProtocol.Cycle(ibp.WatchScope_Sources, changes); err != nil {
+				return fmt.Errorf("failed to report cycle events: %w", err)
+			}
+
+			cycleTrace.End()
 		} else {
 			fmt.Printf("%s Target is up-to-date.\n", color.GreenString("INFO:"))
 		}
