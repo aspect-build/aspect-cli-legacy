@@ -390,13 +390,13 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	}
 
 	// Init() with the full runfiles list
-	_, initCycleTrace := runner.tracer.Start(initCtx, "Run.Cycle")
+	cctx, initCycleTrace := runner.tracer.Start(initCtx, "Run.Cycle")
 
 	initRunfiles, initRunfielsErr := changedetect.loadFullSourceInfo()
 	if initRunfielsErr != nil {
 		return fmt.Errorf("failed to load initial runfiles: %w", initRunfielsErr)
 	}
-	initErr := incrementalProtocol.Init(initRunfiles)
+	initErr := incrementalProtocol.Init(cctx, ibp.WatchScope_Runfiles, initRunfiles)
 	if initErr != nil {
 		return fmt.Errorf("failed to initialize watch protocol: %w", initErr)
 	}
@@ -413,7 +413,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		// hope for a graceful shutdown. Ignore any errors as the process may already be in the
 		// process of shutting down.
 		if incrementalProtocol.HasConnection() {
-			incrementalProtocol.Exit(err)
+			incrementalProtocol.Exit(context.Background(), err)
 		}
 
 		// Terminate the process if it is still running.
@@ -430,6 +430,17 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	}
 
 	watchState := fmt.Sprintf("aspect-run-watch-%d", os.Getpid())
+
+	// If the client declared the watching of sources via IBP
+	// TODO: other methods of declaring watching sources? tags on targets succh as formatters?
+	watchRunfilesChanges := incrementalProtocol.WatchingScope(ibp.WatchScope_Runfiles)
+	watchSourceChanges := incrementalProtocol.WatchingScope(ibp.WatchScope_Sources)
+
+	// For now the CLI only sends CYCLE messages for one or the other, not both RUNFILES and SOURCES
+	if watchRunfilesChanges && watchSourceChanges {
+		fmt.Printf("%s Watching for both source and runfiles changes UNSUPPORTED, fallback to watching sources\n", color.RedString("ERROR:"))
+		watchRunfilesChanges = false
+	}
 
 	// Subscribe to further changes
 	for cs, err := range w.Subscribe(pcctx, watcher.DeferState{DeferWithinState: watchState}) {
@@ -479,22 +490,39 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			// Assume a temporary compilation error, assume an appopriate error message was outputted by the run command.
 			// Output a basic warning and resume waiting for changes.
 			fmt.Printf("%s incremental bazel build command failed: %v\n", color.YellowString("WARNING:"), incBuildErr)
-		} else if changes := changedetect.cycleChanges(); len(changes) > 0 {
+		} else if changes := changedetect.cycleChanges(); len(changes) > 0 && watchRunfilesChanges {
 			logger.Infof("Cycle changes: %v", changes)
 
 			// For now just rerun the target, beware that RunCommand does not yield until
 			// the subprocess exists.
 			fmt.Printf("%s Found %d changes, rebuilding the target.\n", color.GreenString("INFO:"), len(changes))
 
-			_, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
+			ctctx, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
 
-			if err := incrementalProtocol.Cycle(changes); err != nil {
+			if err := incrementalProtocol.Cycle(ctctx, ibp.WatchScope_Runfiles, changes); err != nil {
 				return fmt.Errorf("failed to report cycle events: %w", err)
 			}
 
 			cycleTrace.End()
 
 			// TODO: if we want to support ibazel livereload then we need to report changes.
+		} else if watchSourceChanges {
+			logger.Infof("Cycle source changes: %v", cs.Paths)
+
+			changes := make(map[string]*ibp.SourceInfo)
+			for _, changedSource := range cs.Paths {
+				changes[changedSource] = &ibp.SourceInfo{
+					IsSource: toJsonBoolPtr(true),
+				}
+			}
+
+			ctctx, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
+
+			if err := incrementalProtocol.Cycle(ctctx, ibp.WatchScope_Sources, changes); err != nil {
+				return fmt.Errorf("failed to report cycle events: %w", err)
+			}
+
+			cycleTrace.End()
 		} else {
 			fmt.Printf("%s Target is up-to-date.\n", color.GreenString("INFO:"))
 		}
