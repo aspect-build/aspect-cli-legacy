@@ -44,10 +44,10 @@ func (ib *IBazelProtocol) HasConnection() bool {
 	return ib.stdin != nil
 }
 
-func (ib *IBazelProtocol) Init(sources ibp.SourceInfoMap) error {
+func (ib *IBazelProtocol) Init(scope ibp.WatchScope, sources ibp.SourceInfoMap) error {
 	return nil
 }
-func (ib *IBazelProtocol) Cycle(changes ibp.SourceInfoMap) error {
+func (ib *IBazelProtocol) Cycle(scope ibp.WatchScope, changes ibp.SourceInfoMap) error {
 	res := ib.buildOne(true)
 
 	// Add some delay to let the filesystem settle before we can exit the build state.
@@ -74,6 +74,9 @@ func (ib *IBazelProtocol) Serve(ctx context.Context) error {
 }
 func (ib *IBazelProtocol) WaitForConnection() <-chan ibp.ProtocolVersion {
 	return nil
+}
+func (rb *IBazelProtocol) WatchingScope(cap ibp.WatchScope) bool {
+	return cap == ibp.WatchScope_Runfiles
 }
 
 func (events *IBazelProtocol) write(data string) error {
@@ -147,10 +150,10 @@ func (rb *RestartBazelProtocol) kill() error {
 func (rb *RestartBazelProtocol) HasConnection() bool {
 	return false
 }
-func (rb *RestartBazelProtocol) Init(sources ibp.SourceInfoMap) error {
+func (rb *RestartBazelProtocol) Init(scope ibp.WatchScope, sources ibp.SourceInfoMap) error {
 	return nil
 }
-func (rb *RestartBazelProtocol) Cycle(changes ibp.SourceInfoMap) error {
+func (rb *RestartBazelProtocol) Cycle(scope ibp.WatchScope, changes ibp.SourceInfoMap) error {
 	if err := rb.kill(); err != nil {
 		return fmt.Errorf("failed to close the previous process: %w", err)
 	}
@@ -183,6 +186,9 @@ func (ib *RestartBazelProtocol) Env() []string {
 }
 func (ib *RestartBazelProtocol) WaitForConnection() <-chan ibp.ProtocolVersion {
 	return nil
+}
+func (rb *RestartBazelProtocol) WatchingScope(cap ibp.WatchScope) bool {
+	return cap == ibp.WatchScope_Runfiles
 }
 
 func terminate(p *os.Process) error {
