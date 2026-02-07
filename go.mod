@@ -4,9 +4,9 @@ go 1.24.9
 
 require (
 	github.com/alphadose/haxmap v1.4.1
-	github.com/aspect-build/aspect-gazelle/common v0.0.0-20260204221654-ea45e6281890
-	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20260204221654-ea45e6281890
-	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20260204221654-ea45e6281890
+	github.com/aspect-build/aspect-gazelle/common v0.0.0-20260205223740-1dea602dd03d
+	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20260205223740-1dea602dd03d
+	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20260205223740-1dea602dd03d
 	github.com/bazelbuild/bazel-gazelle v0.47.0
 	github.com/bazelbuild/bazelisk v1.27.0 // NOTE: keep vendored code in sync
 	github.com/bazelbuild/buildtools v0.0.0-20260202105709-e24971d9d1a7
@@ -62,8 +62,8 @@ require (
 	github.com/alecthomas/chroma/v2 v2.23.1 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20251115024249-7cad566bc683 // indirect
-	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20251115024249-7cad566bc683 // indirect
+	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20260205223740-1dea602dd03d // indirect
+	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20260205223740-1dea602dd03d // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
@@ -144,7 +144,6 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
-	github.com/msolo/jsonr v0.0.0-20231023064044-62fbfc3a0313 // indirect
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
@@ -189,3 +188,5 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
+
+require github.com/goexlib/jsonc v0.0.0-20260107034751-fa4908886bd5 // indirect
