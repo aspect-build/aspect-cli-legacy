@@ -38,7 +38,7 @@ const (
 	// Env to opt-in to OTLP exporter endpoint. Overrides other telemetry settings.
 	// Additional OTLP may be set via environment variables as per:
 	// https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/#endpoint-configuration
-	endpointEnv = "OTEL_EXPORTER_OTLP_ENDPOINT"
+	endpointEnv = "ASPECT_OTEL_ENDPOINT"
 )
 
 /**
