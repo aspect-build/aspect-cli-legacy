@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net"
 	"net/url"
 	"os"
@@ -383,13 +384,9 @@ func (bb *besBackend) setupBesUpstreamBackends(ctx context.Context, optionsparse
 
 	for _, backend := range backends {
 		headers := make(map[string]string)
-		for key, value := range globalRemoteHeaders {
-			headers[key] = value
-		}
+		maps.Copy(headers, globalRemoteHeaders)
 		if scoped, ok := scopedRemoteHeaders[backend]; ok {
-			for key, value := range scoped {
-				headers[key] = value
-			}
+			maps.Copy(headers, scoped)
 		}
 		besProxy := besproxy.NewBesProxy(backend, headers)
 		if err := besProxy.Connect(); err != nil {
@@ -491,7 +488,7 @@ func (bb *besBackend) PublishBuildToolEventStream(
 
 	// Goroutines to process messages and send to subscribers
 	eg.Go(func() error { bb.SendEventsToSubscribers(subChanRead, bb.subscribers); return nil })
-	for i := 0; i < numMultiSends; i++ {
+	for range numMultiSends {
 		eg.Go(func() error { bb.SendEventsToSubscribers(subMultiChanRead, bb.mtSubscribers); return nil })
 	}
 

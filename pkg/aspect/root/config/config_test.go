@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Aspect Build Systems, Inc.
+ * Copyright 2023 Aspect Build Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,7 +167,7 @@ plugins:
 func TestMarshalling(t *testing.T) {
 	g := NewWithT(t)
 
-	p, err := config.UnmarshalPluginConfig([]interface{}{map[string]interface{}{
+	p, err := config.UnmarshalPluginConfig([]any{map[string]any{
 		"name": "foo",
 		"from": "foo-from",
 		// multi_threaded_build_events should default to false
@@ -183,14 +183,14 @@ func TestMarshalling(t *testing.T) {
 	g.Expect(p[0].DisableBESEvents).To(BeFalse())
 
 	c := config.MarshalPluginConfig(p)
-	g.Expect(c).To(Equal([]interface{}{map[string]interface{}{
+	g.Expect(c).To(Equal([]any{map[string]any{
 		"name":                        "foo",
 		"from":                        "foo-from",
 		"multi_threaded_build_events": false,
 		"disable_bes_events":          false,
 	}}))
 
-	p2, err := config.UnmarshalPluginConfig([]interface{}{map[string]interface{}{
+	p2, err := config.UnmarshalPluginConfig([]any{map[string]any{
 		"name": "foo2",
 		"from": "foo2-from",
 
@@ -210,7 +210,7 @@ func TestMarshalling(t *testing.T) {
 	g.Expect(p2[0].DisableBESEvents).To(BeTrue())
 
 	c2 := config.MarshalPluginConfig(p2)
-	g.Expect(c2).To(Equal([]interface{}{map[string]interface{}{
+	g.Expect(c2).To(Equal([]any{map[string]any{
 		"name":                        "foo2",
 		"from":                        "foo2-from",
 		"multi_threaded_build_events": true,

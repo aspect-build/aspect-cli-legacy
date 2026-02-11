@@ -25,7 +25,7 @@ import (
 
 func testFixtures(num int) []string {
 	r := make([]string, 0, num)
-	for i := 0; i < num; i++ {
+	for i := range num {
 		r = append(r, fmt.Sprintf("test-fixture-%v", i))
 	}
 	return r

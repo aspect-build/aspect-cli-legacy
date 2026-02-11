@@ -50,7 +50,7 @@ import (
 // PluginSystem is the interface that defines all the methods for the aspect CLI
 // plugin system intended to be used by the Core.
 type PluginSystem interface {
-	Configure(streams ioutils.Streams, pluginsConfig interface{}) error
+	Configure(streams ioutils.Streams, pluginsConfig any) error
 	TearDown()
 	RegisterCustomCommands(cmd *cobra.Command, bazelStartupArgs []string) error
 	// Create an Interceptor for plugins if necessary.
@@ -81,7 +81,7 @@ func NewPluginSystem() PluginSystem {
 }
 
 // Configure configures the plugin system.
-func (ps *pluginSystem) Configure(streams ioutils.Streams, pluginsConfig interface{}) error {
+func (ps *pluginSystem) Configure(streams ioutils.Streams, pluginsConfig any) error {
 	plugins, err := config.UnmarshalPluginConfig(pluginsConfig)
 	if err != nil {
 		return fmt.Errorf("failed to configure plugin system: %w", err)
@@ -229,8 +229,8 @@ func determineBuildId(args []string) string {
 func determineInvocationId(args []string) string {
 	invocationId := ""
 	for _, arg := range args {
-		if strings.HasPrefix(arg, "--invocation_id=") {
-			invocationId = strings.TrimPrefix(arg, "--invocation_id=")
+		if after, ok := strings.CutPrefix(arg, "--invocation_id="); ok {
+			invocationId = after
 		}
 	}
 	// Default to random UUID if not provided on the CLI

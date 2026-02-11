@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Aspect Build Systems, Inc.
+ * Copyright 2023 Aspect Build Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,5 +24,5 @@ type PluginConfig struct {
 	LogLevel                 string
 	MultiThreadedBuildEvents bool
 	DisableBESEvents         bool
-	Properties               map[string]interface{}
+	Properties               map[string]any
 }

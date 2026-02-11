@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Aspect Build Systems, Inc.
+ * Copyright 2023 Aspect Build Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -248,7 +248,7 @@ func LoadWorkspaceConfig() (*viper.Viper, error) {
 
 // Sets a value in the Aspect CLI $WORKSPACE configuration.
 // Returns the path of the config file written to & true if the configuration file is newly created.
-func SetInWorkspaceConfig(key string, value interface{}) (string, bool, error) {
+func SetInWorkspaceConfig(key string, value any) (string, bool, error) {
 	config, err := LoadWorkspaceConfig()
 	if err != nil {
 		return "", false, err
@@ -323,7 +323,7 @@ func LoadSystemConfig() (*viper.Viper, error) {
 
 // Sets a value in the Aspect CLI $HOME configuration.
 // Returns the path of the config file written to & true if the configuration file is newly created.
-func SetInHomeConfig(key string, value interface{}) (string, bool, error) {
+func SetInHomeConfig(key string, value any) (string, bool, error) {
 	config, err := LoadHomeConfig()
 	if err != nil {
 		return "", false, err
@@ -377,10 +377,10 @@ func LoadConfigFile(f string) (*viper.Viper, error) {
 	return v, nil
 }
 
-func MarshalPluginConfig(plugins []types.PluginConfig) interface{} {
-	l := []interface{}{}
+func MarshalPluginConfig(plugins []types.PluginConfig) any {
+	l := []any{}
 	for _, p := range plugins {
-		i := map[string]interface{}{
+		i := map[string]any{
 			"name":                        p.Name,
 			"from":                        p.From,
 			"multi_threaded_build_events": p.MultiThreadedBuildEvents,
@@ -400,12 +400,12 @@ func MarshalPluginConfig(plugins []types.PluginConfig) interface{} {
 	return l
 }
 
-func UnmarshalPluginConfig(pluginsConfig interface{}) ([]types.PluginConfig, error) {
+func UnmarshalPluginConfig(pluginsConfig any) ([]types.PluginConfig, error) {
 	if pluginsConfig == nil {
 		return []types.PluginConfig{}, nil
 	}
 
-	pluginsList, ok := pluginsConfig.([]interface{})
+	pluginsList, ok := pluginsConfig.([]any)
 
 	if !ok {
 		return nil, fmt.Errorf("expected plugins config to be a list")
@@ -414,7 +414,7 @@ func UnmarshalPluginConfig(pluginsConfig interface{}) ([]types.PluginConfig, err
 	plugins := []types.PluginConfig{}
 
 	for i, p := range pluginsList {
-		pluginsMap, ok := p.(map[string]interface{})
+		pluginsMap, ok := p.(map[string]any)
 		if !ok {
 			return nil, fmt.Errorf("expected plugins config entry %v to be a map", i)
 		}
@@ -433,7 +433,7 @@ func UnmarshalPluginConfig(pluginsConfig interface{}) ([]types.PluginConfig, err
 		logLevel, _ := pluginsMap["log_level"].(string)
 		multi_threaded_build_events, _ := pluginsMap["multi_threaded_build_events"].(bool)
 		disable_bes_events, _ := pluginsMap["disable_bes_events"].(bool)
-		properties, _ := pluginsMap["properties"].(map[string]interface{})
+		properties, _ := pluginsMap["properties"].(map[string]any)
 
 		plugins = append(plugins, types.PluginConfig{
 			Name:                     name,

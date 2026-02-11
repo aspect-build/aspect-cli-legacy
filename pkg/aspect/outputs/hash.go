@@ -82,14 +82,14 @@ func AddRunfilesHash(hashFiles map[string][]string, label string, manifestPath s
 		line := strings.TrimSpace(rawLine)
 
 		// Find the index of the first space
-		spaceIndex := strings.Index(line, " ")
-		if spaceIndex == -1 {
+		_, after, ok := strings.Cut(line, " ")
+		if !ok {
 			fmt.Fprintf(os.Stderr, "skipping invalid runfiles manifest entry: '%s'\n", rawLine)
 			continue
 		}
 
 		// Actual path is everything after the first space including additional unescaped spaces
-		actualPath := unescape(line[spaceIndex+1:])
+		actualPath := unescape(after)
 
 		var fileinfo fs.FileInfo = nil
 
@@ -267,7 +267,7 @@ func hashMurmur3Concurrent(files []string, mep *haxmap.Map[string, string], numT
 
 type cachedPassThrough cachedHashResult
 
-func (i cachedPassThrough) Run(ctx context.Context) interface{} {
+func (i cachedPassThrough) Run(ctx context.Context) any {
 	return cachedHashResult{
 		file:   i.file,
 		result: i.result,
@@ -276,7 +276,7 @@ func (i cachedPassThrough) Run(ctx context.Context) interface{} {
 
 type hashWorker string
 
-func (i hashWorker) Run(ctx context.Context) interface{} {
+func (i hashWorker) Run(ctx context.Context) any {
 	file := string(i)
 	if strings.Contains(file, "\n") {
 		return hashResult{
