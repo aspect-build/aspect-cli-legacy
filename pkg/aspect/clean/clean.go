@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Aspect Build Systems, Inc.
+ * Copyright 2023 Aspect Build Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ func (runner *Clean) Run(ctx context.Context, cmd *cobra.Command, args []string)
 
 	// TODO: move separation of flags and arguments to a high level of abstraction
 	flags := make([]string, 0)
-	for i := 0; i < len(args); i++ {
+	for i := range args {
 		if args[i] == "all" {
 			cleanAll = true
 			continue
@@ -129,7 +129,7 @@ func (runner *Clean) reclaimAll() error {
 	go runner.errorProcessor(errorQueue, &errorWaitGroup, &errors)
 
 	// Goroutines for calculating sizes of directories.
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		go runner.sizeCalculator(sizeCalcQueue, confirmationQueue, &sizeCalcWaitGroup)
 	}
 
@@ -138,7 +138,7 @@ func (runner *Clean) reclaimAll() error {
 	// This is due to deleteProcessor breaking up its deletes and adding subdirectories to the
 	// deleteQueue as it does the deleting. Where the other wait groups ensure all their goroutines
 	// have finished processing, deleteWaitGroup ensures deleteQueue is empty before the program exits.
-	for i := 0; i < 8; i++ {
+	for range 8 {
 		go runner.deleteProcessor(deleteQueue, &deleteWaitGroup, sizeQueue, errorQueue)
 	}
 

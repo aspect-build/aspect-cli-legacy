@@ -1,3 +1,19 @@
+/*
+ * Copyright 2023 Aspect Build Systems, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package flags
 
 import "strings"
@@ -16,16 +32,15 @@ func ParseSet(base []string, args []string) []string {
 	}
 
 	for _, val := range args {
-		parts := strings.Split(val, ",")
-		for _, part := range parts {
+		for part := range strings.SplitSeq(val, ",") {
 			if part == "" { // Handle empty strings from "a,,b"
 				continue
 			}
 
-			if strings.HasPrefix(part, "+") {
-				resultSet[strings.TrimPrefix(part, "+")] = true
-			} else if strings.HasPrefix(part, "-") {
-				delete(resultSet, strings.TrimPrefix(part, "-"))
+			if after, ok := strings.CutPrefix(part, "+"); ok {
+				resultSet[after] = true
+			} else if after, ok := strings.CutPrefix(part, "-"); ok {
+				delete(resultSet, after)
 			} else {
 				resultSet = make(map[string]bool) // Reset the set
 				resultSet[part] = true

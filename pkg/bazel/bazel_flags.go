@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Aspect Build Systems, Inc.
+ * Copyright 2023 Aspect Build Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/aspect-build/aspect-cli-legacy/bazel/flags"
@@ -366,10 +367,10 @@ func listBazelRules(workspaceCwd string, completionPkg string) ([]string, error)
 
 	var results []string
 
-	rules := strings.Split(strings.TrimSpace(stdout.String()), "\n")
+	rules := strings.SplitSeq(strings.TrimSpace(stdout.String()), "\n")
 
 	// Do post-processing on the labels so that results start with completionPkg
-	for _, t := range rules {
+	for t := range rules {
 		if t == "" {
 			continue
 		}
@@ -486,10 +487,5 @@ func isExpando(flag string) bool {
 }
 
 func isDocumented(flag string) bool {
-	for _, documentedFlag := range documentedBazelFlags {
-		if documentedFlag == flag {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(documentedBazelFlags, flag)
 }
