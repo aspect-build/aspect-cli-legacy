@@ -15,7 +15,7 @@
  */
 
 /*
- * Copyright 2024 Aspect Build Systems, Inc.
+ * Copyright 2026 Aspect Build Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,9 +51,39 @@ const GO_DEPS_EXTENSION_NAME = "go_deps"
 // https://github.com/bazel-contrib/bazel-gazelle/blob/v0.39.1/internal/bzlmod/go_deps.bzl#L648-L654
 const GO_REPOSITORY_CONFIG_REPO_NAME = "bazel_gazelle_go_repository_config"
 
+// The standard repository name for the go_sdk from rules_go.
+const GO_SDK_REPO_NAME = "go_sdk"
+
 // bazel 8 switches the bzlmod separator to "+"
 // See https://github.com/bazelbuild/bazel/issues/23127
 var BZLMOD_REPO_SEPARATORS = []string{"~", "+"}
+
+// setupGoRoot discovers GOROOT from the workspace's Bazel-configured @go_sdk
+// and sets the GOROOT environment variable so the Go language plugin uses the
+// correct go binary rather than whatever is on PATH.
+//
+// Skipped if GOROOT is already set.
+func setupGoRoot() {
+	if os.Getenv("GOROOT") != "" {
+		return
+	}
+
+	bzl := bazel.WorkspaceFromWd
+	var out strings.Builder
+	streams := ioutils.Streams{Stdout: &out, Stderr: nil}
+	if err := bzl.RunCommand(streams, nil, "run", "--ui_event_filters=-info,-debug", "--noshow_progress", fmt.Sprintf("@%s//:bin/go", GO_SDK_REPO_NAME), "--", "env", "GOROOT"); err != nil {
+		BazelLog.Infof("Could not determine GOROOT from Bazel @%s: %v", GO_SDK_REPO_NAME, err)
+		return
+	}
+
+	goroot := strings.TrimSpace(out.String())
+	if goroot == "" {
+		return
+	}
+
+	BazelLog.Infof("Setting GOROOT=%s (from Bazel @go_sdk)", goroot)
+	os.Setenv("GOROOT", goroot)
+}
 
 func determineGoRepositoryConfigPath() (string, error) {
 	// TODO(jason): look into a store of previous invocations for relevant logs

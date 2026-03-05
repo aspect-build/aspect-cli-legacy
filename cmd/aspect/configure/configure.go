@@ -189,6 +189,8 @@ configure:
 
 	// gazelle --repo_config via environment variable or a discovery mechanism
 	if slices.Contains(v.Languages(), runner.Go) {
+		setupGoRoot()
+
 		goConfigPath := os.Getenv(GO_REPOSITORY_CONFIG_ENV)
 		if goConfigPath == "" {
 			p, err := determineGoRepositoryConfigPath()
