@@ -36,6 +36,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/aspect-build/aspect-cli-legacy/pkg/bazel"
@@ -62,6 +63,10 @@ var BZLMOD_REPO_SEPARATORS = []string{"~", "+"}
 // and sets the GOROOT environment variable so the Go language plugin uses the
 // correct go binary rather than whatever is on PATH.
 //
+// Uses "bazel query --output=location" rather than "bazel run" so that this
+// does not invalidate the analysis cache when Bazel was previously invoked with
+// a different --config.
+//
 // Skipped if GOROOT is already set.
 func setupGoRoot() {
 	if os.Getenv("GOROOT") != "" {
@@ -70,18 +75,41 @@ func setupGoRoot() {
 
 	bzl := bazel.WorkspaceFromWd
 	var out strings.Builder
-	streams := ioutils.Streams{Stdout: &out, Stderr: nil}
-	if err := bzl.RunCommand(streams, nil, "run", "--ui_event_filters=-info,-debug", "--noshow_progress", fmt.Sprintf("@%s//:bin/go", GO_SDK_REPO_NAME), "--", "env", "GOROOT"); err != nil {
-		BazelLog.Infof("Could not determine GOROOT from Bazel @%s: %v", GO_SDK_REPO_NAME, err)
+	var queryStderr strings.Builder
+	streams := ioutils.Streams{Stdout: &out, Stderr: &queryStderr}
+	if err := bzl.RunCommand(streams, nil, "query", "--output=location", fmt.Sprintf("@%s//:bin/go", GO_SDK_REPO_NAME)); err != nil {
+		BazelLog.Errorf("Could not determine GOROOT from Bazel @%s, error from query:\nSTDERR: %v\n\nError: %v", GO_SDK_REPO_NAME, queryStderr.String(), err)
 		return
 	}
 
-	goroot := strings.TrimSpace(out.String())
-	if goroot == "" {
+	// bazel query --output=location prints "<path>:<line>:<col>: <description>"
+	// e.g. "/home/user/.cache/.../external/go_sdk/bin/go:1:1: source file @go_sdk//:bin/go"
+	// Split on the first ": " to isolate "<path>:<line>:<col>" before stripping
+	// the line/col — the description may itself contain ":" (e.g. the label).
+	raw := strings.TrimSpace(out.String())
+	if raw == "" {
+		BazelLog.Warnf("Could not determine GOROOT from Bazel @%s: no output from query", GO_SDK_REPO_NAME)
+		return
+	}
+	position, _, _ := strings.Cut(raw, ": ")
+
+	// Strip the trailing ":line:col" from "<path>:<line>:<col>"
+	location := position
+	if i := strings.LastIndex(location, ":"); i > 0 {
+		location = location[:i]
+	}
+	if i := strings.LastIndex(location, ":"); i > 0 {
+		location = location[:i]
+	}
+
+	// GOROOT is the go_sdk root — the grandparent of bin/go
+	goroot := filepath.Dir(filepath.Dir(location))
+	if goroot == "" || goroot == "." {
+		BazelLog.Warnf("Could not determine GOROOT from Bazel query--output=location: %q", location)
 		return
 	}
 
-	BazelLog.Infof("Setting GOROOT=%s (from Bazel @go_sdk)", goroot)
+	BazelLog.Infof("Setting GOROOT=%s (from Bazel @go_sdk via query)", goroot)
 	os.Setenv("GOROOT", goroot)
 }
 
