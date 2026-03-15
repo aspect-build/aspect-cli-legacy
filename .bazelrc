@@ -1,17 +1,10 @@
-# Import Aspect bazelrc presets
-import %workspace%/.aspect/bazelrc/bazel7.bazelrc
-import %workspace%/.aspect/bazelrc/convenience.bazelrc
-import %workspace%/.aspect/bazelrc/correctness.bazelrc
-import %workspace%/.aspect/bazelrc/debug.bazelrc
-import %workspace%/.aspect/bazelrc/javascript.bazelrc
-import %workspace%/.aspect/bazelrc/performance.bazelrc
+import %workspace%/tools/preset.bazelrc
 
 ### YOUR PROJECT SPECIFIC OPTIONS GO HERE ###
-common --enable_platform_specific_config
 
 common:release -c opt --stamp --workspace_status_command="node tools/workspace_status.js"
 
-# --incompatible_disallow_empty_glob setting from .aspect/bazelrc/correctness.bazelrc causes issues with LLVM toolchain
+# --incompatible_disallow_empty_glob setting from tools/preset.bazelrc causes issues with LLVM toolchain
 common --noincompatible_disallow_empty_glob
 
 # Don't try and auto detect the cc toolchain, as we use our own gcc toolchains.
