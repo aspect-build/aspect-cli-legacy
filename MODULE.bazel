@@ -10,7 +10,7 @@ bazel_dep(name = "bazelrc-preset.bzl", version = "1.9.2")
 # bazel_lib.tar()
 # use_repo(bazel_lib, "bsd_tar_toolchains", "jq_linux_amd64", "jq_linux_arm64", "jq_toolchains")
 
-bazel_dep(name = "buildifier_prebuilt", version = "8.0.0")
+bazel_dep(name = "buildifier_prebuilt", version = "8.5.1")
 bazel_dep(name = "rules_nodejs", version = "6.3.1")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
@@ -48,7 +48,5 @@ bazel_binary = use_repo_rule("//integration_tests:bazel_binary.bzl", "bazel_bina
 bazel_binary(name = "bazel_6_4_0")
 
 include("//bazel/include:go.MODULE.bazel")
-
 include("//bazel/include:llvm.MODULE.bazel")
-
 include("//bazel/include:proto.MODULE.bazel")
