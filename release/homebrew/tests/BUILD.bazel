@@ -178,6 +178,7 @@ sh_test(
     ],
     deps = [
         "@bazel_lib//shlib/lib:assertions",  # keep
+        "@rules_shell//shell/runfiles",
     ],
 )
 
@@ -189,6 +190,7 @@ sh_test(
     ],
     deps = [
         "@bazel_lib//shlib/lib:assertions",  # keep
+        "@rules_shell//shell/runfiles",
     ],
 )
 

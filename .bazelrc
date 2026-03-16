@@ -4,6 +4,8 @@ import %workspace%/tools/preset.bazelrc
 
 common:release -c opt --stamp --workspace_status_command="node tools/workspace_status.js"
 
+common --enable_workspace
+
 # --incompatible_disallow_empty_glob setting from tools/preset.bazelrc causes issues with LLVM toolchain
 common --noincompatible_disallow_empty_glob
 
