@@ -13,9 +13,9 @@ proto_library(
         "//bazel/failure_details:failure_details_proto",
         "//bazel/invocation_policy:invocation_policy_proto",
         "//bazel/packages_metrics:devtools_build_lib_packages_metrics_proto",
-        "@com_google_protobuf//:any_proto",
-        "@com_google_protobuf//:duration_proto",
-        "@com_google_protobuf//:timestamp_proto",
+        "@protobuf//:any_proto",
+        "@protobuf//:duration_proto",
+        "@protobuf//:timestamp_proto",
     ],
 )
 

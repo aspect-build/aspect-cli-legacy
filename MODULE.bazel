@@ -23,7 +23,9 @@ bazel_dep(name = "aspect_rules_lint", version = "2.3.0")
 bazel_dep(name = "bazel_features", version = "1.43.0")
 bazel_dep(name = "bazel_skylib", version = "1.9.0")
 bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "protobuf", version = "33.4")
 bazel_dep(name = "rules_pkg", version = "1.2.0")
+bazel_dep(name = "rules_proto", version = "7.1.0")
 bazel_dep(name = "rules_shell", version = "0.6.1")
 
 # For integration testing.
@@ -35,4 +37,3 @@ bazel_binary(name = "bazel_6_4_0")
 
 include("//bazel/include:go.MODULE.bazel")
 include("//bazel/include:llvm.MODULE.bazel")
-include("//bazel/include:proto.MODULE.bazel")
