@@ -1,6 +1,6 @@
 "repository rules for downloading bazel"
 
-load("@aspect_bazel_lib//lib:repo_utils.bzl", "repo_utils")
+load("@bazel_lib//lib:repo_utils.bzl", "repo_utils")
 
 # Visit https://github.com/bazelbuild/bazel/releases/tag/x.x.x and download the corresponding
 # .sha256 files to get the SHAs for new versions

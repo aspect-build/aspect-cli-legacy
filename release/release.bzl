@@ -1,7 +1,7 @@
 """This module provides the macros for performing a release.
 """
 
-load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
+load("@bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 load(":hashes.bzl", "hashes")
 load(":platforms.bzl", "platforms")

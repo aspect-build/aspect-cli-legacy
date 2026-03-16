@@ -3,9 +3,9 @@
 Workaround https://github.com/bazelbuild/rules_go/issues/3658
 """
 
-load("@aspect_bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
-load("@aspect_bazel_lib//lib:directory_path.bzl", "make_directory_path")
-load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
+load("@bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
+load("@bazel_lib//lib:directory_path.bzl", "make_directory_path")
+load("@bazel_lib//lib:write_source_files.bzl", "write_source_files")
 
 # buildifier: disable=function-docstring-args
 def write_go_generated_source_files(name, src, output_files, **kwargs):
