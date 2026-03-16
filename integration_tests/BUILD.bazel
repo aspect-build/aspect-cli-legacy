@@ -15,7 +15,7 @@ bzl_library(
     name = "bazel_binary",
     srcs = ["bazel_binary.bzl"],
     visibility = ["//visibility:public"],
-    deps = ["@aspect_bazel_lib//lib:repo_utils"],
+    deps = ["@bazel_lib//lib:repo_utils"],
 )
 
 sh_library(

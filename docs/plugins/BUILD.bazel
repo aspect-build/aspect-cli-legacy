@@ -1,4 +1,4 @@
-load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
+load("@bazel_lib//lib:write_source_files.bzl", "write_source_files")
 load("@npm//docs/plugins:ajv-cli/package_json.bzl", ajv = "bin")
 load("@npm//docs/plugins:json-schema-to-typescript/package_json.bzl", ts = "bin")
 

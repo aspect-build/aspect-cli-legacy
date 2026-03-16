@@ -1,4 +1,4 @@
-load("@aspect_bazel_lib//lib:testing.bzl", "assert_contains")
+load("@bazel_lib//lib:testing.bzl", "assert_contains")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_shell//shell:sh_library.bzl", "sh_library")
@@ -177,7 +177,7 @@ sh_test(
         ":monterey_bottle",
     ],
     deps = [
-        "@aspect_bazel_lib//shlib/lib:assertions",  # keep
+        "@bazel_lib//shlib/lib:assertions",  # keep
     ],
 )
 
@@ -188,7 +188,7 @@ sh_test(
         "//release/homebrew:generate_formula",
     ],
     deps = [
-        "@aspect_bazel_lib//shlib/lib:assertions",  # keep
+        "@bazel_lib//shlib/lib:assertions",  # keep
     ],
 )
 

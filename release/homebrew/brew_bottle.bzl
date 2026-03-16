@@ -20,7 +20,7 @@ bazelisk
 
 """
 
-load("@aspect_bazel_lib//lib:utils.bzl", "to_label")
+load("@bazel_lib//lib:utils.bzl", "to_label")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_attributes", "pkg_files")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
