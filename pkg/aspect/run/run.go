@@ -413,7 +413,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		// hope for a graceful shutdown. Ignore any errors as the process may already be in the
 		// process of shutting down.
 		if incrementalProtocol.HasConnection() {
-			incrementalProtocol.Exit(context.Background(), err)
+			incrementalProtocol.Exit(context.Background(), pcctx.Err())
 		}
 
 		// Terminate the process if it is still running.
