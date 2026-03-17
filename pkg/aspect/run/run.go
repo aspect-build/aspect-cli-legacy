@@ -280,9 +280,14 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		return fmt.Errorf("failed to create initial bazel command: %w", err)
 	}
 
-	startCmd, incrementalProtocol, initErr := func() (*exec.Cmd, ibp.IncrementalBazel, error) {
+	startCmd, incrementalProtocol, initErr := func() (_ *exec.Cmd, _ ibp.IncrementalBazel, retErr error) {
 		initCtx, initTrace := runner.tracer.Start(watchCtx, "Run.Init", trace.WithAttributes())
-		defer initTrace.End()
+		defer func() {
+			if retErr != nil {
+				initTrace.SetStatus(codes.Error, retErr.Error())
+			}
+			initTrace.End()
+		}()
 
 		logger.Infof("initial --watch build: %v", initCmd.Args)
 
@@ -371,7 +376,12 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 
 		// Init() with the full runfiles list
 		cctx, initCycleTrace := runner.tracer.Start(initCtx, "Run.Cycle")
-		defer initCycleTrace.End()
+		defer func() {
+			if retErr != nil {
+				initCycleTrace.SetStatus(codes.Error, retErr.Error())
+			}
+			initCycleTrace.End()
+		}()
 
 		initRunfiles, initRunfilesErr := changedetect.loadFullSourceInfo()
 		if initRunfilesErr != nil {
@@ -439,86 +449,96 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			return fmt.Errorf("failed to get next event: %w", err)
 		}
 
-		tctx, watchTrace := runner.tracer.Start(watchCtx, "Run.Subscribe.WatchEvent")
-
-		// Enter into the build state to discard spurious changes caused by Bazel reading the
-		// inputs which leads to their atime to change.
-		if err := w.StateEnter(watchState); err != nil {
-			return fmt.Errorf("failed to enter build state: %w", err)
-		}
-
-		logger.Debugf("watchman detected changes: %v", cs.Paths)
-
-		// The command to detect changes in the run target.
-		detectCmd, err := createBazelScriptCmd(false, true)
-		if err != nil {
-			return fmt.Errorf("failed to create bazel detect command: %w", err)
-		}
-
-		// Something has changed, but we have no idea if it affects our target.
-		// Normally we'd want to perform a cquery to determine if it affects but
-		// that is too costly especially in larger monorepos. So instead we rebuild
-		// the target with --execution_log_json_file and determine if it ran any
-		// actions.
-		//
-		// TODO: delay the command stdout and do not output on quick noops
-		logger.Infof("incremental --watch build: %v", detectCmd.Args)
-
-		incBuildErr := runner.runCmd(tctx, detectCmd, "Run.Subscribe.Build")
-
-		dtErr := changedetect.detectChanges(cs.Paths)
-		if dtErr != nil {
-			return fmt.Errorf("failed to detect changes: %w", dtErr)
-		}
-
-		if incBuildErr != nil {
-			// The incremental build failed.
-			// Assume a temporary compilation error, assume an appropriate error message was outputted by the run command.
-			// Output a basic warning and resume waiting for changes.
-			fmt.Printf("%s incremental bazel build command failed: %v\n", color.YellowString("WARNING:"), incBuildErr)
-		} else if changes := changedetect.cycleChanges(); len(changes) > 0 && watchRunfilesChanges {
-			logger.Infof("Cycle changes: %v", changes)
-
-			// For now just rerun the target, beware that RunCommand does not yield until
-			// the subprocess exits.
-			fmt.Printf("%s Found %d changes, rebuilding the target.\n", color.GreenString("INFO:"), len(changes))
-
-			ctctx, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
-
-			if err := incrementalProtocol.Cycle(ctctx, ibp.WatchScope_Runfiles, changes); err != nil {
-				return fmt.Errorf("failed to report cycle events: %w", err)
-			}
-
-			cycleTrace.End()
-
-			// TODO: if we want to support ibazel livereload then we need to report changes.
-		} else if watchSourceChanges {
-			logger.Infof("Cycle source changes: %v", cs.Paths)
-
-			changes := make(map[string]*ibp.SourceInfo)
-			for _, changedSource := range cs.Paths {
-				changes[changedSource] = &ibp.SourceInfo{
-					IsSource: toJsonBoolPtr(true),
+		if err := func() (retErr error) {
+			tctx, watchTrace := runner.tracer.Start(watchCtx, "Run.Subscribe.WatchEvent")
+			defer func() {
+				if retErr != nil {
+					watchTrace.SetStatus(codes.Error, retErr.Error())
 				}
+				watchTrace.End()
+			}()
+
+			// Enter into the build state to discard spurious changes caused by Bazel reading the
+			// inputs which leads to their atime to change.
+			if err := w.StateEnter(watchState); err != nil {
+				return fmt.Errorf("failed to enter build state: %w", err)
 			}
 
-			ctctx, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
+			logger.Debugf("watchman detected changes: %v", cs.Paths)
 
-			if err := incrementalProtocol.Cycle(ctctx, ibp.WatchScope_Sources, changes); err != nil {
-				return fmt.Errorf("failed to report cycle events: %w", err)
+			// The command to detect changes in the run target.
+			detectCmd, err := createBazelScriptCmd(false, true)
+			if err != nil {
+				return fmt.Errorf("failed to create bazel detect command: %w", err)
 			}
 
-			cycleTrace.End()
-		} else {
-			fmt.Printf("%s Target is up-to-date.\n", color.GreenString("INFO:"))
-		}
+			// Something has changed, but we have no idea if it affects our target.
+			// Normally we'd want to perform a cquery to determine if it affects but
+			// that is too costly especially in larger monorepos. So instead we rebuild
+			// the target with --execution_log_json_file and determine if it ran any
+			// actions.
+			//
+			// TODO: delay the command stdout and do not output on quick noops
+			logger.Infof("incremental --watch build: %v", detectCmd.Args)
 
-		// Leave the build state and fast forward the subscription clock.
-		if err := w.StateLeave(watchState); err != nil {
-			return fmt.Errorf("failed to leave build state: %w", err)
-		}
+			incBuildErr := runner.runCmd(tctx, detectCmd, "Run.Subscribe.Build")
 
-		watchTrace.End()
+			dtErr := changedetect.detectChanges(cs.Paths)
+			if dtErr != nil {
+				return fmt.Errorf("failed to detect changes: %w", dtErr)
+			}
+
+			if incBuildErr != nil {
+				// The incremental build failed.
+				// Assume a temporary compilation error, assume an appropriate error message was outputted by the run command.
+				// Output a basic warning and resume waiting for changes.
+				fmt.Printf("%s incremental bazel build command failed: %v\n", color.YellowString("WARNING:"), incBuildErr)
+			} else if changes := changedetect.cycleChanges(); len(changes) > 0 && watchRunfilesChanges {
+				logger.Infof("Cycle changes: %v", changes)
+
+				// For now just rerun the target, beware that RunCommand does not yield until
+				// the subprocess exits.
+				fmt.Printf("%s Found %d changes, rebuilding the target.\n", color.GreenString("INFO:"), len(changes))
+
+				ctctx, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
+				defer cycleTrace.End()
+
+				if err := incrementalProtocol.Cycle(ctctx, ibp.WatchScope_Runfiles, changes); err != nil {
+					cycleTrace.SetStatus(codes.Error, err.Error())
+					return fmt.Errorf("failed to report cycle events: %w", err)
+				}
+
+				// TODO: if we want to support ibazel livereload then we need to report changes.
+			} else if watchSourceChanges {
+				logger.Infof("Cycle source changes: %v", cs.Paths)
+
+				changes := make(map[string]*ibp.SourceInfo)
+				for _, changedSource := range cs.Paths {
+					changes[changedSource] = &ibp.SourceInfo{
+						IsSource: toJsonBoolPtr(true),
+					}
+				}
+
+				ctctx, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
+				defer cycleTrace.End()
+
+				if err := incrementalProtocol.Cycle(ctctx, ibp.WatchScope_Sources, changes); err != nil {
+					cycleTrace.SetStatus(codes.Error, err.Error())
+					return fmt.Errorf("failed to report cycle events: %w", err)
+				}
+			} else {
+				fmt.Printf("%s Target is up-to-date.\n", color.GreenString("INFO:"))
+			}
+
+			// Leave the build state and fast forward the subscription clock.
+			if err := w.StateLeave(watchState); err != nil {
+				return fmt.Errorf("failed to leave build state: %w", err)
+			}
+
+			return nil
+		}(); err != nil {
+			return err
+		}
 	}
 
 	return nil
