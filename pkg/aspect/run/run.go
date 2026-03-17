@@ -299,7 +299,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 
 	logger.Infof("initial --watch build: %v", initCmd.Args)
 
-	err = runner.runCmd(pcctx, initCmd, "Run.Subscribe.Build")
+	err = runner.runCmd(initCtx, initCmd, "Run.Subscribe.Build")
 	if err != nil {
 		return fmt.Errorf("initial bazel command failed: %w", err)
 	}
