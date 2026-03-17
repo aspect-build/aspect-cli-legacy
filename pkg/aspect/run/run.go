@@ -279,114 +279,115 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		return fmt.Errorf("failed to create initial bazel command: %w", err)
 	}
 
-	initCtx, initTrace := runner.tracer.Start(watchCtx, "Run.Init", trace.WithAttributes())
+	startCmd, incrementalProtocol, initErr := func() (*exec.Cmd, ibp.IncrementalBazel, error) {
+		initCtx, initTrace := runner.tracer.Start(watchCtx, "Run.Init", trace.WithAttributes())
+		defer initTrace.End()
 
-	logger.Infof("initial --watch build: %v", initCmd.Args)
+		logger.Infof("initial --watch build: %v", initCmd.Args)
 
-	err = runner.runCmd(initCtx, initCmd, "Run.Subscribe.Build")
-	if err != nil {
-		return fmt.Errorf("initial bazel command failed: %w", err)
-	}
-	initCmd = nil
-
-	// Detect the context of the run target after this initial build.
-	if err := changedetect.detectContext(); err != nil {
-		return fmt.Errorf("failed to detect context on init: %w", err)
-	}
-
-	// The command to start the run target.
-	startCmd := createRunCmd()
-
-	// The incremental bazel protocol/tool to use going forward.
-	var incrementalProtocol ibp.IncrementalBazel
-
-	// If the target explicitly supports ibazel but NOT explicitly supports incremental build protocol
-	// then assume only legacy ibazel support is available.
-	if changedetect.supportsIBazelNotifyChanges() && !changedetect.explicitlySupportsIBP() {
-		// Fallback to only using the legacy ibazel protocol.
-		fmt.Printf("%s Fallback to legacy ibazel protocol\n", color.GreenString("INFO:"))
-
-		// In order to support ibazel events we need to set the stdin to a pipe.
-		// By default MakeBazelCommand sets it to bzlCommandStreams.stdin but we
-		// want to control stdin depending on the watch mode.
-		// In order to pipe stdin we need to set it to nil first and then call StdinPipe.
-		startCmd.Stdin = nil
-		runStdin, err := startCmd.StdinPipe()
-		if err != nil {
-			return fmt.Errorf("failed to create stdin pipe for ibazel: %w", err)
+		if err := runner.runCmd(initCtx, initCmd, "Run.Subscribe.Build"); err != nil {
+			return nil, nil, fmt.Errorf("initial bazel command failed: %w", err)
 		}
 
-		incrementalProtocol = &IBazelProtocol{
-			stdin: runStdin,
+		// Detect the context of the run target after this initial build.
+		if err := changedetect.detectContext(); err != nil {
+			return nil, nil, fmt.Errorf("failed to detect context on init: %w", err)
 		}
-	} else {
-		incrementalProtocol = abazel
+
+		// The command to start the run target.
+		startCmd := createRunCmd()
+
+		// The incremental bazel protocol/tool to use going forward.
+		var incrementalProtocol ibp.IncrementalBazel
+
+		// If the target explicitly supports ibazel but NOT explicitly supports incremental build protocol
+		// then assume only legacy ibazel support is available.
+		if changedetect.supportsIBazelNotifyChanges() && !changedetect.explicitlySupportsIBP() {
+			// Fallback to only using the legacy ibazel protocol.
+			fmt.Printf("%s Fallback to legacy ibazel protocol\n", color.GreenString("INFO:"))
+
+			// In order to support ibazel events we need to set the stdin to a pipe.
+			// By default MakeBazelCommand sets it to bzlCommandStreams.stdin but we
+			// want to control stdin depending on the watch mode.
+			// In order to pipe stdin we need to set it to nil first and then call StdinPipe.
+			startCmd.Stdin = nil
+			runStdin, err := startCmd.StdinPipe()
+			if err != nil {
+				return nil, nil, fmt.Errorf("failed to create stdin pipe for ibazel: %w", err)
+			}
+
+			incrementalProtocol = &IBazelProtocol{
+				stdin: runStdin,
+			}
+		} else {
+			incrementalProtocol = abazel
+		}
+
+		// Start the bazel command
+		if err := startCmd.Start(); err != nil {
+			return nil, nil, fmt.Errorf("failed to start bazel command: %w", err)
+		}
+
+		// Significantly increase the timeout if the target explicitly supports the watch protocol
+		// since failure to connect will be a hard error instead of a fallback to restarting.
+		watchConnectionTimeout := defaultWatchConnectionTimeout
+		if changedetect.explicitlySupportsIBP() {
+			watchConnectionTimeout *= 10
+		}
+
+		// Give the watcher some time to start and open the connection before sending Init()
+		if !incrementalProtocol.HasConnection() {
+			// TODO: don't assume abazel is the only non-instant connection
+
+			select {
+			case <-watchCtx.Done():
+				fmt.Printf("%s Process cancelled before establishing connection: %v\n", color.RedString("ERROR:"), watchCtx.Err())
+				return nil, nil, watchCtx.Err()
+			case v := <-abazel.WaitForConnection():
+				fmt.Printf("%s Received connection to %s using abazel v%v\n", color.GreenString("INFO:"), abazel.Address(), v)
+			case <-time.After(watchConnectionTimeout):
+				fmt.Printf("%s Timeout (%vms) waiting for watch protocol connection.\n", color.YellowString("WARNING:"), watchConnectionTimeout.Milliseconds())
+			}
+		}
+
+		// Abandon the incremental protocol if the target has not responded
+		if !incrementalProtocol.HasConnection() {
+			if changedetect.explicitlySupportsIBP() {
+				fmt.Printf("%s target explicitly supports incremental build protocol but did not connect within %vms.\n", color.RedString("ERROR:"), watchConnectionTimeout.Milliseconds())
+				os.Exit(1)
+			}
+
+			fmt.Printf("%s No watch protocol connection established. Fallback to restart.\n", color.YellowString("WARNING:"))
+
+			go abazel.Close()
+			abazel = nil
+
+			incrementalProtocol = &RestartBazelProtocol{
+				createRunCmd: createRunCmd,
+				runCmd:       startCmd,
+			}
+		}
+
+		// Init() with the full runfiles list
+		cctx, initCycleTrace := runner.tracer.Start(initCtx, "Run.Cycle")
+		defer initCycleTrace.End()
+
+		initRunfiles, initRunfilesErr := changedetect.loadFullSourceInfo()
+		if initRunfilesErr != nil {
+			return nil, nil, fmt.Errorf("failed to load initial runfiles: %w", initRunfilesErr)
+		}
+		if err := incrementalProtocol.Init(cctx, ibp.WatchScope_Runfiles, initRunfiles); err != nil {
+			return nil, nil, fmt.Errorf("failed to initialize watch protocol: %w", err)
+		}
+
+		return startCmd, incrementalProtocol, nil
+	}()
+	if initErr != nil {
+		return initErr
 	}
 
 	// Close the incremental protocol when complete, no matter the protocol type.
 	defer incrementalProtocol.Close()
-
-	// Start the bazel command
-	startErr := startCmd.Start()
-	if startErr != nil {
-		return fmt.Errorf("failed to start bazel command: %w", startErr)
-	}
-
-	// Significantly increase the timeout if the target explicitly supports the watch protocol
-	// since failure to connect will be a hard error instead of a fallback to restarting.
-	watchConnectionTimeout := defaultWatchConnectionTimeout
-	if changedetect.explicitlySupportsIBP() {
-		watchConnectionTimeout *= 10
-	}
-
-	// Give the watcher some time to start and open the connection before sending Init()
-	if !incrementalProtocol.HasConnection() {
-		// TODO: don't assume abazel is the only non-instant connection
-
-		select {
-		case <-watchCtx.Done():
-			fmt.Printf("%s Process cancelled before establishing connection: %v\n", color.RedString("ERROR:"), watchCtx.Err())
-			return watchCtx.Err()
-		case v := <-abazel.WaitForConnection():
-			fmt.Printf("%s Received connection to %s using abazel v%v\n", color.GreenString("INFO:"), abazel.Address(), v)
-		case <-time.After(watchConnectionTimeout):
-			fmt.Printf("%s Timeout (%vms) waiting for watch protocol connection.\n", color.YellowString("WARNING:"), watchConnectionTimeout.Milliseconds())
-			break
-		}
-	}
-
-	// Abandon the incremental protocol if the target has not responded
-	if !incrementalProtocol.HasConnection() {
-		if changedetect.explicitlySupportsIBP() {
-			fmt.Printf("%s target explicitly supports incremental build protocol but did not connect within %vms.\n", color.RedString("ERROR:"), watchConnectionTimeout.Milliseconds())
-			os.Exit(1)
-		}
-
-		fmt.Printf("%s No watch protocol connection established. Fallback to restart.\n", color.YellowString("WARNING:"))
-
-		go abazel.Close()
-		abazel = nil
-
-		incrementalProtocol = &RestartBazelProtocol{
-			createRunCmd: createRunCmd,
-			runCmd:       startCmd,
-		}
-	}
-
-	// Init() with the full runfiles list
-	cctx, initCycleTrace := runner.tracer.Start(initCtx, "Run.Cycle")
-
-	initRunfiles, initRunfilesErr := changedetect.loadFullSourceInfo()
-	if initRunfilesErr != nil {
-		return fmt.Errorf("failed to load initial runfiles: %w", initRunfilesErr)
-	}
-	initErr := incrementalProtocol.Init(cctx, ibp.WatchScope_Runfiles, initRunfiles)
-	if initErr != nil {
-		return fmt.Errorf("failed to initialize watch protocol: %w", initErr)
-	}
-
-	initCycleTrace.End()
-	initTrace.End()
 
 	// Send an 'Exit' message to the child process when the context completes in case
 	// the context was cancelled due to the cli being shutdown.
