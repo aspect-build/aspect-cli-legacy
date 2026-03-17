@@ -128,6 +128,9 @@ func setupOTelTracer(ctx context.Context, exp trace.SpanExporter) (func(), error
 		trace.WithResource(r),
 	)
 
+	otel.SetErrorHandler(otel.ErrorHandlerFunc(func(err error) {
+		fmt.Fprintf(os.Stderr, "otel internal error: %v\n", err)
+	}))
 	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
 		propagation.TraceContext{},
