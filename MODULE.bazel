@@ -35,5 +35,8 @@ bazel_binary = use_repo_rule("//integration_tests:bazel_binary.bzl", "bazel_bina
 
 bazel_binary(name = "bazel_6_4_0")
 
+bazel_dep(name = "llvm", version = "0.6.8")
+
 include("//bazel/include:go.MODULE.bazel")
-include("//bazel/include:llvm.MODULE.bazel")
+
+register_toolchains("@llvm//toolchain:all")
