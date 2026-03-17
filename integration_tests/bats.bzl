@@ -28,7 +28,7 @@ def bats_test(srcs = [], **kwargs):
         srcs = [
             "//integration_tests:runner.sh",
         ],
-        deps = [
+        data = data + srcs + [
             "@bats_assert//:bats_assert",
             "@bats_file//:bats_file",
             "@bats_mock//:bats_mock",
@@ -39,7 +39,6 @@ def bats_test(srcs = [], **kwargs):
         ] + helpers_dirs,
         env = env,
         args = tests + args,
-        data = data + srcs,
         # TODO(alex): remove when we green it up on RBE
         tags = tags + ["no-remote-exec"],
         **kwargs

@@ -38,5 +38,6 @@ bazel_binary(name = "bazel_6_4_0")
 bazel_dep(name = "llvm", version = "0.6.8")
 
 include("//bazel/include:go.MODULE.bazel")
+include("//bazel/include:bats.MODULE.bazel")
 
 register_toolchains("@llvm//toolchain:all")
