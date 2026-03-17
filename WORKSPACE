@@ -21,7 +21,3 @@ register_toolchains(
     "@zig_sdk//toolchain:windows_amd64",
     "@zig_sdk//toolchain:windows_arm64",
 )
-
-load("//integration_tests:bats_deps.bzl", "bats_dependencies")
-
-bats_dependencies()

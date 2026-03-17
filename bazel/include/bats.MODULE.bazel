@@ -1,0 +1,124 @@
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "bats_core",
+    build_file_content = """
+filegroup(
+    name = "bats_core",
+    srcs = glob(["lib/**", "libexec/**"]),
+    visibility = ["//visibility:public"],
+)
+filegroup(
+    name = "bin",
+    srcs = ["bin/bats"],
+    visibility = ["//visibility:public"],
+)
+""",
+    integrity = "sha256-rv8J/ciwyIswh8md4Az1STVtei9qaeP87F4Ohh0vkGM=",
+    strip_prefix = "bats-core-1.11.0",
+    urls = ["https://github.com/bats-core/bats-core/archive/v1.11.0.tar.gz"],
+)
+
+http_archive(
+    name = "bats_assert",
+    add_prefix = "bats-assert",
+    build_file_content = """
+filegroup(
+    name = "bats_assert",
+    srcs = glob(["bats-assert/src/**", "bats-assert/load.bash"]),
+    visibility = ["//visibility:public"],
+)
+filegroup(
+    name = "dir",
+    srcs = ["bats-assert"],
+    visibility = ["//visibility:public"],
+)
+""",
+    integrity = "sha256-mMo7aF+LiZPkjsBXVl5uKrzFQQNO1bDoHxkVBWggN/0=",
+    strip_prefix = "bats-assert-2.1.0",
+    urls = ["https://github.com/bats-core/bats-assert/archive/v2.1.0.tar.gz"],
+)
+
+http_archive(
+    name = "bats_support",
+    add_prefix = "bats-support",
+    build_file_content = """
+filegroup(
+    name = "bats_support",
+    srcs = glob(["bats-support/src/**", "bats-support/load.bash"]),
+    visibility = ["//visibility:public"],
+)
+filegroup(
+    name = "dir",
+    srcs = ["bats-support"],
+    visibility = ["//visibility:public"],
+)
+""",
+    integrity = "sha256-tXdsryy8AHowm1Ooi7isP6oAkQguQUr0PY7XPOXSaLI=",
+    strip_prefix = "bats-support-9bf10e876dd6b624fe44423f0b35e064225f7556",
+    urls = ["https://github.com/bats-core/bats-support/archive/9bf10e876dd6b624fe44423f0b35e064225f7556.tar.gz"],
+)
+
+http_archive(
+    name = "bats_file",
+    add_prefix = "bats-file",
+    build_file_content = """
+filegroup(
+    name = "bats_file",
+    srcs = glob(["bats-file/src/**", "bats-file/load.bash"]),
+    visibility = ["//visibility:public"],
+)
+filegroup(
+    name = "dir",
+    srcs = ["bats-file"],
+    visibility = ["//visibility:public"],
+)
+""",
+    integrity = "sha256-hd3iOyI0EllkQnVrH/gupo4Z1Hy3YoV/y5g4dblD5aU=",
+    strip_prefix = "bats-file-048aa4c595d4a103d6ec3518ead9e071efc019e2",
+    urls = ["https://github.com/bats-core/bats-file/archive/048aa4c595d4a103d6ec3518ead9e071efc019e2.tar.gz"],
+)
+
+http_archive(
+    name = "bats_mock",
+    add_prefix = "bats-mock",
+    build_file_content = """
+filegroup(
+    name = "bats_mock",
+    srcs = glob(["bats-mock/**"], allow_empty = True),
+    visibility = ["//visibility:public"],
+)
+filegroup(
+    name = "dir",
+    srcs = ["bats-mock"],
+    visibility = ["//visibility:public"],
+)
+""",
+    integrity = "sha256-FVn9PmtjgY9t34ZSJQ27yd5HIw8MRrkdyEpztXBM080=",
+    strip_prefix = "bats-mock-48fce74482a4d2bb879b904ccab31b6bc98e3224",
+    urls = ["https://github.com/grayhemp/bats-mock/archive/48fce74482a4d2bb879b904ccab31b6bc98e3224.tar.gz"],
+)
+
+http_archive(
+    name = "bats_detik",
+    add_prefix = "bats-detik",
+    build_file_content = """
+filegroup(
+    name = "bats_detik",
+    srcs = [
+        "bats-detik/lib/detik.bash",
+        "bats-detik/lib/linter.bash",
+        "bats-detik/lib/utils.bash",
+    ],
+    visibility = ["//visibility:public"],
+)
+filegroup(
+    name = "dir",
+    srcs = ["bats-detik"],
+    visibility = ["//visibility:public"],
+)
+""",
+    integrity = "sha256-16bor7Kmxj5xHgS0hkEHy3vpJo2X/hDTVRzmUvLR+Q8=",
+    strip_prefix = "bats-detik-85ce4ba67d2ccec6e248202f3e994a86abc6e0a4",
+    urls = ["https://github.com/bats-core/bats-detik/archive/85ce4ba67d2ccec6e248202f3e994a86abc6e0a4.tar.gz"],
+)

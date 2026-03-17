@@ -5,13 +5,6 @@ load("@rules_shell//shell:sh_library.bzl", "sh_library")
 exports_files(["runner.sh"])
 
 bzl_library(
-    name = "bats_deps",
-    srcs = ["bats_deps.bzl"],
-    visibility = ["//visibility:public"],
-    deps = ["@bazel_tools//tools/build_defs/repo:http.bzl"],
-)
-
-bzl_library(
     name = "bazel_binary",
     srcs = ["bazel_binary.bzl"],
     visibility = ["//visibility:public"],
