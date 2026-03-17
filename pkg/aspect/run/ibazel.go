@@ -52,7 +52,10 @@ func (ib *IBazelProtocol) Cycle(ctx context.Context, scope ibp.WatchScope, chang
 
 	// Add some delay to let the filesystem settle before we can exit the build state.
 	// In the future we might make this configurable.
-	time.Sleep(100 * time.Millisecond)
+	select {
+	case <-time.After(100 * time.Millisecond):
+	case <-ctx.Done():
+	}
 
 	return res
 }
@@ -164,7 +167,10 @@ func (rb *RestartBazelProtocol) Cycle(ctx context.Context, scope ibp.WatchScope,
 
 	// Add some delay to let the filesystem settle before we can exit the build state.
 	// In the future we might make this configurable.
-	time.Sleep(100 * time.Millisecond)
+	select {
+	case <-time.After(100 * time.Millisecond):
+	case <-ctx.Done():
+	}
 
 	return nil
 }
