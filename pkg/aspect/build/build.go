@@ -181,7 +181,7 @@ func (runner *Build) buildWatch(ctx context.Context, bazelCmd []string, streams 
 
 		// Leave the build state and fast forward the subscription clock.
 		if err := w.StateLeave(watchState); err != nil {
-			return fmt.Errorf("failed to exit build state: %w", err)
+			return fmt.Errorf("failed to leave build state: %w", err)
 		}
 	}
 

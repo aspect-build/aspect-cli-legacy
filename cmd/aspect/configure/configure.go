@@ -320,7 +320,7 @@ func runConfigureWatch(ctx context.Context, v *runner.GazelleRunner, mode string
 
 		// Leave the build state and fast forward the subscription clock.
 		if err := w.StateLeave(watchState); err != nil {
-			return fmt.Errorf("failed to enter build state: %w", err)
+			return fmt.Errorf("failed to leave build state: %w", err)
 		}
 	}
 
