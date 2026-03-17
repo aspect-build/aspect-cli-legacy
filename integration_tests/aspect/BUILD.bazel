@@ -30,6 +30,7 @@ data = [
         "lint",
         "reenter",
         "run",
+        "telemetry",
     ]
 ]
 

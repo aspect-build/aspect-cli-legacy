@@ -24,13 +24,13 @@ import (
 	"github.com/aspect-build/aspect-cli-legacy/buildinfo"
 	"github.com/spf13/viper"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.39.0"
-
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
 )
 
 const (
@@ -113,13 +113,24 @@ func setupOTelOTLP(ctx context.Context, telemetryEndpointUrl string, headers map
 }
 
 func setupOTelTracer(ctx context.Context, exp trace.SpanExporter) (func(), error) {
-	r, err := resource.Merge(
-		resource.Default(),
-		resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceName("Aspect CLI"),
-			semconv.ServiceVersion(buildinfo.Current().Version()),
-		),
+	attrs := []attribute.KeyValue{
+		semconv.ServiceName("Aspect CLI"),
+		semconv.ServiceVersion(buildinfo.Current().Version()),
+	}
+	if wd, err := os.Getwd(); err == nil {
+		attrs = append(attrs, semconv.ProcessWorkingDirectory(wd))
+	}
+
+	r, err := resource.New(ctx,
+		resource.WithFromEnv(),
+		resource.WithTelemetrySDK(),
+		resource.WithHost(),
+		resource.WithOSType(),
+		resource.WithProcessPID(),
+		resource.WithProcessExecutableName(),
+		resource.WithProcessOwner(),
+		resource.WithProcessRuntimeVersion(),
+		resource.WithAttributes(attrs...),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create resource: %w", err)
