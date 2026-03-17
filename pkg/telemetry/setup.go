@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/aspect-build/aspect-cli-legacy/buildinfo"
 	"github.com/spf13/viper"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
@@ -117,6 +118,7 @@ func setupOTelTracer(ctx context.Context, exp trace.SpanExporter) (func(), error
 		resource.NewWithAttributes(
 			semconv.SchemaURL,
 			semconv.ServiceName("Aspect CLI"),
+			semconv.ServiceVersion(buildinfo.Current().Version()),
 		),
 	)
 	if err != nil {
