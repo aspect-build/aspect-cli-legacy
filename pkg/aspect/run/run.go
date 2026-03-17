@@ -14,22 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * Copyright 2025 Aspect Build Systems, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package run
 
 import (
@@ -200,16 +184,16 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	// Primary context to rule all async and background operations.
 	// TODO: Cobras context seems to cancel too early. perhaps use that instead
 	// of using our own signal?
-	pcctx, cancel := context.WithCancel(context.Background())
+	pctx, cancel := context.WithCancel(context.Background())
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 	go func() {
-		<-c
+		<-sigCh
 		cancel()
 	}()
 
-	pcctx, t := runner.tracer.Start(pcctx, "Run.Watch", trace.WithAttributes(
+	watchCtx, t := runner.tracer.Start(pctx, "Run.Watch", trace.WithAttributes(
 		traceAttr.StringSlice("command", bazelCmd),
 	))
 	defer t.End()
@@ -218,9 +202,9 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	// Start in the background while bazel-run is also initializing in parallel
 	// in case watchman is slow to startup.
 	w := watcher.NewWatchman(runner.bzl.WorkspaceRoot())
-	wInit := errgroup.Group{}
-	wInit.Go(func() error {
-		_, t := runner.tracer.Start(pcctx, "Watchman.Start")
+	watchmanStartup := errgroup.Group{}
+	watchmanStartup.Go(func() error {
+		_, t := runner.tracer.Start(watchCtx, "Watchman.Start")
 		defer t.End()
 
 		if err := w.Start(); err != nil {
@@ -234,7 +218,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	// goroutine to stop the watcher when we receive a signal to cancel the
 	// process.
 	go func() {
-		<-pcctx.Done()
+		<-watchCtx.Done()
 		w.Close()
 	}()
 
@@ -244,7 +228,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	abazel := ibp.NewServer()
 
 	// Start listening for a connection immediately.
-	if err := abazel.Serve(pcctx); err != nil {
+	if err := abazel.Serve(watchCtx); err != nil {
 		return fmt.Errorf("failed to connect to aspect bazel protocol: %w", err)
 	}
 
@@ -268,7 +252,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			runCmdArgs = append(runCmdArgs, "--noallow_analysis_cache_discard")
 		}
 
-		return runner.bzl.MakeBazelCommand(pcctx, flags.AddFlagToCommand(bazelCmd, runCmdArgs...), bzlCommandStreams, nil, nil)
+		return runner.bzl.MakeBazelCommand(watchCtx, flags.AddFlagToCommand(bazelCmd, runCmdArgs...), bzlCommandStreams, nil, nil)
 	}
 
 	createRunCmd := func() *exec.Cmd {
@@ -281,7 +265,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			env = append(env, abazel.Env()...)
 		}
 
-		startCmd := exec.CommandContext(pcctx, startScript)
+		startCmd := exec.CommandContext(watchCtx, startScript)
 		startCmd.Stdin = bzlCommandStreams.Stdin
 		startCmd.Stdout = bzlCommandStreams.Stdout
 		startCmd.Stderr = bzlCommandStreams.Stderr
@@ -295,7 +279,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		return fmt.Errorf("failed to create initial bazel command: %w", err)
 	}
 
-	initCtx, initTrace := runner.tracer.Start(pcctx, "Run.Init", trace.WithAttributes())
+	initCtx, initTrace := runner.tracer.Start(watchCtx, "Run.Init", trace.WithAttributes())
 
 	logger.Infof("initial --watch build: %v", initCmd.Args)
 
@@ -316,7 +300,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	// The incremental bazel protocol/tool to use going forward.
 	var incrementalProtocol ibp.IncrementalBazel
 
-	// If the target explicitly supports ibazel but NOT excplicitly supports incremental build protocol
+	// If the target explicitly supports ibazel but NOT explicitly supports incremental build protocol
 	// then assume only legacy ibazel support is available.
 	if changedetect.supportsIBazelNotifyChanges() && !changedetect.explicitlySupportsIBP() {
 		// Fallback to only using the legacy ibazel protocol.
@@ -360,9 +344,9 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		// TODO: don't assume abazel is the only non-instant connection
 
 		select {
-		case <-pcctx.Done():
-			fmt.Printf("%s Process cancelled before establishing connection: %v\n", color.RedString("ERROR:"), pcctx.Err())
-			return pcctx.Err()
+		case <-watchCtx.Done():
+			fmt.Printf("%s Process cancelled before establishing connection: %v\n", color.RedString("ERROR:"), watchCtx.Err())
+			return watchCtx.Err()
 		case v := <-abazel.WaitForConnection():
 			fmt.Printf("%s Received connection to %s using abazel v%v\n", color.GreenString("INFO:"), abazel.Address(), v)
 		case <-time.After(watchConnectionTimeout):
@@ -371,7 +355,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		}
 	}
 
-	// Abandon the incrmental protocol if the target has not responded
+	// Abandon the incremental protocol if the target has not responded
 	if !incrementalProtocol.HasConnection() {
 		if changedetect.explicitlySupportsIBP() {
 			fmt.Printf("%s target explicitly supports incremental build protocol but did not connect within %vms.\n", color.RedString("ERROR:"), watchConnectionTimeout.Milliseconds())
@@ -392,9 +376,9 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	// Init() with the full runfiles list
 	cctx, initCycleTrace := runner.tracer.Start(initCtx, "Run.Cycle")
 
-	initRunfiles, initRunfielsErr := changedetect.loadFullSourceInfo()
-	if initRunfielsErr != nil {
-		return fmt.Errorf("failed to load initial runfiles: %w", initRunfielsErr)
+	initRunfiles, initRunfilesErr := changedetect.loadFullSourceInfo()
+	if initRunfilesErr != nil {
+		return fmt.Errorf("failed to load initial runfiles: %w", initRunfilesErr)
 	}
 	initErr := incrementalProtocol.Init(cctx, ibp.WatchScope_Runfiles, initRunfiles)
 	if initErr != nil {
@@ -407,24 +391,24 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	// Send an 'Exit' message to the child process when the context completes in case
 	// the context was cancelled due to the cli being shutdown.
 	go func() {
-		<-pcctx.Done()
+		<-watchCtx.Done()
 
 		// If a connection still exists to the incremental protocol, send an Exit message and
 		// hope for a graceful shutdown. Ignore any errors as the process may already be in the
 		// process of shutting down.
 		if incrementalProtocol.HasConnection() {
-			incrementalProtocol.Exit(context.Background(), pcctx.Err())
+			incrementalProtocol.Exit(context.Background(), watchCtx.Err())
 		}
 
 		// Terminate the process if it is still running.
 		terminate(startCmd.Process)
 	}()
 
-	pcctx, st := runner.tracer.Start(pcctx, "Run.Subscribe")
+	watchCtx, st := runner.tracer.Start(watchCtx, "Run.Subscribe")
 	defer st.End()
 
 	// Watchman must finish initializing before we can subscribe
-	wErr := wInit.Wait()
+	wErr := watchmanStartup.Wait()
 	if wErr != nil {
 		return wErr
 	}
@@ -443,7 +427,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	}
 
 	// Subscribe to further changes
-	for cs, err := range w.Subscribe(pcctx, watcher.DeferState{DeferWithinState: watchState}) {
+	for cs, err := range w.Subscribe(watchCtx, watcher.DeferState{DeferWithinState: watchState}) {
 		if err != nil {
 			// Break the subscribe iteration if the context is done or if the watcher is closed.
 			if errors.Is(err, context.Canceled) || errors.Is(err, net.ErrClosed) {
@@ -453,9 +437,9 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			return fmt.Errorf("failed to get next event: %w", err)
 		}
 
-		tctx, watchTrace := runner.tracer.Start(pcctx, "Run.Subscribe.WatchEvent")
+		tctx, watchTrace := runner.tracer.Start(watchCtx, "Run.Subscribe.WatchEvent")
 
-		// Enter into the build state to discard supirious changes caused by Bazel reading the
+		// Enter into the build state to discard spurious changes caused by Bazel reading the
 		// inputs which leads to their atime to change.
 		if err := w.StateEnter(watchState); err != nil {
 			return fmt.Errorf("failed to enter build state: %w", err)
@@ -487,14 +471,14 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 
 		if incBuildErr != nil {
 			// The incremental build failed.
-			// Assume a temporary compilation error, assume an appopriate error message was outputted by the run command.
+			// Assume a temporary compilation error, assume an appropriate error message was outputted by the run command.
 			// Output a basic warning and resume waiting for changes.
 			fmt.Printf("%s incremental bazel build command failed: %v\n", color.YellowString("WARNING:"), incBuildErr)
 		} else if changes := changedetect.cycleChanges(); len(changes) > 0 && watchRunfilesChanges {
 			logger.Infof("Cycle changes: %v", changes)
 
 			// For now just rerun the target, beware that RunCommand does not yield until
-			// the subprocess exists.
+			// the subprocess exits.
 			fmt.Printf("%s Found %d changes, rebuilding the target.\n", color.GreenString("INFO:"), len(changes))
 
 			ctctx, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
