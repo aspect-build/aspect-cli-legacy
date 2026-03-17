@@ -14,22 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * Copyright 2022 Aspect Build Systems, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package build
 
 import (
@@ -103,16 +87,16 @@ func (runner *Build) Run(ctx context.Context, cmd *cobra.Command, args []string)
 			color.YellowString("WARNING:"),
 		)
 
-		pcctx, cancel := context.WithCancel(context.Background())
+		watchCtx, cancel := context.WithCancel(context.Background())
 
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+		sigCh := make(chan os.Signal, 1)
+		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 		go func() {
-			<-c
+			<-sigCh
 			cancel()
 		}()
 
-		err = runner.buildWatch(pcctx, bazelCmd, bzlCommandStreams)
+		err = runner.buildWatch(watchCtx, bazelCmd, bzlCommandStreams)
 	} else {
 		err = runner.bzl.RunCommand(bzlCommandStreams, nil, bazelCmd...)
 	}
@@ -166,7 +150,7 @@ func (runner *Build) buildWatch(ctx context.Context, bazelCmd []string, streams 
 			return fmt.Errorf("failed to get next event: %w", err)
 		}
 
-		// Enter into the build state to discard supirious changes caused by Bazel reading the
+		// Enter into the build state to discard spurious changes caused by Bazel reading the
 		// inputs which leads to their atime to change.
 		if err := w.StateEnter(watchState); err != nil {
 			return fmt.Errorf("failed to enter build state: %w", err)
