@@ -29,7 +29,14 @@ var (
 	BazelTargetsKey = attribute.Key("bazel.targets")
 	// BazelArgsKey is the full raw argument list passed to the bazel command.
 	BazelArgsKey = attribute.Key("bazel.args")
+	// BazelInvocationIdKey is the Bazel invocation ID.
+	BazelInvocationIdKey = attribute.Key("bazel.invocation_id")
 )
+
+// BazelInvocationId returns a span attribute for the given Bazel invocation ID.
+func BazelInvocationId(id string) attribute.KeyValue {
+	return BazelInvocationIdKey.String(id)
+}
 
 // BazelCmdAttrs extracts standard span attributes from a bazel command slice.
 // cmd[0] is expected to be the bazel subcommand (e.g. "build", "run", "test").
