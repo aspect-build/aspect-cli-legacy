@@ -22,6 +22,7 @@ go_library(
         "@aspect_gazelle_runner//pkg/ibp",
         "@aspect_gazelle_runner//pkg/watchman",
         "@com_github_fatih_color//:color",
+        "@com_github_google_uuid//:uuid",
         "@com_github_klauspost_compress//zstd",
         "@com_github_spf13_cobra//:cobra",
         "@io_opentelemetry_go_otel//:otel",
@@ -50,6 +51,7 @@ go_test(
         "//pkg/plugin/system/bep",
         "//pkg/plugin/system/bep/mock",
         "@com_github_golang_mock//gomock",
+        "@com_github_google_uuid//:uuid",
         "@com_github_onsi_gomega//:gomega",
     ],
 )
