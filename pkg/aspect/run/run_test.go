@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Aspect Build Systems, Inc.
+ * Copyright 2023 Aspect Build Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	. "github.com/onsi/gomega"
 
 	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/run"
@@ -32,6 +33,17 @@ import (
 	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/bep"
 	bep_mock "github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/bep/mock"
 )
+
+// extractInvocationID finds the --invocation_id=<value> arg and returns the value,
+// or empty string if not found.
+func extractInvocationID(args []string) string {
+	for _, arg := range args {
+		if after, ok := strings.CutPrefix(arg, "--invocation_id="); ok {
+			return after
+		}
+	}
+	return ""
+}
 
 func TestRun(t *testing.T) {
 	t.Run("when the bazel runner fails, the aspect run fails", func(t *testing.T) {
@@ -47,7 +59,7 @@ func TestRun(t *testing.T) {
 		}
 		bzl.
 			EXPECT().
-			RunCommand(streams, nil, "run", "//...", "--bes_backend=grpc://127.0.0.1:12345").
+			RunCommand(streams, nil, "run", "//...", "--bes_backend=grpc://127.0.0.1:12345", gomock.Any()).
 			Return(expectErr)
 		besBackend := bep_mock.NewMockBESBackend(ctrl)
 		besBackend.
@@ -78,7 +90,7 @@ func TestRun(t *testing.T) {
 		bzl := bazel_mock.NewMockBazel(ctrl)
 		bzl.
 			EXPECT().
-			RunCommand(streams, nil, "run", "//...", "--bes_backend=grpc://127.0.0.1:12345").
+			RunCommand(streams, nil, "run", "//...", "--bes_backend=grpc://127.0.0.1:12345", gomock.Any()).
 			Return(nil)
 		besBackend := bep_mock.NewMockBESBackend(ctrl)
 		besBackend.
@@ -115,7 +127,7 @@ func TestRun(t *testing.T) {
 		bzl := bazel_mock.NewMockBazel(ctrl)
 		bzl.
 			EXPECT().
-			RunCommand(streams, nil, "run", "//my/runable:target", "--bes_backend=grpc://127.0.0.1:12345", "--", "myarg").
+			RunCommand(streams, nil, "run", "//my/runable:target", "--bes_backend=grpc://127.0.0.1:12345", gomock.Any(), "--", "myarg").
 			Return(nil)
 		besBackend := bep_mock.NewMockBESBackend(ctrl)
 		besBackend.
@@ -134,5 +146,104 @@ func TestRun(t *testing.T) {
 		err := b.Run(ctx, nil, []string{"//my/runable:target", "--", "myarg"})
 
 		g.Expect(err).To(BeNil())
+	})
+
+	t.Run("invocation_id passed to bazel is a valid UUID", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		var capturedArgs []string
+		streams := ioutils.Streams{}
+		bzl := bazel_mock.NewMockBazel(ctrl)
+		bzl.
+			EXPECT().
+			RunCommand(gomock.Any(), gomock.Any(), gomock.Any()).
+			DoAndReturn(func(_ ioutils.Streams, _ *string, args ...string) error {
+				capturedArgs = args
+				return nil
+			})
+		besBackend := bep_mock.NewMockBESBackend(ctrl)
+		besBackend.EXPECT().Args().Return([]string{}).Times(1)
+		besBackend.EXPECT().Errors().Times(1)
+
+		ctx := bep.InjectBESInterceptor(context.Background(), besBackend)
+
+		b := run.New(streams, streams, bzl)
+		_ = b.Run(ctx, nil, []string{"//..."})
+
+		invocationID := extractInvocationID(capturedArgs)
+		g.Expect(invocationID).NotTo(BeEmpty())
+		_, err := uuid.Parse(invocationID)
+		g.Expect(err).To(BeNil(), "invocation_id should be a valid UUID, got: %s", invocationID)
+	})
+
+	t.Run("each invocation receives a unique invocation_id", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		var capturedIDs []string
+		streams := ioutils.Streams{}
+		bzl := bazel_mock.NewMockBazel(ctrl)
+		bzl.
+			EXPECT().
+			RunCommand(gomock.Any(), gomock.Any(), gomock.Any()).
+			DoAndReturn(func(_ ioutils.Streams, _ *string, args ...string) error {
+				capturedIDs = append(capturedIDs, extractInvocationID(args))
+				return nil
+			}).
+			Times(2)
+		besBackend := bep_mock.NewMockBESBackend(ctrl)
+		besBackend.EXPECT().Args().Return([]string{}).Times(2)
+		besBackend.EXPECT().Errors().Times(2)
+
+		ctx := bep.InjectBESInterceptor(context.Background(), besBackend)
+
+		b := run.New(streams, streams, bzl)
+		_ = b.Run(ctx, nil, []string{"//..."})
+		_ = b.Run(ctx, nil, []string{"//..."})
+
+		g.Expect(capturedIDs).To(HaveLen(2))
+		g.Expect(capturedIDs[0]).NotTo(BeEmpty())
+		g.Expect(capturedIDs[1]).NotTo(BeEmpty())
+		g.Expect(capturedIDs[0]).NotTo(Equal(capturedIDs[1]))
+	})
+
+	t.Run("pre-existing invocation_id in args is passed through unchanged", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		fixedID := "a1b2c3d4-0000-0000-0000-000000000000"
+		var capturedArgs []string
+		streams := ioutils.Streams{}
+		bzl := bazel_mock.NewMockBazel(ctrl)
+		bzl.
+			EXPECT().
+			RunCommand(gomock.Any(), gomock.Any(), gomock.Any()).
+			DoAndReturn(func(_ ioutils.Streams, _ *string, args ...string) error {
+				capturedArgs = args
+				return nil
+			})
+		besBackend := bep_mock.NewMockBESBackend(ctrl)
+		besBackend.EXPECT().Args().Return([]string{}).Times(1)
+		besBackend.EXPECT().Errors().Times(1)
+
+		ctx := bep.InjectBESInterceptor(context.Background(), besBackend)
+
+		b := run.New(streams, streams, bzl)
+		_ = b.Run(ctx, nil, []string{"//...", "--invocation_id=" + fixedID})
+
+		invocationID := extractInvocationID(capturedArgs)
+		g.Expect(invocationID).To(Equal(fixedID))
+
+		var invocationIDCount int
+		for _, arg := range capturedArgs {
+			if strings.HasPrefix(arg, "--invocation_id=") {
+				invocationIDCount++
+			}
+		}
+		g.Expect(invocationIDCount).To(Equal(1), "invocation_id should appear exactly once")
 	})
 }
