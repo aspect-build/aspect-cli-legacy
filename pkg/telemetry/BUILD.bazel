@@ -1,8 +1,11 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "telemetry",
-    srcs = ["setup.go"],
+    srcs = [
+        "bazel_attrs.go",
+        "setup.go",
+    ],
     importpath = "github.com/aspect-build/aspect-cli-legacy/pkg/telemetry",
     visibility = ["//visibility:public"],
     deps = [
@@ -17,4 +20,10 @@ go_library(
         "@io_opentelemetry_go_otel_sdk//resource",
         "@io_opentelemetry_go_otel_sdk//trace",
     ],
+)
+
+go_test(
+    name = "telemetry_test",
+    srcs = ["bazel_attrs_test.go"],
+    embed = [":telemetry"],
 )
