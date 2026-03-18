@@ -36,13 +36,13 @@ import (
 	"github.com/aspect-build/aspect-cli-legacy/pkg/bazel"
 	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 	"github.com/aspect-build/aspect-cli-legacy/pkg/plugin/system/bep"
+	"github.com/aspect-build/aspect-cli-legacy/pkg/telemetry"
 	logger "github.com/aspect-build/aspect-gazelle/common/logger"
 	"github.com/aspect-build/aspect-gazelle/runner/pkg/ibp"
 	watcher "github.com/aspect-build/aspect-gazelle/runner/pkg/watchman"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"go.opentelemetry.io/otel"
-	traceAttr "go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/sync/errgroup"
@@ -129,7 +129,7 @@ func (runner *Run) Run(ctx context.Context, cmd *cobra.Command, args []string) (
 
 func (runner *Run) runBazelCommand(ctx context.Context, bazelCmd []string, bzlCommandStreams ioutils.Streams) error {
 	_, t := runner.tracer.Start(ctx, "Run", trace.WithAttributes(
-		traceAttr.StringSlice("command", bazelCmd),
+		telemetry.BazelCmdAttrs(bazelCmd)...,
 	))
 	defer t.End()
 
@@ -142,7 +142,7 @@ func (runner *Run) runBazelCommand(ctx context.Context, bazelCmd []string, bzlCo
 
 func (runner *Run) runCmd(c context.Context, initCmd *exec.Cmd, spanName string) error {
 	_, runTrace := runner.tracer.Start(c, spanName, trace.WithAttributes(
-		traceAttr.StringSlice("command", initCmd.Args),
+		telemetry.BazelCmdAttrs(initCmd.Args)...,
 	))
 
 	err := initCmd.Run()
@@ -195,7 +195,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	}()
 
 	watchCtx, t := runner.tracer.Start(pctx, "Run.Watch", trace.WithAttributes(
-		traceAttr.StringSlice("command", bazelCmd),
+		telemetry.BazelCmdAttrs(bazelCmd)...,
 	))
 	defer t.End()
 
