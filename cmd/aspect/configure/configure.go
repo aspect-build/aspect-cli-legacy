@@ -213,15 +213,9 @@ configure:
 			ExitCode: aspecterrors.UnhandledOrInternalError,
 			Err:      err,
 		}
-	} else if changed {
-		if mode == "fix" {
-			err = &aspecterrors.ExitError{
-				ExitCode: aspecterrors.ConfigureFixed,
-			}
-		} else {
-			err = &aspecterrors.ExitError{
-				ExitCode: aspecterrors.ConfigureDiff,
-			}
+	} else if changed && mode == "diff" {
+		err = &aspecterrors.ExitError{
+			ExitCode: aspecterrors.ConfigureDiff,
 		}
 	}
 
