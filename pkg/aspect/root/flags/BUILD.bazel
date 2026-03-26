@@ -23,7 +23,10 @@ go_library(
 
 go_test(
     name = "flags_test",
-    srcs = ["noable_bool_test.go"],
+    srcs = [
+        "noable_bool_test.go",
+        "utils_test.go",
+    ],
     deps = [
         ":flags",
         "@com_github_onsi_gomega//:gomega",

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Aspect Build Systems, Inc.
+ * Copyright 2023 Aspect Build Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,26 @@
  */
 
 package flags
+
+import "strings"
+
+// FindInvocationId scans the Bazel portion of args (before any bare "--") for
+// --invocation_id, accepting both "--invocation_id=<id>" and "--invocation_id <id>" forms.
+// Returns the last occurrence (matching Bazel's last-flag-wins precedence), or "" if not found.
+func FindInvocationId(args []string) string {
+	last := ""
+	for i, arg := range args {
+		if arg == "--" {
+			break
+		}
+		if after, ok := strings.CutPrefix(arg, "--invocation_id="); ok {
+			last = after
+		} else if arg == "--invocation_id" && i+1 < len(args) && args[i+1] != "--" {
+			last = args[i+1]
+		}
+	}
+	return last
+}
 
 func AddFlagToCommand(command []string, flag ...string) []string {
 	result := make([]string, 0, len(command)+1)

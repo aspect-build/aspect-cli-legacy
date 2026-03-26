@@ -227,17 +227,10 @@ func determineBuildId(args []string) string {
 }
 
 func determineInvocationId(args []string) string {
-	invocationId := ""
-	for _, arg := range args {
-		if after, ok := strings.CutPrefix(arg, "--invocation_id="); ok {
-			invocationId = after
-		}
+	if id := rootFlags.FindInvocationId(args); id != "" {
+		return id
 	}
-	// Default to random UUID if not provided on the CLI
-	if invocationId == "" {
-		invocationId = uuid.NewString()
-	}
-	return invocationId
+	return uuid.NewString()
 }
 
 func removeLastBesBackend(args []string) ([]string, string) {

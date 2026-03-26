@@ -355,6 +355,7 @@ func (bb *besPipe) Args() []string {
 	args := []string{
 		"--build_event_binary_file",
 		bb.bepBinPath,
+		"--invocation_id=" + bb.besInvocationId,
 	}
 
 	// Also add wait_for_upload_complete flag if the bes pipe was explicitly requested.
