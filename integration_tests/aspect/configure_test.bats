@@ -42,7 +42,7 @@ configure:
     javascript: true
 EOF
     run aspect configure
-    [ "$status" -eq 110 ]
+    [ "$status" -eq 0 ]
     # TODO: interactive in CI
     # assert_output --partial "Updating BUILD files for"
     # assert_output --partial "1 BUILD file updated"
@@ -84,7 +84,7 @@ configure:
     go: true
 EOF
     run aspect configure
-    [ "$status" -eq 110 ]
+    [ "$status" -eq 0 ]
     # TODO: interactive in CI
     # assert_output --partial "Updating BUILD files for"
     # assert_output --partial "1 BUILD file updated"
@@ -99,7 +99,7 @@ configure:
     protobuf: true
 EOF
     run aspect configure
-    [ "$status" -eq 110 ]
+    [ "$status" -eq 0 ]
     # TODO: interactive in CI
     # assert_output --partial "Updating BUILD files for"
     # assert_output --partial "1 BUILD file updated"
