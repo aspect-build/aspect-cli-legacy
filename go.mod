@@ -4,12 +4,12 @@ go 1.26.1
 
 require (
 	github.com/alphadose/haxmap v1.4.1
-	github.com/aspect-build/aspect-gazelle/common v0.0.0-20260318205919-2c0124a75ed2
-	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20260318205919-2c0124a75ed2
-	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20260318205919-2c0124a75ed2
-	github.com/bazelbuild/bazel-gazelle v0.47.0
+	github.com/aspect-build/aspect-gazelle/common v0.0.0-20260410200821-7355aac035d1
+	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20260410200821-7355aac035d1
+	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20260410200821-7355aac035d1
+	github.com/bazelbuild/bazel-gazelle v0.50.0
 	github.com/bazelbuild/bazelisk v1.27.0 // NOTE: keep vendored code in sync
-	github.com/bazelbuild/buildtools v0.0.0-20260211083412-859bfffeef82
+	github.com/bazelbuild/buildtools v0.0.0-20260319080235-05d2ebe49b0f
 	github.com/bluekeyes/go-gitdiff v0.8.1
 	github.com/charmbracelet/huh v0.8.0
 	github.com/creack/pty v1.1.24
@@ -62,13 +62,13 @@ require (
 	github.com/alecthomas/chroma/v2 v2.23.1 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20260318205919-2c0124a75ed2 // indirect
-	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20260318205919-2c0124a75ed2 // indirect
+	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20260410200821-7355aac035d1 // indirect
+	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20260410200821-7355aac035d1 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/bazel-contrib/rules_jvm v0.32.0 // indirect
-	github.com/bazel-contrib/rules_python/gazelle v0.0.0-20260128021939-0057883aa25f // indirect
+	github.com/bazel-contrib/rules_python/gazelle v0.0.0-20260223163720-bac549496f67 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/bmatcuk/doublestar/v4 v4.10.0 // indirect
 	github.com/bufbuild/rules_buf v0.5.2 // indirect
@@ -104,7 +104,7 @@ require (
 	github.com/gertd/go-pluralize v0.2.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.8.0 // indirect
-	github.com/go-git/go-git/v5 v5.17.0 // indirect
+	github.com/go-git/go-git/v5 v5.17.1 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect

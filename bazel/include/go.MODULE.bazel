@@ -10,7 +10,7 @@ go_sdk.nogo(nogo = "//:nogo")
 use_repo(go_sdk, "go_sdk")
 
 # Gazelle to load go modules and generate BUILD files
-bazel_dep(name = "gazelle", version = "0.47.0", repo_name = "bazel_gazelle")
+bazel_dep(name = "gazelle", version = "0.50.0", repo_name = "bazel_gazelle")
 single_version_override(
     module_name = "gazelle",
     patch_strip = 1,
@@ -25,42 +25,42 @@ single_version_override(
 bazel_dep(name = "aspect_gazelle", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle",
-    integrity = "sha256-TOriQ41/y5AM4OpGSJKqO/XGBefrW3WbFpg92Y+ZdrY=",
-    strip_prefix = "aspect-gazelle-2c0124a75ed21883fd497e305fe6e071408c986b",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/2c0124a75ed21883fd497e305fe6e071408c986b.tar.gz"],
+    integrity = "sha256-ozsBetSpkhSrxXOdenY1Vgb5U6O+huoK/38rdMTOGxU=",
+    strip_prefix = "aspect-gazelle-7355aac035d155f3b4d29cb67b4f761085b36b2f",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/7355aac035d155f3b4d29cb67b4f761085b36b2f.tar.gz"],
 )
 
 bazel_dep(name = "aspect_gazelle_js", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle_js",
-    integrity = "sha256-TOriQ41/y5AM4OpGSJKqO/XGBefrW3WbFpg92Y+ZdrY=",
-    strip_prefix = "aspect-gazelle-2c0124a75ed21883fd497e305fe6e071408c986b/language/js",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/2c0124a75ed21883fd497e305fe6e071408c986b.tar.gz"],
+    integrity = "sha256-ozsBetSpkhSrxXOdenY1Vgb5U6O+huoK/38rdMTOGxU=",
+    strip_prefix = "aspect-gazelle-7355aac035d155f3b4d29cb67b4f761085b36b2f/language/js",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/7355aac035d155f3b4d29cb67b4f761085b36b2f.tar.gz"],
 )
 
 bazel_dep(name = "aspect_gazelle_orion", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle_orion",
-    integrity = "sha256-TOriQ41/y5AM4OpGSJKqO/XGBefrW3WbFpg92Y+ZdrY=",
-    strip_prefix = "aspect-gazelle-2c0124a75ed21883fd497e305fe6e071408c986b/language/orion",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/2c0124a75ed21883fd497e305fe6e071408c986b.tar.gz"],
+    integrity = "sha256-ozsBetSpkhSrxXOdenY1Vgb5U6O+huoK/38rdMTOGxU=",
+    strip_prefix = "aspect-gazelle-7355aac035d155f3b4d29cb67b4f761085b36b2f/language/orion",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/7355aac035d155f3b4d29cb67b4f761085b36b2f.tar.gz"],
 )
 
 bazel_dep(name = "aspect_gazelle_runner", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle_runner",
-    integrity = "sha256-TOriQ41/y5AM4OpGSJKqO/XGBefrW3WbFpg92Y+ZdrY=",
-    strip_prefix = "aspect-gazelle-2c0124a75ed21883fd497e305fe6e071408c986b/runner",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/2c0124a75ed21883fd497e305fe6e071408c986b.tar.gz"],
+    integrity = "sha256-ozsBetSpkhSrxXOdenY1Vgb5U6O+huoK/38rdMTOGxU=",
+    strip_prefix = "aspect-gazelle-7355aac035d155f3b4d29cb67b4f761085b36b2f/runner",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/7355aac035d155f3b4d29cb67b4f761085b36b2f.tar.gz"],
 )
 
 # Not direclty used but must be declared+overriden until aspect_gazelle_runner points to one published to BCR.
 bazel_dep(name = "aspect_gazelle_kotlin", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle_kotlin",
-    integrity = "sha256-TOriQ41/y5AM4OpGSJKqO/XGBefrW3WbFpg92Y+ZdrY=",
-    strip_prefix = "aspect-gazelle-2c0124a75ed21883fd497e305fe6e071408c986b/language/kotlin",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/2c0124a75ed21883fd497e305fe6e071408c986b.tar.gz"],
+    integrity = "sha256-ozsBetSpkhSrxXOdenY1Vgb5U6O+huoK/38rdMTOGxU=",
+    strip_prefix = "aspect-gazelle-7355aac035d155f3b4d29cb67b4f761085b36b2f/language/kotlin",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/7355aac035d155f3b4d29cb67b4f761085b36b2f.tar.gz"],
 )
 
 # Go modules
@@ -80,6 +80,16 @@ go_deps.module_override(
     patch_strip = 1,
     patches = ["//patches:bazelisk-two_segment_forks.patch"],
     path = "github.com/bazelbuild/bazelisk",
+)
+go_deps.module_override(
+    patch_strip = 1,
+    patches = ["//patches:buildtools-build_proto.patch"],
+    path = "github.com/bazelbuild/buildtools",
+)
+go_deps.gazelle_override(
+    build_file_generation = "clean",
+    directives = ["gazelle:proto disable_global"],
+    path = "github.com/bazelbuild/buildtools",
 )
 go_deps.gazelle_override(
     build_file_generation = "clean",
