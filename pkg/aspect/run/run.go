@@ -155,7 +155,7 @@ func (runner *Run) runBazelCommand(ctx context.Context, bazelCmd []string, bzlCo
 
 func (runner *Run) runCmd(c context.Context, initCmd *exec.Cmd, spanName string, invocationId string) error {
 	_, runTrace := runner.tracer.Start(c, spanName, trace.WithAttributes(
-		append(telemetry.BazelCmdAttrs(initCmd.Args), telemetry.BazelInvocationId(invocationId))...,
+		append(telemetry.BazelCmdAttrs(initCmd.Args[1:]), telemetry.BazelInvocationId(invocationId))...,
 	))
 
 	err := initCmd.Run()
