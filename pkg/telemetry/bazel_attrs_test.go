@@ -62,6 +62,26 @@ func TestBazelTargets(t *testing.T) {
 			want: []string{"//foo:bin"},
 		},
 		{
+			name: "run with boolean flag before bare target",
+			args: []string{"run", "--keep_going", "target"},
+			want: []string{"target"},
+		},
+		{
+			name: "run with multiple boolean flags before bare target",
+			args: []string{"run", "--keep_going", "--verbose_failures", "target"},
+			want: []string{"target"},
+		},
+		{
+			name: "run with space-separated flag value before bare target",
+			args: []string{"run", "--invocation_id", "abc-123", "target"},
+			want: []string{"target"},
+		},
+		{
+			name: "run with value flag then boolean flag before bare target",
+			args: []string{"run", "--invocation_id", "abc-123", "--keep_going", "target"},
+			want: []string{"target"},
+		},
+		{
 			name: "only -- separator",
 			args: []string{"run", "--", "//foo:bar"},
 			want: nil,
@@ -69,6 +89,11 @@ func TestBazelTargets(t *testing.T) {
 		{
 			name: "command only",
 			args: []string{"build"},
+			want: nil,
+		},
+		{
+			name: "build with only space-separated flag value",
+			args: []string{"build", "--flag", "value"},
 			want: nil,
 		},
 		{
