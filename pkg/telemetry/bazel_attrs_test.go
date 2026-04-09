@@ -43,7 +43,12 @@ func TestBazelTargets(t *testing.T) {
 		},
 		{
 			name: "args after -- are excluded",
-			args: []string{"run", "//foo:bar", "--", "ignore", "--these", "//and:these"},
+			args: []string{"build", "//foo:bar", "--", "ignore", "--these", "//and:these"},
+			want: []string{"//foo:bar"},
+		},
+		{
+			name: "args after run //target are excluded",
+			args: []string{"run", "//foo:bar", "ignore", "--these", "//and:these"},
 			want: []string{"//foo:bar"},
 		},
 		{
@@ -78,8 +83,8 @@ func TestBazelTargets(t *testing.T) {
 		},
 		{
 			name: "build command with multiple targets and flags",
-			args: []string{"build", "--config=opt", "//foo:bar", "//baz/..."},
-			want: []string{"//foo:bar", "//baz/..."},
+			args: []string{"build", "--config=opt", "//foo:bar", "//baz/...", ":boo"},
+			want: []string{"//foo:bar", "//baz/...", ":boo"},
 		},
 		{
 			name: "relative label with colon",
