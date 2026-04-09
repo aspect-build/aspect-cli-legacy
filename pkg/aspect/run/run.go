@@ -207,9 +207,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		cancel()
 	}()
 
-	watchCtx, t := runner.tracer.Start(pctx, "Run.Watch", trace.WithAttributes(
-		telemetry.BazelCmdAttrs(bazelCmd)...,
-	))
+	watchCtx, t := runner.tracer.Start(pctx, "Run.Watch")
 	defer t.End()
 
 	// Start the workspace watcher.
