@@ -55,7 +55,8 @@ aspect configure [flags]
       --progress          Show progress throughout 'configure' invocation
       --r                 Recursively update BUILD files in subdirectories (default true)
       --watch             Use the EXPERIMENTAL watch mode to watch for changes in the workspace and automatically 'configure' when files change
-      --watchman          Use the EXPERIMENTAL watchman daemon to watch for changes across 'configure' invocations
+      --watchman          Use the EXPERIMENTAL watchman daemon to watch for changes across 'configure' invocations.
+                          	Overrides configure.watchman config (true|false|auto)
 ```
 
 ### Options inherited from parent commands

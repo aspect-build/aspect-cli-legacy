@@ -23,6 +23,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/exec"
 	"path"
 	"slices"
 	"strconv"
@@ -102,13 +103,14 @@ Run 'aspect help directives' or see https://github.com/aspect-build/aspect-cli-l
 	viper.SetDefault("configure.index", "all")
 	viper.SetDefault("configure.recurse", true)
 	viper.SetDefault("configure.progress", false)
+	viper.SetDefault("configure.watchman", "auto")
 
 	// TODO: restrict to only valid values (see https://github.com/spf13/pflag/issues/236)
 	cmd.Flags().String("mode", "fix", "Method for emitting merged BUILD files.\n\tfix: write generated and merged files to disk\n\tprint: print files to stdout\n\tdiff: print a unified diff")
 	cmd.Flags().String("index", viper.GetString("configure.index"), "Type of index to build before running.\n\tall: build a full index of the workspace\n\tnone: do not build an index\n\tlazy: builds index entries on demand")
 	cmd.Flags().Bool("r", viper.GetBool("configure.recurse"), "Recursively update BUILD files in subdirectories")
 	cmd.Flags().StringSlice("exclude", []string{}, "Files to exclude from BUILD generation")
-	cmd.Flags().Bool("watchman", false, "Use the EXPERIMENTAL watchman daemon to watch for changes across 'configure' invocations")
+	cmd.Flags().Bool("watchman", false, "Use the EXPERIMENTAL watchman daemon to watch for changes across 'configure' invocations.\n\tOverrides configure.watchman config (true|false|auto)")
 	cmd.Flags().Bool("watch", false, "Use the EXPERIMENTAL watch mode to watch for changes in the workspace and automatically 'configure' when files change")
 	cmd.Flags().Bool("progress", viper.GetBool("configure.progress"), "Show progress throughout 'configure' invocation")
 
@@ -126,6 +128,25 @@ func run(ctx context.Context, flags *pflag.FlagSet, args []string) error {
 	watch, _ := flags.GetBool("watch")
 	useWatchman, _ := flags.GetBool("watchman")
 	progress, _ := flags.GetBool("progress")
+
+	// If --watchman was not explicitly set, determine the effective value from the
+	// configure.watchman config option (true|false|auto). In auto mode (the default),
+	// watchman caching is enabled when a .watchmanconfig file is present at the workspace root.
+	if !flags.Changed("watchman") {
+		switch viper.GetString("configure.watchman") {
+		case "true":
+			useWatchman = true
+		case "false":
+			useWatchman = false
+		default: // "auto"
+			workspaceRoot := bazel.WorkspaceFromWd.WorkspaceRoot()
+			_, watchmanOnPath := exec.LookPath("watchman")
+			if workspaceRoot != "" && watchmanOnPath == nil {
+				_, err := os.Stat(path.Join(workspaceRoot, ".watchmanconfig"))
+				useWatchman = err == nil
+			}
+		}
+	}
 
 	// Use watchman caching if either watchman or watch mode is enabled
 	if watch || useWatchman {
