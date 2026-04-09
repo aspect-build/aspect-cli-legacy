@@ -153,12 +153,16 @@ func (runner *Run) runBazelCommand(ctx context.Context, bazelCmd []string, bzlCo
 	return err
 }
 
-func (runner *Run) runCmd(c context.Context, initCmd *exec.Cmd, spanName string, invocationId string) error {
+func (runner *Run) runCmd(c context.Context, cmd *exec.Cmd, spanName string) error {
+	var invocationId string
+
+	cmd.Args, invocationId = ensureInvocationId(cmd.Args)
+
 	_, runTrace := runner.tracer.Start(c, spanName, trace.WithAttributes(
-		append(telemetry.BazelCmdAttrs(initCmd.Args[1:]), telemetry.BazelInvocationId(invocationId))...,
+		append(telemetry.BazelCmdAttrs(cmd.Args[1:]), telemetry.BazelInvocationId(invocationId))...,
 	))
 
-	err := initCmd.Run()
+	err := cmd.Run()
 	if err != nil {
 		runTrace.SetStatus(codes.Error, err.Error())
 	}
@@ -249,7 +253,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 
 	fmt.Printf("%s Listening on watch socket %s\n", color.GreenString("INFO:"), abazel.Address())
 
-	createBazelScriptCmd := func(allowDiscard, trackChanges bool) (*exec.Cmd, string, error) {
+	createBazelScriptCmd := func(allowDiscard, trackChanges bool) (*exec.Cmd, error) {
 		// Additional arguments for the bazel run command
 		runCmdArgs := []string{}
 
@@ -264,9 +268,9 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			runCmdArgs = append(runCmdArgs, "--noallow_analysis_cache_discard")
 		}
 
-		allArgs, invocationId := ensureInvocationId(flags.AddFlagToCommand(bazelCmd, runCmdArgs...))
+		allArgs := flags.AddFlagToCommand(bazelCmd, runCmdArgs...)
 		cmd, err := runner.bzl.MakeBazelCommand(watchCtx, allArgs, bzlCommandStreams, nil, nil)
-		return cmd, invocationId, err
+		return cmd, err
 	}
 
 	createRunCmd := func() *exec.Cmd {
@@ -288,13 +292,8 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 	}
 
 	// Create and start the intial bazel command to build+inspect the run target
-	initCmd, initInvocationId, err := createBazelScriptCmd(true, false)
-	if err != nil {
-		return fmt.Errorf("failed to create initial bazel command: %w", err)
-	}
-
 	startCmd, incrementalProtocol, initErr := func() (_ *exec.Cmd, _ ibp.IncrementalBazel, retErr error) {
-		initCtx, initTrace := runner.tracer.Start(watchCtx, "Run.Init", trace.WithAttributes())
+		initCtx, initTrace := runner.tracer.Start(watchCtx, "Run.Init")
 		defer func() {
 			if retErr != nil {
 				initTrace.SetStatus(codes.Error, retErr.Error())
@@ -302,9 +301,14 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			initTrace.End()
 		}()
 
+		initCmd, err := createBazelScriptCmd(true, false)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to create initial bazel command: %w", err)
+		}
+
 		logger.Infof("initial --watch build: %v", initCmd.Args)
 
-		if err := runner.runCmd(initCtx, initCmd, "Run.Subscribe.Build", initInvocationId); err != nil {
+		if err := runner.runCmd(initCtx, initCmd, "Run.Subscribe.Build"); err != nil {
 			return nil, nil, fmt.Errorf("initial bazel command failed: %w", err)
 		}
 
@@ -480,7 +484,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			logger.Debugf("watchman detected changes: %v", cs.Paths)
 
 			// The command to detect changes in the run target.
-			detectCmd, detectInvocationId, err := createBazelScriptCmd(false, true)
+			detectCmd, err := createBazelScriptCmd(false, true)
 			if err != nil {
 				return fmt.Errorf("failed to create bazel detect command: %w", err)
 			}
@@ -494,7 +498,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			// TODO: delay the command stdout and do not output on quick noops
 			logger.Infof("incremental --watch build: %v", detectCmd.Args)
 
-			incBuildErr := runner.runCmd(tctx, detectCmd, "Run.Subscribe.Build", detectInvocationId)
+			incBuildErr := runner.runCmd(tctx, detectCmd, "Run.Subscribe.Build")
 
 			dtErr := changedetect.detectChanges(cs.Paths)
 			if dtErr != nil {
