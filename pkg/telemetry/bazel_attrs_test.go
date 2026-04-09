@@ -52,6 +52,16 @@ func TestBazelTargets(t *testing.T) {
 			want: []string{"//foo:bar"},
 		},
 		{
+			name: "run with space-separated flag value before target",
+			args: []string{"run", "--invocation_id", "abc-123", "//pkg:bin"},
+			want: []string{"//pkg:bin"},
+		},
+		{
+			name: "run with boolean flag before //target",
+			args: []string{"run", "--keep_going", "//foo:bin"},
+			want: []string{"//foo:bin"},
+		},
+		{
 			name: "only -- separator",
 			args: []string{"run", "--", "//foo:bar"},
 			want: nil,

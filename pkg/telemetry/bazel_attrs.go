@@ -55,23 +55,40 @@ func BazelCmdAttrs(cmd []string) []attribute.KeyValue {
 	return attrs
 }
 
+// looksLikeBazelLabel reports whether s looks like a Bazel target label
+// (absolute, repo-relative, or external), as opposed to a bare flag value.
+func looksLikeBazelLabel(s string) bool {
+	return strings.HasPrefix(s, "//") || strings.HasPrefix(s, "@") || strings.HasPrefix(s, ":")
+}
+
 // bazelTargets returns the target patterns from a bazel command slice.
 // cmd[0] is the subcommand and is skipped. Arguments starting with "-" are treated as flags
 // and skipped. A bare "--" ends target parsing; everything after it is passed to the binary
 // being run.
+//
+// For space-separated flags ("--flag value" form), the value is skipped: a non-flag arg
+// that follows a "--flag" (no "=") and does not look like a Bazel label is treated as the
+// flag's value rather than a target.
 func bazelTargets(cmd []string) []string {
 	var targets []string
-	for _, arg := range cmd[1:] {
+	args := cmd[1:]
+	for i, arg := range args {
 		if arg == "--" {
 			break
 		}
-		if !strings.HasPrefix(arg, "-") {
-			targets = append(targets, arg)
-
-			if cmd[0] == "run" {
-				// For "bazel run", only the first non-flag argument is a target; the rest are passed to the binary.
-				break
-			}
+		if strings.HasPrefix(arg, "-") {
+			continue
+		}
+		// Skip values of space-separated flags ("--flag value" form): if the previous arg
+		// started with "--" and had no "=", and this arg doesn't look like a label, treat
+		// it as the flag's value.
+		if i > 0 && strings.HasPrefix(args[i-1], "--") && !strings.Contains(args[i-1], "=") && !looksLikeBazelLabel(arg) {
+			continue
+		}
+		targets = append(targets, arg)
+		if cmd[0] == "run" {
+			// For "bazel run", only the first non-flag argument is a target; the rest are passed to the binary.
+			break
 		}
 	}
 	return targets
