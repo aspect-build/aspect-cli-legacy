@@ -46,11 +46,12 @@ teardown() {
     grep -A 15 '"bazel\.args"' "${TEST_TMPDIR}/otel.json" | grep -q '"//please:pkg"'
 }
 
-@test 'bazel.targets includes targets and excludes flags' {
-    run aspect run --keep_going //test:target -- //not:these
+@test 'bazel.targets includes targets and excludes args+flags' {
+    run aspect run --keep_going //test:target foobar --keep_going foobar -- //not:these
     assert_success
     run grep -o '"bazel\.targets","Value":{"Type":"STRINGSLICE","Value":\[[^]]*\]' "${TEST_TMPDIR}/otel.json"
     assert_output --partial '"//test:target"'
     refute_output --partial '"--keep_going"'
+    refute_output --partial '"foobar"'
     refute_output --partial '"//not:these"'
 }

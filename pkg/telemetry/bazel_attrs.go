@@ -67,6 +67,11 @@ func bazelTargets(cmd []string) []string {
 		}
 		if !strings.HasPrefix(arg, "-") {
 			targets = append(targets, arg)
+
+			if cmd[0] == "run" {
+				// For "bazel run", only the first non-flag argument is a target; the rest are passed to the binary.
+				break
+			}
 		}
 	}
 	return targets
