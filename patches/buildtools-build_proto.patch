@@ -1,0 +1,8 @@
+diff --git a/buildifier/internal/BUILD b/buildifier/internal/BUILD
+new file mode 100644
+--- /dev/null
++++ b/buildifier/internal/BUILD
+@@ -0,0 +1,3 @@
++# This file is recreated by a patch because build_file_generation = "clean" deletes it.
++# It must exist so that buildifier/buildifier.bzl can load //buildifier/internal:factory.bzl.
++
