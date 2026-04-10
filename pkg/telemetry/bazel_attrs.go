@@ -68,9 +68,10 @@ func looksLikeBazelLabel(s string) bool {
 //
 // For space-separated flags ("--flag value" form), the value is skipped: a non-flag arg
 // that follows a "--flag" (no "=") and does not look like a Bazel label is treated as the
-// flag's value rather than a target.
+// flag's value rather than a target. If no targets are found (e.g. a boolean flag preceded
+// a bare target), the skipped args are returned as a fallback.
 func bazelTargets(cmd []string) []string {
-	var targets []string
+	var targets, skipped []string
 	args := cmd[1:]
 	for i, arg := range args {
 		if arg == "--" {
@@ -83,6 +84,7 @@ func bazelTargets(cmd []string) []string {
 		// started with "--" and had no "=", and this arg doesn't look like a label, treat
 		// it as the flag's value.
 		if i > 0 && strings.HasPrefix(args[i-1], "--") && !strings.Contains(args[i-1], "=") && !looksLikeBazelLabel(arg) {
+			skipped = append(skipped, arg)
 			continue
 		}
 		targets = append(targets, arg)
@@ -91,5 +93,11 @@ func bazelTargets(cmd []string) []string {
 			break
 		}
 	}
-	return targets
+	if len(targets) > 0 {
+		return targets
+	}
+	if cmd[0] == "run" && len(skipped) > 0 {
+		return skipped[len(skipped)-1:]
+	}
+	return nil
 }
