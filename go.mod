@@ -4,16 +4,16 @@ go 1.26.1
 
 require (
 	github.com/alphadose/haxmap v1.4.1
-	github.com/aspect-build/aspect-gazelle/common v0.0.0-20260410200821-7355aac035d1
-	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20260410200821-7355aac035d1
-	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20260410200821-7355aac035d1
+	github.com/aspect-build/aspect-gazelle/common v0.0.0-20260414174220-3d51106eaf6d
+	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20260414174220-3d51106eaf6d
+	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20260414174220-3d51106eaf6d
 	github.com/bazelbuild/bazel-gazelle v0.50.0
 	github.com/bazelbuild/bazelisk v1.27.0 // NOTE: keep vendored code in sync
 	github.com/bazelbuild/buildtools v0.0.0-20260319080235-05d2ebe49b0f
 	github.com/bluekeyes/go-gitdiff v0.8.1
 	github.com/charmbracelet/huh v0.8.0
 	github.com/creack/pty v1.1.24
-	github.com/fatih/color v1.18.0
+	github.com/fatih/color v1.19.0
 	github.com/golang/mock v1.7.0-rc.1
 	github.com/golang/protobuf v1.5.4
 	github.com/hashicorp/go-hclog v1.6.3
@@ -27,7 +27,7 @@ require (
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/reviewdog/errorformat v0.0.0-20250320004447-223c26dbe212
 	github.com/reviewdog/reviewdog v0.17.4
-	github.com/rs/zerolog v1.34.0
+	github.com/rs/zerolog v1.35.0
 	github.com/sourcegraph/go-diff v0.7.0
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
@@ -39,10 +39,10 @@ require (
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.42.0
 	go.opentelemetry.io/otel/sdk v1.42.0
 	go.opentelemetry.io/otel/trace v1.42.0
-	golang.org/x/mod v0.34.0
+	golang.org/x/mod v0.35.0
 	golang.org/x/sync v0.20.0
-	golang.org/x/term v0.41.0
-	golang.org/x/tools v0.43.0
+	golang.org/x/term v0.42.0
+	golang.org/x/tools v0.44.0
 	google.golang.org/genproto v0.0.0-20251029180050-ab9386a59fda
 	google.golang.org/genproto/googleapis/api v0.0.0-20260209200024-4cfbd4190f57
 	google.golang.org/grpc v1.79.2
@@ -62,8 +62,8 @@ require (
 	github.com/alecthomas/chroma/v2 v2.23.1 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20260410200821-7355aac035d1 // indirect
-	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20260410200821-7355aac035d1 // indirect
+	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20260414174220-3d51106eaf6d // indirect
+	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20260414174220-3d51106eaf6d // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
@@ -104,7 +104,7 @@ require (
 	github.com/gertd/go-pluralize v0.2.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.8.0 // indirect
-	github.com/go-git/go-git/v5 v5.17.1 // indirect
+	github.com/go-git/go-git/v5 v5.17.2 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -127,8 +127,8 @@ require (
 	github.com/haya14busa/go-sarif v0.0.0-20240630170108-a3ba8d79599f // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/itchyny/gojq v0.12.18 // indirect
-	github.com/itchyny/timefmt-go v0.1.7 // indirect
+	github.com/itchyny/gojq v0.12.19 // indirect
+	github.com/itchyny/timefmt-go v0.1.8 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
 	github.com/kevinburke/ssh_config v1.4.0 // indirect
@@ -139,7 +139,7 @@ require (
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect
-	github.com/mikefarah/yq/v4 v4.52.4 // indirect
+	github.com/mikefarah/yq/v4 v4.52.5 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
@@ -150,7 +150,7 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/oklog/run v1.1.0 // indirect
-	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
+	github.com/pelletier/go-toml/v2 v2.3.0 // indirect
 	github.com/pjbgf/sha1cd v0.5.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/psanford/memfs v0.0.0-20241019191636-4ef911798f9b // indirect
@@ -175,14 +175,14 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.42.0 // indirect
 	go.opentelemetry.io/otel/metric v1.42.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.9.0 // indirect
-	go.starlark.net v0.0.0-20260210143700-b62fd896b91b // indirect
+	go.starlark.net v0.0.0-20260326113308-fadfc96def35 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.4 // indirect
-	golang.org/x/crypto v0.49.0 // indirect
+	golang.org/x/crypto v0.50.0 // indirect
 	golang.org/x/exp v0.0.0-20260112195511-716be5621a96 // indirect
-	golang.org/x/net v0.52.0 // indirect
-	golang.org/x/sys v0.42.0 // indirect
-	golang.org/x/text v0.35.0 // indirect
+	golang.org/x/net v0.53.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/text v0.36.0 // indirect
 	golang.org/x/tools/go/vcs v0.1.0-deprecated // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260209200024-4cfbd4190f57 // indirect
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
