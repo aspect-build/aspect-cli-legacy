@@ -17,50 +17,49 @@ single_version_override(
     patches = [
         "//patches:gazelle-branded.patch",
         "//patches:gazelle-gitignore.patch",
-        # Disabled due to https://github.com/aspect-build/aspect-gazelle/issues/140
-        # "//patches:gazelle-watchman.patch",
+        "//patches:gazelle-watchman.patch",
     ],
 )
 
 bazel_dep(name = "aspect_gazelle", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle",
-    integrity = "sha256-mXcmJ8hTVigu6eVl3t63NDQF4iAd8LvKAPgYCLkaI/4=",
-    strip_prefix = "aspect-gazelle-76f60981db5995b7e67dc5e40968a2bec7e9b2f7",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/76f60981db5995b7e67dc5e40968a2bec7e9b2f7.tar.gz"],
+    integrity = "sha256-YVikG1kdNfSlonCZr1lM8zBr2eQwpo5rVBpfCiCL+og=",
+    strip_prefix = "aspect-gazelle-baf8a9e207bf105a6735219bacbb14d718eb2a14",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/baf8a9e207bf105a6735219bacbb14d718eb2a14.tar.gz"],
 )
 
 bazel_dep(name = "aspect_gazelle_js", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle_js",
-    integrity = "sha256-mXcmJ8hTVigu6eVl3t63NDQF4iAd8LvKAPgYCLkaI/4=",
-    strip_prefix = "aspect-gazelle-76f60981db5995b7e67dc5e40968a2bec7e9b2f7/language/js",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/76f60981db5995b7e67dc5e40968a2bec7e9b2f7.tar.gz"],
+    integrity = "sha256-YVikG1kdNfSlonCZr1lM8zBr2eQwpo5rVBpfCiCL+og=",
+    strip_prefix = "aspect-gazelle-baf8a9e207bf105a6735219bacbb14d718eb2a14/language/js",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/baf8a9e207bf105a6735219bacbb14d718eb2a14.tar.gz"],
 )
 
 bazel_dep(name = "aspect_gazelle_orion", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle_orion",
-    integrity = "sha256-mXcmJ8hTVigu6eVl3t63NDQF4iAd8LvKAPgYCLkaI/4=",
-    strip_prefix = "aspect-gazelle-76f60981db5995b7e67dc5e40968a2bec7e9b2f7/language/orion",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/76f60981db5995b7e67dc5e40968a2bec7e9b2f7.tar.gz"],
+    integrity = "sha256-YVikG1kdNfSlonCZr1lM8zBr2eQwpo5rVBpfCiCL+og=",
+    strip_prefix = "aspect-gazelle-baf8a9e207bf105a6735219bacbb14d718eb2a14/language/orion",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/baf8a9e207bf105a6735219bacbb14d718eb2a14.tar.gz"],
 )
 
 bazel_dep(name = "aspect_gazelle_runner", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle_runner",
-    integrity = "sha256-mXcmJ8hTVigu6eVl3t63NDQF4iAd8LvKAPgYCLkaI/4=",
-    strip_prefix = "aspect-gazelle-76f60981db5995b7e67dc5e40968a2bec7e9b2f7/runner",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/76f60981db5995b7e67dc5e40968a2bec7e9b2f7.tar.gz"],
+    integrity = "sha256-YVikG1kdNfSlonCZr1lM8zBr2eQwpo5rVBpfCiCL+og=",
+    strip_prefix = "aspect-gazelle-baf8a9e207bf105a6735219bacbb14d718eb2a14/runner",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/baf8a9e207bf105a6735219bacbb14d718eb2a14.tar.gz"],
 )
 
 # Not direclty used but must be declared+overriden until aspect_gazelle_runner points to one published to BCR.
 bazel_dep(name = "aspect_gazelle_kotlin", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle_kotlin",
-    integrity = "sha256-mXcmJ8hTVigu6eVl3t63NDQF4iAd8LvKAPgYCLkaI/4=",
-    strip_prefix = "aspect-gazelle-76f60981db5995b7e67dc5e40968a2bec7e9b2f7/language/kotlin",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/76f60981db5995b7e67dc5e40968a2bec7e9b2f7.tar.gz"],
+    integrity = "sha256-YVikG1kdNfSlonCZr1lM8zBr2eQwpo5rVBpfCiCL+og=",
+    strip_prefix = "aspect-gazelle-baf8a9e207bf105a6735219bacbb14d718eb2a14/language/kotlin",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/baf8a9e207bf105a6735219bacbb14d718eb2a14.tar.gz"],
 )
 
 # Go modules
@@ -71,8 +70,7 @@ go_deps.module_override(
     patches = [
         "//patches:gazelle-branded.patch",
         "//patches:gazelle-gitignore.patch",
-        # Disabled due to https://github.com/aspect-build/aspect-gazelle/issues/140
-        # "//patches:gazelle-watchman.patch",
+        "//patches:gazelle-watchman.patch",
     ],
     path = "github.com/bazelbuild/bazel-gazelle",
 )
