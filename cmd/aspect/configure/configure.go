@@ -328,6 +328,9 @@ func runConfigureWatch(ctx context.Context, v *runner.GazelleRunner, mode string
 
 // Convert a watch.ChangeSet to ibp.SourceInfoMap
 func changesetToCycle(cs *watchman.ChangeSet) ibp.SourceInfoMap {
+	if cs.IsFreshInstance {
+		return nil
+	}
 	b := true
 	si := &ibp.SourceInfo{IsSource: &b}
 	changes := make(ibp.SourceInfoMap, len(cs.Paths))

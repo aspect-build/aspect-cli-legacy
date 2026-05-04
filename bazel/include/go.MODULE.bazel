@@ -24,42 +24,42 @@ single_version_override(
 bazel_dep(name = "aspect_gazelle", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle",
-    integrity = "sha256-YVikG1kdNfSlonCZr1lM8zBr2eQwpo5rVBpfCiCL+og=",
-    strip_prefix = "aspect-gazelle-baf8a9e207bf105a6735219bacbb14d718eb2a14",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/baf8a9e207bf105a6735219bacbb14d718eb2a14.tar.gz"],
+    integrity = "sha256-XZUwwAH0/gyoW90PDDiZUxZaSuQcBQuvEe7PBaL0Eoc=",
+    strip_prefix = "aspect-gazelle-9c84884007d508c04a4b327cbf9c586a0c9d966c",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/9c84884007d508c04a4b327cbf9c586a0c9d966c.tar.gz"],
 )
 
 bazel_dep(name = "aspect_gazelle_js", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle_js",
-    integrity = "sha256-YVikG1kdNfSlonCZr1lM8zBr2eQwpo5rVBpfCiCL+og=",
-    strip_prefix = "aspect-gazelle-baf8a9e207bf105a6735219bacbb14d718eb2a14/language/js",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/baf8a9e207bf105a6735219bacbb14d718eb2a14.tar.gz"],
+    integrity = "sha256-XZUwwAH0/gyoW90PDDiZUxZaSuQcBQuvEe7PBaL0Eoc=",
+    strip_prefix = "aspect-gazelle-9c84884007d508c04a4b327cbf9c586a0c9d966c/language/js",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/9c84884007d508c04a4b327cbf9c586a0c9d966c.tar.gz"],
 )
 
 bazel_dep(name = "aspect_gazelle_orion", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle_orion",
-    integrity = "sha256-YVikG1kdNfSlonCZr1lM8zBr2eQwpo5rVBpfCiCL+og=",
-    strip_prefix = "aspect-gazelle-baf8a9e207bf105a6735219bacbb14d718eb2a14/language/orion",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/baf8a9e207bf105a6735219bacbb14d718eb2a14.tar.gz"],
+    integrity = "sha256-XZUwwAH0/gyoW90PDDiZUxZaSuQcBQuvEe7PBaL0Eoc=",
+    strip_prefix = "aspect-gazelle-9c84884007d508c04a4b327cbf9c586a0c9d966c/language/orion",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/9c84884007d508c04a4b327cbf9c586a0c9d966c.tar.gz"],
 )
 
 bazel_dep(name = "aspect_gazelle_runner", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle_runner",
-    integrity = "sha256-YVikG1kdNfSlonCZr1lM8zBr2eQwpo5rVBpfCiCL+og=",
-    strip_prefix = "aspect-gazelle-baf8a9e207bf105a6735219bacbb14d718eb2a14/runner",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/baf8a9e207bf105a6735219bacbb14d718eb2a14.tar.gz"],
+    integrity = "sha256-XZUwwAH0/gyoW90PDDiZUxZaSuQcBQuvEe7PBaL0Eoc=",
+    strip_prefix = "aspect-gazelle-9c84884007d508c04a4b327cbf9c586a0c9d966c/runner",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/9c84884007d508c04a4b327cbf9c586a0c9d966c.tar.gz"],
 )
 
 # Not direclty used but must be declared+overriden until aspect_gazelle_runner points to one published to BCR.
 bazel_dep(name = "aspect_gazelle_kotlin", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle_kotlin",
-    integrity = "sha256-YVikG1kdNfSlonCZr1lM8zBr2eQwpo5rVBpfCiCL+og=",
-    strip_prefix = "aspect-gazelle-baf8a9e207bf105a6735219bacbb14d718eb2a14/language/kotlin",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/baf8a9e207bf105a6735219bacbb14d718eb2a14.tar.gz"],
+    integrity = "sha256-XZUwwAH0/gyoW90PDDiZUxZaSuQcBQuvEe7PBaL0Eoc=",
+    strip_prefix = "aspect-gazelle-9c84884007d508c04a4b327cbf9c586a0c9d966c/language/kotlin",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/9c84884007d508c04a4b327cbf9c586a0c9d966c.tar.gz"],
 )
 
 # Go modules

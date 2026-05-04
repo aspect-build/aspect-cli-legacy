@@ -481,7 +481,11 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 				return fmt.Errorf("failed to enter build state: %w", err)
 			}
 
-			logger.Debugf("watchman detected changes: %v", cs.Paths)
+			if cs.IsFreshInstance {
+				logger.Infof("watchman fresh-instance event, resetting state")
+			} else {
+				logger.Debugf("watchman detected changes: %v", cs.Paths)
+			}
 
 			// The command to detect changes in the run target.
 			detectCmd, err := createBazelScriptCmd(false, true)
@@ -500,51 +504,72 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 
 			incBuildErr := runner.runCmd(tctx, detectCmd, "Run.Subscribe.Build")
 
-			dtErr := changedetect.detectChanges(cs.Paths)
-			if dtErr != nil {
-				return fmt.Errorf("failed to detect changes: %w", dtErr)
+			var sourceChanges []string
+			if !cs.IsFreshInstance {
+				sourceChanges = cs.Paths
 			}
+			if err := changedetect.detectChanges(sourceChanges); err != nil {
+				return fmt.Errorf("failed to detect changes: %w", err)
+			}
+
+			var (
+				cycleScope   ibp.WatchScope
+				cycleChanges ibp.SourceInfoMap
+			)
 
 			if incBuildErr != nil {
 				// The incremental build failed.
 				// Assume a temporary compilation error, assume an appropriate error message was outputted by the run command.
 				// Output a basic warning and resume waiting for changes.
 				fmt.Printf("%s incremental bazel build command failed: %v\n", color.YellowString("WARNING:"), incBuildErr)
-			} else if changes := changedetect.cycleChanges(); len(changes) > 0 && watchRunfilesChanges {
-				logger.Infof("Cycle changes: %v", changes)
-
-				// For now just rerun the target, beware that RunCommand does not yield until
-				// the subprocess exits.
-				fmt.Printf("%s Found %d changes, rebuilding the target.\n", color.GreenString("INFO:"), len(changes))
-
-				ctctx, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
-				defer cycleTrace.End()
-
-				if err := incrementalProtocol.Cycle(ctctx, ibp.WatchScope_Runfiles, changes); err != nil {
-					cycleTrace.SetStatus(codes.Error, err.Error())
-					return fmt.Errorf("failed to report cycle events: %w", err)
-				}
-
-				// TODO: if we want to support ibazel livereload then we need to report changes.
-			} else if watchSourceChanges {
-				logger.Infof("Cycle source changes: %v", cs.Paths)
-
-				changes := make(map[string]*ibp.SourceInfo)
-				for _, changedSource := range cs.Paths {
-					changes[changedSource] = &ibp.SourceInfo{
-						IsSource: toJsonBoolPtr(true),
-					}
-				}
-
-				ctctx, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
-				defer cycleTrace.End()
-
-				if err := incrementalProtocol.Cycle(ctctx, ibp.WatchScope_Sources, changes); err != nil {
-					cycleTrace.SetStatus(codes.Error, err.Error())
-					return fmt.Errorf("failed to report cycle events: %w", err)
-				}
 			} else {
-				fmt.Printf("%s Target is up-to-date.\n", color.GreenString("INFO:"))
+				// Drain accumulated changes every cycle to keep the
+				// detector's internal map bounded; the result may be
+				// ignored (fresh-instance, source mode) when constructing
+				// the IBP message.
+				changes := changedetect.cycleChanges()
+
+				switch {
+				case cs.IsFreshInstance:
+					// IBP peer gets a reset (nil sources) instead of `changes`.
+					if watchRunfilesChanges {
+						cycleScope = ibp.WatchScope_Runfiles
+					} else if watchSourceChanges {
+						cycleScope = ibp.WatchScope_Sources
+					}
+				case watchRunfilesChanges && len(changes) > 0:
+					logger.Infof("Cycle changes: %v", changes)
+
+					// For now just rerun the target, beware that RunCommand does not yield until
+					// the subprocess exits.
+					fmt.Printf("%s Found %d changes, rebuilding the target.\n", color.GreenString("INFO:"), len(changes))
+
+					cycleScope = ibp.WatchScope_Runfiles
+					cycleChanges = changes
+					// TODO: if we want to support ibazel livereload then we need to report changes.
+				case watchSourceChanges:
+					logger.Infof("Cycle source changes: %v", cs.Paths)
+
+					cycleScope = ibp.WatchScope_Sources
+					cycleChanges = make(ibp.SourceInfoMap, len(cs.Paths))
+					for _, changedSource := range cs.Paths {
+						cycleChanges[changedSource] = &ibp.SourceInfo{
+							IsSource: toJsonBoolPtr(true),
+						}
+					}
+				default:
+					fmt.Printf("%s Target is up-to-date.\n", color.GreenString("INFO:"))
+				}
+			}
+
+			if cycleScope != "" {
+				ctctx, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
+				defer cycleTrace.End()
+
+				if err := incrementalProtocol.Cycle(ctctx, cycleScope, cycleChanges); err != nil {
+					cycleTrace.SetStatus(codes.Error, err.Error())
+					return fmt.Errorf("failed to report cycle events: %w", err)
+				}
 			}
 
 			// Leave the build state and fast forward the subscription clock.

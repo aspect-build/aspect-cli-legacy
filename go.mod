@@ -4,9 +4,9 @@ go 1.26.1
 
 require (
 	github.com/alphadose/haxmap v1.4.1
-	github.com/aspect-build/aspect-gazelle/common v0.0.0-20260504030056-baf8a9e207bf
-	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20260504030056-baf8a9e207bf
-	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20260504030056-baf8a9e207bf
+	github.com/aspect-build/aspect-gazelle/common v0.0.0-20260504072208-9c84884007d5
+	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20260504072208-9c84884007d5
+	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20260504072208-9c84884007d5
 	github.com/bazelbuild/bazel-gazelle v0.50.0
 	github.com/bazelbuild/bazelisk v1.27.0 // NOTE: keep vendored code in sync
 	github.com/bazelbuild/buildtools v0.0.0-20260319080235-05d2ebe49b0f
@@ -21,7 +21,7 @@ require (
 	github.com/hay-kot/scaffold v0.11.0
 	github.com/klauspost/compress v1.18.3
 	github.com/manifoldco/promptui v0.9.0
-	github.com/mattn/go-isatty v0.0.20
+	github.com/mattn/go-isatty v0.0.22
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/gomega v1.39.1
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
@@ -54,7 +54,7 @@ require (
 require (
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/EngFlow/gazelle_cc v0.5.0 // indirect
-	github.com/Masterminds/semver/v3 v3.4.0 // indirect
+	github.com/Masterminds/semver/v3 v3.5.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.3.0 // indirect
 	github.com/a8m/envsubst v1.4.3 // indirect
@@ -62,8 +62,8 @@ require (
 	github.com/alecthomas/chroma/v2 v2.23.1 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20260504030056-baf8a9e207bf // indirect
-	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20260504030056-baf8a9e207bf // indirect
+	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20260504072208-9c84884007d5 // indirect
+	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20260504072208-9c84884007d5 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
@@ -139,7 +139,7 @@ require (
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect
-	github.com/mikefarah/yq/v4 v4.52.5 // indirect
+	github.com/mikefarah/yq/v4 v4.53.2 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
@@ -150,7 +150,7 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/oklog/run v1.1.0 // indirect
-	github.com/pelletier/go-toml/v2 v2.3.0 // indirect
+	github.com/pelletier/go-toml/v2 v2.3.1 // indirect
 	github.com/pjbgf/sha1cd v0.5.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/psanford/memfs v0.0.0-20241019191636-4ef911798f9b // indirect
@@ -169,8 +169,8 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/yuin/goldmark v1.7.13 // indirect
 	github.com/yuin/goldmark-emoji v1.0.6 // indirect
-	github.com/yuin/gopher-lua v1.1.1 // indirect
-	github.com/zclconf/go-cty v1.18.0 // indirect
+	github.com/yuin/gopher-lua v1.1.2 // indirect
+	github.com/zclconf/go-cty v1.18.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.42.0 // indirect
 	go.opentelemetry.io/otel/metric v1.42.0 // indirect
