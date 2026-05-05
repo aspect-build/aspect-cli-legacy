@@ -19,9 +19,14 @@ package run
 import (
 	"bytes"
 	_ "embed"
+	"fmt"
+	"os"
+	"path"
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/aspect-build/aspect-gazelle/runner/pkg/ibp"
 )
 
 //go:embed testdata/changedetector_test-compact_exec-a.bin
@@ -102,5 +107,79 @@ rules_nodejs~~node~nodejs_darwin_arm64/bin/nodejs/bin/node /private/var/tmp/_baz
 	// External files
 	if !r.runfiles["rules_nodejs~~node~nodejs_darwin_arm64/bin/nodejs/bin/node"].is_external {
 		t.Errorf("Expected external mappings")
+	}
+}
+
+// detectChanges(nil) is the path used by runWatch on watchman fresh-instance
+// events: cs.Paths is unreliable, so the only reconciliation signal is the
+// runfiles manifest. Verify that entries previously in cd.sourcesInfo but
+// missing from the latest manifest are recorded as deletions in the cycle
+// changes.
+func TestDetectChangesNilReconcilesDeletions(t *testing.T) {
+	tmp := t.TempDir()
+	localExecroot := path.Join(tmp, "_main")
+	targetExecutablePath := "myapp_/myapp"
+	if err := os.MkdirAll(path.Join(localExecroot, "myapp_"), 0755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+
+	// Runfiles manifest contains kept_file but not deleted_file.
+	runfilesManifestPath := path.Join(localExecroot, targetExecutablePath+".runfiles_manifest")
+	if err := os.WriteFile(runfilesManifestPath, []byte("_main/kept_file /elsewhere/kept_file\n"), 0644); err != nil {
+		t.Fatalf("write runfiles manifest: %v", err)
+	}
+
+	// Watch manifest: 5 lines (localExecroot, targetExecutablePath, label, tags, "").
+	watchManifestPath := path.Join(tmp, "watch.manifest")
+	watchContents := fmt.Sprintf("%s\n%s\n//myapp:myapp\n\n", localExecroot, targetExecutablePath)
+	if err := os.WriteFile(watchManifestPath, []byte(watchContents), 0644); err != nil {
+		t.Fatalf("write watch manifest: %v", err)
+	}
+	watchManifest, err := os.Open(watchManifestPath)
+	if err != nil {
+		t.Fatalf("open watch manifest: %v", err)
+	}
+	defer watchManifest.Close()
+
+	// A valid (non-empty) zstd-encoded exec log; entries don't affect deletion
+	// detection since they're not in our runfiles manifest.
+	execLogPath := path.Join(tmp, "execlog.bin")
+	if err := os.WriteFile(execLogPath, execACompressed, 0644); err != nil {
+		t.Fatalf("write execlog: %v", err)
+	}
+	execLog, err := os.Open(execLogPath)
+	if err != nil {
+		t.Fatalf("open execlog: %v", err)
+	}
+	defer execLog.Close()
+
+	cd := &ChangeDetector{
+		workspaceDir:      tmp,
+		execlogFile:       execLog,
+		watchManifestFile: watchManifest,
+		sourcesInfo: ibp.SourceInfoMap{
+			"_main/kept_file":    {IsSource: toJsonBoolPtr(true)},
+			"_main/deleted_file": {IsSource: toJsonBoolPtr(true)},
+		},
+		cycleSourceChanges: ibp.SourceInfoMap{},
+	}
+
+	if err := cd.detectChanges(nil); err != nil {
+		t.Fatalf("detectChanges(nil): %v", err)
+	}
+
+	if _, ok := cd.sourcesInfo["_main/kept_file"]; !ok {
+		t.Errorf("kept_file should remain in sourcesInfo, got %v", cd.sourcesInfo)
+	}
+	if _, ok := cd.sourcesInfo["_main/deleted_file"]; ok {
+		t.Errorf("deleted_file should be removed from sourcesInfo")
+	}
+
+	changes := cd.cycleChanges()
+	si, ok := changes["_main/deleted_file"]
+	if !ok {
+		t.Errorf("expected deletion marker for deleted_file in cycleChanges, got %v", changes)
+	} else if si != nil {
+		t.Errorf("expected nil SourceInfo (deletion marker), got %+v", si)
 	}
 }
