@@ -313,8 +313,14 @@ func runConfigureWatch(ctx context.Context, v *runner.GazelleRunner, mode string
 			return fmt.Errorf("failed to enter build state: %w", err)
 		}
 
-		if err := abazel.Cycle(ctx, ibp.WatchScope_Sources, changesetToCycle(cs)); err != nil {
-			return fmt.Errorf("failed to send cycle to incremental protocol: %w", err)
+		if cs.IsFreshInstance {
+			if err := abazel.CycleReset(ctx); err != nil {
+				return fmt.Errorf("failed to send cycle reset to incremental protocol: %w", err)
+			}
+		} else {
+			if err := abazel.Cycle(ctx, ibp.WatchScope_Sources, changesetToCycle(cs)); err != nil {
+				return fmt.Errorf("failed to send cycle to incremental protocol: %w", err)
+			}
 		}
 
 		// Leave the build state and fast forward the subscription clock.

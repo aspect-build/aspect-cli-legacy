@@ -515,6 +515,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			var (
 				cycleScope   ibp.WatchScope
 				cycleChanges ibp.SourceInfoMap
+				cycleIsReset bool
 			)
 
 			if incBuildErr != nil {
@@ -525,19 +526,15 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 			} else {
 				// Drain accumulated changes every cycle to keep the
 				// detector's internal map bounded; the result may be
-				// ignored (fresh-instance, source mode) when constructing
+				// ignored (source mode + fresh-instance) when constructing
 				// the IBP message.
 				changes := changedetect.cycleChanges()
 
 				switch {
-				case cs.IsFreshInstance:
-					// IBP peer gets a reset (nil sources) instead of `changes`.
-					if watchRunfilesChanges {
-						cycleScope = ibp.WatchScope_Runfiles
-					} else if watchSourceChanges {
-						cycleScope = ibp.WatchScope_Sources
-					}
 				case watchRunfilesChanges && len(changes) > 0:
+					// Runfiles deltas are reconciled from the runfiles manifest and
+					// execlog, so they're trustworthy even after a watchman fresh-instance
+					// where cs.Paths is empty.
 					logger.Infof("Cycle changes: %v", changes)
 
 					// For now just rerun the target, beware that RunCommand does not yield until
@@ -547,6 +544,11 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 					cycleScope = ibp.WatchScope_Runfiles
 					cycleChanges = changes
 					// TODO: if we want to support ibazel livereload then we need to report changes.
+				case watchSourceChanges && cs.IsFreshInstance:
+					// Source-mode cycles are keyed by cs.Paths, which is unreliable on a
+					// fresh-instance and has no manifest-based reconciliation; signal a
+					// full peer reset.
+					cycleIsReset = true
 				case watchSourceChanges:
 					logger.Infof("Cycle source changes: %v", cs.Paths)
 
@@ -562,7 +564,15 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 				}
 			}
 
-			if cycleScope != "" {
+			if cycleIsReset {
+				ctctx, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
+				defer cycleTrace.End()
+
+				if err := incrementalProtocol.CycleReset(ctctx); err != nil {
+					cycleTrace.SetStatus(codes.Error, err.Error())
+					return fmt.Errorf("failed to report cycle reset: %w", err)
+				}
+			} else if cycleScope != "" {
 				ctctx, cycleTrace := runner.tracer.Start(tctx, "Run.Cycle")
 				defer cycleTrace.End()
 

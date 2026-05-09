@@ -59,6 +59,9 @@ func (ib *IBazelProtocol) Cycle(ctx context.Context, scope ibp.WatchScope, chang
 
 	return res
 }
+func (ib *IBazelProtocol) CycleReset(ctx context.Context) error {
+	return ib.Cycle(ctx, ibp.WatchScope_Runfiles, nil)
+}
 func (ib *IBazelProtocol) Close() error {
 	return nil
 }
@@ -173,6 +176,9 @@ func (rb *RestartBazelProtocol) Cycle(ctx context.Context, scope ibp.WatchScope,
 	}
 
 	return nil
+}
+func (rb *RestartBazelProtocol) CycleReset(ctx context.Context) error {
+	return rb.Cycle(ctx, ibp.WatchScope_Runfiles, nil)
 }
 func (rb *RestartBazelProtocol) Close() error {
 	return nil
