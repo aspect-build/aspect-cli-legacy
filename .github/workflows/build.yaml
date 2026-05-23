@@ -24,7 +24,7 @@ jobs:
       - run: |
           bazel build --config=release //release
           bazel run --config=release //release -- /tmp/aspect/release
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         id: upload
         with:
           name: linux
@@ -60,7 +60,7 @@ jobs:
   #       run: |
   #         cp $(bazel cquery --config=release --output=files //release:aspect-windows-x86_64.exe) aspect.exe
   #         ./aspect.exe --help
-  #     - uses: actions/upload-artifact@v4
+  #     - uses: actions/upload-artifact@v7
   #       id: upload
   #       with:
   #         name: windows
