@@ -23,7 +23,7 @@ jobs:
       - name: Prepare workspace snippet
         run: .github/workflows/install_snippet.sh > release_notes.txt
       - name: Create GitHub draft release and upload artifacts
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           # Use GH feature to populate the changelog automatically
           generate_release_notes: true
