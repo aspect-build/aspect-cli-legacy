@@ -6,4 +6,9 @@
 /.vscode
 **/.terraform/*
 node_modules/
+# rules_go's go_sdk module extension produces non-reproducible "facts" (it
+# fetches the go.dev SDK manifest, which drifts as new Go patch releases
+# land). Committing the lockfile causes spurious CI failures under
+# --lockfile_mode=error, so we don't track it. See .bazelrc for the matching
+# override that disables lockfile enforcement on CI.
 MODULE.bazel.lock

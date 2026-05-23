@@ -5,7 +5,5 @@ go_library(
     srcs = ["prompt.go"],
     importpath = "github.com/aspect-build/aspect-cli-legacy/pkg/ioutils/prompt",
     visibility = ["//visibility:public"],
-    deps = [
-        "@com_github_manifoldco_promptui//:promptui",
-    ],
+    deps = ["@com_github_manifoldco_promptui//:promptui"],
 )

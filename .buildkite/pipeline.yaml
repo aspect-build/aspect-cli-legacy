@@ -1,0 +1,65 @@
+steps:
+  - key: test
+    label: ":bazel: Test"
+    agents:
+      queue: aspect-default
+    retry:
+      manual:
+        allowed: true
+        permit_on_passed: false
+      automatic:
+        - limit: 1
+          exit_status: 36
+        - limit: 1
+          exit_status: 255
+        - limit: 1
+          exit_status: -1
+    command: aspect test --task-key=test -- //...
+  - key: buildifier
+    label: ":hammer_and_wrench: Buildifier"
+    agents:
+      queue: aspect-default
+    retry:
+      manual:
+        allowed: true
+        permit_on_passed: false
+      automatic:
+        - limit: 1
+          exit_status: 36
+        - limit: 1
+          exit_status: 255
+        - limit: 1
+          exit_status: -1
+    command: aspect format --task-key buildifier --formatter-target=//tools/format:format-starlark
+  - key: format
+    label: ":hammer_and_wrench: Format"
+    agents:
+      queue: aspect-default
+    retry:
+      manual:
+        allowed: true
+        permit_on_passed: false
+      automatic:
+        - limit: 1
+          exit_status: 36
+        - limit: 1
+          exit_status: 255
+        - limit: 1
+          exit_status: -1
+    command: aspect format --task-key=format
+  - key: gazelle
+    label: ":deer: Gazelle"
+    agents:
+      queue: aspect-default
+    retry:
+      manual:
+        allowed: true
+        permit_on_passed: false
+      automatic:
+        - limit: 1
+          exit_status: 36
+        - limit: 1
+          exit_status: 255
+        - limit: 1
+          exit_status: -1
+    command: aspect gazelle --task-key=gazelle

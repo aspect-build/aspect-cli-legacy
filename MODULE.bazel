@@ -5,6 +5,7 @@ module(
 
 bazel_dep(name = "bazel_lib", version = "3.2.2")
 bazel_dep(name = "bazelrc-preset.bzl", version = "1.9.2")
+bazel_dep(name = "aspect_gazelle_prebuilt", version = "0.0.11")
 bazel_dep(name = "buildifier_prebuilt", version = "8.5.1.2")
 bazel_dep(name = "aspect_rules_js", version = "3.0.3")
 
@@ -34,9 +35,9 @@ bazel_binary = use_repo_rule("//integration_tests:bazel_binary.bzl", "bazel_bina
 
 bazel_binary(name = "bazel_6_4_0")
 
-bazel_dep(name = "llvm", version = "0.7.5")
-
 include("//bazel/include:go.MODULE.bazel")
 include("//bazel/include:bats.MODULE.bazel")
+
+bazel_dep(name = "llvm", version = "0.8.3")
 
 register_toolchains("@llvm//toolchain:all")
