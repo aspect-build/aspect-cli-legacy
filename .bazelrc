@@ -6,7 +6,6 @@ common:release -c opt --stamp --workspace_status_command="node tools/workspace_s
 
 common --enable_workspace
 
-
 common --repo_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
 common --repo_env=BAZEL_NO_APPLE_CPP_TOOLCHAIN=1
 common:linux --host_platform=//platforms:linux_host_platform
@@ -23,16 +22,12 @@ common --@protobuf//bazel/toolchains:prefer_prebuilt_protoc
 
 build:windows --sandbox_add_mount_pair=C:\Temp
 
+# build without the bytes
+common:ci --remote_download_outputs=minimal
+common:ci --nobuild_runfile_links
 
-# Load any settings & overrides specific to the external remote cache from `.aspect/bazelrc/remote-cache.bazelrc`.
-# This file should appear in `.gitignore` so that settings are not shared with team members. This
-# should be last statement in this config so the user configuration is able to overwrite flags from
-# this file. See https://bazel.build/configure/best-practices#bazelrc-file.
-# Setup of this file is automated by running the setup_remote_cache.sh Bash script.
-try-import %workspace%/.aspect/bazelrc/remote-cache.bazelrc
-
-# Load any settings & overrides specific to the current user from `.aspect/bazelrc/user.bazelrc`.
-# This file should appear in `.gitignore` so that settings are not shared with team members. This
-# should be last statement in this config so the user configuration is able to overwrite flags from
-# this file. See https://bazel.build/configure/best-practices#bazelrc-file.
-try-import %workspace%/.aspect/bazelrc/user.bazelrc
+# Override the preset's `--lockfile_mode=error` on CI. rules_go's go_sdk
+# extension records non-reproducible facts (fetched from the go.dev SDK
+# manifest), so enforcing the lockfile flakes whenever Go ships a new patch
+# release. We also don't commit MODULE.bazel.lock — see .gitignore.
+common:ci --lockfile_mode=off

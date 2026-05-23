@@ -5,7 +5,5 @@ go_library(
     srcs = ["cache.go"],
     importpath = "github.com/aspect-build/aspect-cli-legacy/pkg/ioutils/cache",
     visibility = ["//visibility:public"],
-    deps = [
-        "@com_github_mitchellh_go_homedir//:go-homedir",
-    ],
+    deps = ["@com_github_mitchellh_go_homedir//:go-homedir"],
 )

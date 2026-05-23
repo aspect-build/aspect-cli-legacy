@@ -1,6 +1,4 @@
 load("@aspect_rules_js//js:defs.bzl", "js_library")
-load("@bazel_gazelle//:def.bzl", "gazelle")
-load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 load("@io_bazel_rules_go//go:def.bzl", "nogo")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
@@ -106,7 +104,10 @@ nogo(
 #   cannot use :map_kind go_proto_library go_proto_library //:go_proto_library.bzl
 #   because we need gazelle to understand the built-in kind, see https://github.com/bazelbuild/bazel-gazelle/issues/1162
 #   so instead we are using the aspect-build/rules_go fork which has our write_source_files feature
-gazelle(name = "gazelle")
+alias(
+    name = "gazelle",
+    actual = "//tools/gazelle",
+)
 
 alias(
     name = "aspect",
@@ -123,21 +124,12 @@ alias(
     actual = "@go_sdk//:bin/go",
 )
 
-buildifier(
+alias(
     name = "buildifier",
-    exclude_patterns = ["./.git/*"],
-    lint_mode = "fix",
-    mode = "fix",
-)
-
-buildifier(
-    name = "buildifier.check",
-    exclude_patterns = ["./.git/*"],
-    lint_mode = "warn",
-    mode = "diff",
+    actual = "//tools/format:format-starlark",
 )
 
 alias(
     name = "format",
-    actual = "//tools:format",
+    actual = "//tools/format",
 )
