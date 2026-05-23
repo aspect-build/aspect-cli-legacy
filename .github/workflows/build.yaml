@@ -18,7 +18,7 @@ jobs:
     outputs:
       artifact: ${{steps.upload.outputs.artifact-url}}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Needed to see tags
       - run: |
@@ -41,7 +41,7 @@ jobs:
   #     USE_BAZEL_VERSION: 7.6.1
   #     BAZELISK_BASE_URL: https://github.com/bazelbuild/bazel/releases/download
   #   steps:
-  #     - uses: actions/checkout@v4
+  #     - uses: actions/checkout@v6
   #       with:
   #         fetch-depth: 0 # Needed to see tags
   #     - uses: bazel-contrib/setup-bazel@0.9.0
