@@ -1,7 +1,5 @@
 import %workspace%/tools/preset.bazelrc
 
-### YOUR PROJECT SPECIFIC OPTIONS GO HERE ###
-
 common:release -c opt --stamp --workspace_status_command="node tools/workspace_status.js"
 
 common --enable_workspace
@@ -22,7 +20,7 @@ common --@protobuf//bazel/toolchains:prefer_prebuilt_protoc
 
 build:windows --sandbox_add_mount_pair=C:\Temp
 
-# build without the bytes
+# Build without the bytes
 common:ci --remote_download_outputs=minimal
 common:ci --nobuild_runfile_links
 

@@ -126,7 +126,7 @@ alias(
 
 alias(
     name = "buildifier",
-    actual = "//tools/format:format-starlark",
+    actual = "//tools/format:buildifier",
 )
 
 alias(
