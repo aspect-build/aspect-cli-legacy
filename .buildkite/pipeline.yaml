@@ -30,7 +30,7 @@ steps:
           exit_status: 255
         - limit: 1
           exit_status: -1
-    command: aspect buildifier
+    command: aspect format --task-key buildifier
   - key: format
     label: ":hammer_and_wrench: Format"
     agents:
