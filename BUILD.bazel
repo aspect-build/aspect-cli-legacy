@@ -126,7 +126,7 @@ alias(
 
 alias(
     name = "buildifier",
-    actual = "//tools/format:buildifier",
+    actual = "@buildifier_prebuilt//buildifier",
 )
 
 alias(

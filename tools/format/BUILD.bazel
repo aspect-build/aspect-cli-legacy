@@ -23,4 +23,3 @@ format_multirun(
     terraform = "@aspect_rules_lint//format:terraform",
     yaml = "@aspect_rules_lint//format:yamlfmt",
 )
-
