@@ -24,11 +24,3 @@ format_multirun(
     yaml = "@aspect_rules_lint//format:yamlfmt",
 )
 
-# Starlark-only formatter for the dedicated buildifier CI step. Lets us run
-# buildifier in parallel with the multi-language `format` target while
-# `aspect format --task-key=format` ignores Starlark patterns to avoid
-# duplicate work. See https://docs.aspect.build/cli/migration/buildifier.
-format_multirun(
-    name = "buildifier",
-    starlark = "@buildifier_prebuilt//:buildifier",
-)
