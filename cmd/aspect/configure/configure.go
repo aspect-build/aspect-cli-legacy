@@ -44,7 +44,13 @@ import (
 	"github.com/aspect-build/aspect-gazelle/runner"
 	"github.com/aspect-build/aspect-gazelle/runner/pkg/ibp"
 	"github.com/aspect-build/aspect-gazelle/runner/pkg/watchman"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
+
+var tracer = otel.Tracer("aspect-configure")
 
 func init() {
 	if os.Getenv("ASPECT_CLI_LOG_FILE") != "" {
@@ -218,9 +224,26 @@ configure:
 
 	args = append(preArgs, args...)
 
+	spanName := "Configure"
+	if watch {
+		spanName = "Configure.Watch"
+	}
+	ctx, span := tracer.Start(ctx, spanName, trace.WithAttributes(
+		attribute.String("configure.mode", mode),
+		attribute.String("configure.index", indexType),
+		attribute.Bool("configure.recurse", recurse),
+		attribute.StringSlice("configure.languages", v.Languages()),
+		attribute.StringSlice("configure.args", args),
+	))
+	defer span.End()
+
 	if watch {
 		// Watch mode has its own run/return/exit-code logic
-		return runConfigureWatch(ctx, v, mode, args)
+		err := runConfigureWatch(ctx, v, mode, args)
+		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
+		}
+		return err
 	}
 
 	changed, err := v.Generate(runner.UpdateCmd, mode, args)
@@ -230,6 +253,7 @@ configure:
 	// - files diffs
 	// - files updated
 	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		err = &aspecterrors.ExitError{
 			ExitCode: aspecterrors.UnhandledOrInternalError,
 			Err:      err,
@@ -264,8 +288,16 @@ func runConfigureWatch(ctx context.Context, v *runner.GazelleRunner, mode string
 
 	// Start the workspace watcher
 	w := watchman.NewWatchman(bazel.WorkspaceFromWd.WorkspaceRoot())
-	if err := w.Start(); err != nil {
-		return fmt.Errorf("failed to start the watcher: %w", err)
+	if err := func() error {
+		_, t := tracer.Start(ctx, "Watchman.Start")
+		defer t.End()
+		if err := w.Start(); err != nil {
+			t.SetStatus(codes.Error, err.Error())
+			return fmt.Errorf("failed to start the watcher: %w", err)
+		}
+		return nil
+	}(); err != nil {
+		return err
 	}
 	defer w.Close()
 
@@ -297,7 +329,10 @@ func runConfigureWatch(ctx context.Context, v *runner.GazelleRunner, mode string
 
 	watchState := fmt.Sprintf("aspect-configure-watch-%d", os.Getpid())
 
-	for cs, err := range w.Subscribe(ctx, watchman.DropState{DropWithinState: watchState}) {
+	subCtx, st := tracer.Start(ctx, "Configure.Subscribe")
+	defer st.End()
+
+	for cs, err := range w.Subscribe(subCtx, watchman.DropState{DropWithinState: watchState}) {
 		if err != nil {
 			// Break the subscribe iteration if the context is done or if the watcher is closed.
 			if errors.Is(err, context.Canceled) || errors.Is(err, net.ErrClosed) {
@@ -307,26 +342,48 @@ func runConfigureWatch(ctx context.Context, v *runner.GazelleRunner, mode string
 			return fmt.Errorf("failed to get next event: %w", err)
 		}
 
-		// Enter into the build state to discard spurious changes caused by Bazel reading the
-		// inputs which leads to their atime to change.
-		if err := w.StateEnter(watchState); err != nil {
-			return fmt.Errorf("failed to enter build state: %w", err)
+		if err := handleConfigureWatchEvent(subCtx, w, abazel, watchState, cs); err != nil {
+			return err
 		}
+	}
 
-		if cs.IsFreshInstance {
-			if err := abazel.CycleReset(ctx); err != nil {
-				return fmt.Errorf("failed to send cycle reset to incremental protocol: %w", err)
-			}
-		} else {
-			if err := abazel.Cycle(ctx, ibp.WatchScope_Sources, changesetToCycle(cs)); err != nil {
-				return fmt.Errorf("failed to send cycle to incremental protocol: %w", err)
-			}
-		}
+	return nil
+}
 
-		// Leave the build state and fast forward the subscription clock.
-		if err := w.StateLeave(watchState); err != nil {
-			return fmt.Errorf("failed to leave build state: %w", err)
+func handleConfigureWatchEvent(ctx context.Context, w *watchman.WatchmanWatcher, abazel ibp.IncrementalBazel, watchState string, cs *watchman.ChangeSet) (retErr error) {
+	eventCtx, eventSpan := tracer.Start(ctx, "Configure.Subscribe.WatchEvent")
+	defer func() {
+		if retErr != nil {
+			eventSpan.SetStatus(codes.Error, retErr.Error())
 		}
+		eventSpan.End()
+	}()
+
+	// Enter into the build state to discard spurious changes caused by Bazel reading the
+	// inputs which leads to their atime to change.
+	if err := w.StateEnter(watchState); err != nil {
+		return fmt.Errorf("failed to enter build state: %w", err)
+	}
+
+	cctx, cycleSpan := tracer.Start(eventCtx, "Configure.Cycle")
+	var cycleErr error
+	if cs.IsFreshInstance {
+		cycleErr = abazel.CycleReset(cctx)
+	} else {
+		cycleErr = abazel.Cycle(cctx, ibp.WatchScope_Sources, changesetToCycle(cs))
+	}
+	if cycleErr != nil {
+		cycleSpan.SetStatus(codes.Error, cycleErr.Error())
+	}
+	cycleSpan.End()
+
+	if cycleErr != nil {
+		return fmt.Errorf("failed to send cycle to incremental protocol: %w", cycleErr)
+	}
+
+	// Leave the build state and fast forward the subscription clock.
+	if err := w.StateLeave(watchState); err != nil {
+		return fmt.Errorf("failed to leave build state: %w", err)
 	}
 
 	return nil
