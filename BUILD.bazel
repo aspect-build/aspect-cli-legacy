@@ -93,9 +93,14 @@ nogo(
 # TODO: upgrade
 # gazelle:go_grpc_compilers @io_bazel_rules_go//proto:go_grpc
 
+# TODO: drop when gazelle/v2 is resolved correctly
+# common is a go_deps module; resolve it explicitly so gazelle's lazy index does
+# not shell out to `go` (which can't resolve common's placeholder treesitter dep).
+# gazelle:resolve go github.com/aspect-build/aspect-gazelle/common @com_github_aspect_build_aspect_gazelle_common//:common
+# gazelle:resolve_regexp go github.com/aspect-build/aspect-gazelle/common/(.*) @com_github_aspect_build_aspect_gazelle_common//$1
+
 # Use gazelle bazel MODULEs instead of go.mod
 # gazelle:resolve_regexp go github.com/bazelbuild/bazel-gazelle/(.*) @bazel_gazelle//$1:go_default_library
-# gazelle:resolve_regexp go github.com/aspect-build/aspect-gazelle/common(/.*)? @aspect_gazelle//common$1
 # gazelle:resolve_regexp go github.com/aspect-build/aspect-gazelle/runner @aspect_gazelle_runner
 # gazelle:resolve_regexp go github.com/aspect-build/aspect-gazelle/runner/(.*) @aspect_gazelle_runner//$1
 # gazelle:resolve_regexp go github.com/aspect-build/aspect-gazelle/language/orion @aspect_gazelle_orion
