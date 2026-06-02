@@ -39,7 +39,6 @@ def bats_test(srcs = [], **kwargs):
         ] + helpers_dirs,
         env = env,
         args = tests + args,
-        # TODO(alex): remove when we green it up on RBE
-        tags = tags + ["no-remote-exec"],
+        tags = tags,
         **kwargs
     )
