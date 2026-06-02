@@ -1,27 +1,26 @@
 package(default_visibility = ["//visibility:public"])
 
-# Go's stdlib uses non-PIC absolute relocations incompatible with PIE.
-# Disable PIE on Linux platforms so the LLVM toolchain uses -static instead of -static-pie.
-#
-# Use glibc (gnu.2.28) rather than musl: the oxc-based Rust JS parser
-# (@aspect_gazelle_js) vendors its crates only for the *-unknown-linux-gnu
-# triples, so a musl target platform leaves those crates @platforms//:incompatible
-# and fails the release build. gnu.2.28 matches //platforms:linux_host_platform
-# and is a conservative baseline (RHEL 8 / Debian 10 era).
+# Release Linux binaries link statically against musl (run on any Linux, no
+# version floor). pie:off avoids -static-pie (Go's stdlib uses absolute
+# relocations). libc:musl (from the parent) + pie:off select the musl LLVM
+# C/C++ toolchain; @rules_rs//rs/platforms/constraints:musl opts the Rust JS
+# parser (@aspect_gazelle_js) into musl, which rules_rs doesn't default to.
 platform(
     name = "linux_x86_64",
     constraint_values = [
         "@llvm//constraints/pie:off",
+        "@rules_rs//rs/platforms/constraints:musl",
     ],
-    parents = ["@llvm//platforms:linux_amd64_gnu.2.28"],
+    parents = ["@llvm//platforms:linux_amd64_musl"],
 )
 
 platform(
     name = "linux_aarch64",
     constraint_values = [
         "@llvm//constraints/pie:off",
+        "@rules_rs//rs/platforms/constraints:musl",
     ],
-    parents = ["@llvm//platforms:linux_arm64_gnu.2.28"],
+    parents = ["@llvm//platforms:linux_arm64_musl"],
 )
 
 alias(

@@ -40,4 +40,8 @@ include("//bazel/include:bats.MODULE.bazel")
 
 bazel_dep(name = "llvm", version = "0.8.3")
 
+# Exposes @rules_rs//rs/platforms/constraints:musl by apparent name for
+# //platforms (toolchains are registered transitively by @aspect_gazelle_js).
+bazel_dep(name = "rules_rs", version = "0.0.83")
+
 register_toolchains("@llvm//toolchain:all")
