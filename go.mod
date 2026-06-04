@@ -4,12 +4,12 @@ go 1.26.4
 
 require (
 	github.com/alphadose/haxmap v1.4.1
-	github.com/aspect-build/aspect-gazelle/common v0.0.0-20260602001136-da6423ae1b83
-	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20260602001136-da6423ae1b83
-	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20260602001136-da6423ae1b83
-	github.com/bazelbuild/bazel-gazelle v0.51.0
+	github.com/aspect-build/aspect-gazelle/common v0.0.0-20260604074543-b8689198774e
+	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20260604074543-b8689198774e
+	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20260604074543-b8689198774e
+	github.com/bazelbuild/bazel-gazelle v0.51.1
 	github.com/bazelbuild/bazelisk v1.27.0 // NOTE: keep vendored code in sync
-	github.com/bazelbuild/buildtools v0.0.0-20260319080235-05d2ebe49b0f
+	github.com/bazelbuild/buildtools v0.0.0-20260528135316-84fa6c32aee6
 	github.com/bluekeyes/go-gitdiff v0.8.1
 	github.com/charmbracelet/huh v0.8.0
 	github.com/creack/pty v1.1.24
@@ -34,11 +34,11 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/tejzpr/ordered-concurrently/v3 v3.0.1
 	github.com/twmb/murmur3 v1.1.8
-	go.opentelemetry.io/otel v1.42.0
+	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.42.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.42.0
 	go.opentelemetry.io/otel/sdk v1.42.0
-	go.opentelemetry.io/otel/trace v1.42.0
+	go.opentelemetry.io/otel/trace v1.44.0
 	golang.org/x/mod v0.36.0
 	golang.org/x/sync v0.20.0
 	golang.org/x/term v0.43.0
@@ -62,17 +62,17 @@ require (
 	github.com/alecthomas/chroma/v2 v2.23.1 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20260602001136-da6423ae1b83 // indirect
-	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20260602001136-da6423ae1b83 // indirect
-	github.com/aspect-build/aspect-gazelle/treesitter v0.0.0-20260602001136-da6423ae1b83 // indirect
+	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20260604074543-b8689198774e // indirect
+	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20260604074543-b8689198774e // indirect
+	github.com/aspect-build/aspect-gazelle/treesitter v0.0.0-20260604074543-b8689198774e // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
-	github.com/bazel-contrib/rules_jvm v0.32.0 // indirect
-	github.com/bazel-contrib/rules_python/gazelle v0.0.0-20260510140936-e29c577dab87 // indirect
+	github.com/bazel-contrib/rules_jvm v0.33.0 // indirect
+	github.com/bazel-contrib/rules_python/gazelle v0.0.0-20260520000513-6aad8828e826 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/bmatcuk/doublestar/v4 v4.10.0 // indirect
-	github.com/bufbuild/rules_buf v0.5.2 // indirect
+	github.com/bufbuild/rules_buf v0.5.4 // indirect
 	github.com/catppuccin/go v0.3.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -121,7 +121,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0 // indirect
-	github.com/hashicorp/go-version v1.7.0 // indirect
+	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.24.0 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/haya14busa/go-checkstyle v0.0.0-20170303121022-5e9d09f51fa1 // indirect
@@ -174,7 +174,7 @@ require (
 	github.com/zclconf/go-cty v1.18.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.42.0 // indirect
-	go.opentelemetry.io/otel/metric v1.42.0 // indirect
+	go.opentelemetry.io/otel/metric v1.44.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.9.0 // indirect
 	go.starlark.net v0.0.0-20260521175807-f5d928020cb8 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
