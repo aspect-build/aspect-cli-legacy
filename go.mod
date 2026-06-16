@@ -4,10 +4,10 @@ go 1.26.4
 
 require (
 	github.com/alphadose/haxmap v1.4.1
-	github.com/aspect-build/aspect-gazelle/common v0.0.0-20260604074543-b8689198774e
-	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20260604074543-b8689198774e
-	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20260604074543-b8689198774e
-	github.com/bazelbuild/bazel-gazelle v0.51.1
+	github.com/aspect-build/aspect-gazelle/common v0.0.0-20260615233543-25e742869fc1
+	github.com/aspect-build/aspect-gazelle/language/orion v0.0.0-20260615233543-25e742869fc1
+	github.com/aspect-build/aspect-gazelle/runner v0.0.0-20260615233543-25e742869fc1
+	github.com/bazelbuild/bazel-gazelle v0.51.3
 	github.com/bazelbuild/bazelisk v1.27.0 // NOTE: keep vendored code in sync
 	github.com/bazelbuild/buildtools v0.0.0-20260528135316-84fa6c32aee6
 	github.com/bluekeyes/go-gitdiff v0.8.1
@@ -53,7 +53,7 @@ require (
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
-	github.com/EngFlow/gazelle_cc v0.5.0 // indirect
+	github.com/EngFlow/gazelle_cc v0.6.0 // indirect
 	github.com/Masterminds/semver/v3 v3.5.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.3.0 // indirect
@@ -62,9 +62,9 @@ require (
 	github.com/alecthomas/chroma/v2 v2.23.1 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20260604074543-b8689198774e // indirect
-	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20260604074543-b8689198774e // indirect
-	github.com/aspect-build/aspect-gazelle/treesitter v0.0.0-20260604074543-b8689198774e // indirect
+	github.com/aspect-build/aspect-gazelle/language/js v0.0.0-20260615233543-25e742869fc1 // indirect
+	github.com/aspect-build/aspect-gazelle/language/kotlin v0.0.0-20260615233543-25e742869fc1 // indirect
+	github.com/aspect-build/aspect-gazelle/treesitter v0.0.0-20260615233543-25e742869fc1 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
@@ -140,7 +140,7 @@ require (
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect
-	github.com/mikefarah/yq/v4 v4.53.2 // indirect
+	github.com/mikefarah/yq/v4 v4.53.3 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
@@ -176,7 +176,7 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.42.0 // indirect
 	go.opentelemetry.io/otel/metric v1.44.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.9.0 // indirect
-	go.starlark.net v0.0.0-20260521175807-f5d928020cb8 // indirect
+	go.starlark.net v0.0.0-20260522144826-ec58d4b459e2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.4 // indirect
 	golang.org/x/crypto v0.51.0 // indirect
