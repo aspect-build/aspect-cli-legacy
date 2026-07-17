@@ -359,22 +359,22 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		}
 
 		// Give the watcher some time to start and open the connection before sending Init()
-		if !incrementalProtocol.HasConnection() {
+		if !incrementalProtocol.IsReady() {
 			// TODO: don't assume abazel is the only non-instant connection
 
 			select {
 			case <-watchCtx.Done():
 				fmt.Printf("%s Process cancelled before establishing connection: %v\n", color.RedString("ERROR:"), watchCtx.Err())
 				return nil, nil, watchCtx.Err()
-			case v := <-abazel.WaitForConnection():
-				fmt.Printf("%s Received connection to %s using abazel v%v\n", color.GreenString("INFO:"), abazel.Address(), v)
+			case <-abazel.WaitForReady():
+				fmt.Printf("%s Received connection to %s using abazel v%v\n", color.GreenString("INFO:"), abazel.Address(), abazel.NegotiatedVersion())
 			case <-time.After(watchConnectionTimeout):
 				fmt.Printf("%s Timeout (%vms) waiting for watch protocol connection.\n", color.YellowString("WARNING:"), watchConnectionTimeout.Milliseconds())
 			}
 		}
 
 		// Abandon the incremental protocol if the target has not responded
-		if !incrementalProtocol.HasConnection() {
+		if !incrementalProtocol.IsReady() {
 			if changedetect.explicitlySupportsIBP() {
 				fmt.Printf("%s target explicitly supports incremental build protocol but did not connect within %vms.\n", color.RedString("ERROR:"), watchConnectionTimeout.Milliseconds())
 				os.Exit(1)
@@ -425,7 +425,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		// If a connection still exists to the incremental protocol, send an Exit message and
 		// hope for a graceful shutdown. Ignore any errors as the process may already be in the
 		// process of shutting down.
-		if incrementalProtocol.HasConnection() {
+		if incrementalProtocol.IsReady() {
 			incrementalProtocol.Exit(context.Background(), watchCtx.Err())
 		}
 
