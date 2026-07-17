@@ -319,11 +319,11 @@ func runConfigureWatch(ctx context.Context, v *runner.GazelleRunner, mode string
 	// Wait for either the connection to be established or the timeout to occur.
 	// Should be instant since the runner is in-process.
 	select {
-	case <-abazel.WaitForConnection():
+	case <-abazel.WaitForReady():
 	case <-time.After(10 * time.Second):
 	}
 
-	if !abazel.HasConnection() {
+	if !abazel.IsReady() {
 		return fmt.Errorf("no connection to incremental protocol")
 	}
 

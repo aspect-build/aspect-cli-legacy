@@ -40,7 +40,7 @@ type IBazelProtocol struct {
 
 var _ ibp.IncrementalBazel = (*IBazelProtocol)(nil)
 
-func (ib *IBazelProtocol) HasConnection() bool {
+func (ib *IBazelProtocol) IsReady() bool {
 	return ib.stdin != nil
 }
 
@@ -78,8 +78,11 @@ func (ib *IBazelProtocol) Env() []string {
 func (ib *IBazelProtocol) Serve(ctx context.Context) error {
 	return nil
 }
-func (ib *IBazelProtocol) WaitForConnection() <-chan ibp.ProtocolVersion {
+func (ib *IBazelProtocol) WaitForReady() <-chan struct{} {
 	return nil
+}
+func (ib *IBazelProtocol) NegotiatedVersion() ibp.ProtocolVersion {
+	return -1
 }
 func (rb *IBazelProtocol) WatchingScope(cap ibp.WatchScope) bool {
 	return cap == ibp.WatchScope_Runfiles
@@ -153,7 +156,7 @@ func (rb *RestartBazelProtocol) kill() error {
 	return terminate(p)
 }
 
-func (rb *RestartBazelProtocol) HasConnection() bool {
+func (rb *RestartBazelProtocol) IsReady() bool {
 	return false
 }
 func (rb *RestartBazelProtocol) Init(ctx context.Context, scope ibp.WatchScope, sources ibp.SourceInfoMap) error {
@@ -196,8 +199,11 @@ func (ib *RestartBazelProtocol) Address() string {
 func (ib *RestartBazelProtocol) Env() []string {
 	return []string{}
 }
-func (ib *RestartBazelProtocol) WaitForConnection() <-chan ibp.ProtocolVersion {
+func (ib *RestartBazelProtocol) WaitForReady() <-chan struct{} {
 	return nil
+}
+func (ib *RestartBazelProtocol) NegotiatedVersion() ibp.ProtocolVersion {
+	return -1
 }
 func (rb *RestartBazelProtocol) WatchingScope(cap ibp.WatchScope) bool {
 	return cap == ibp.WatchScope_Runfiles
