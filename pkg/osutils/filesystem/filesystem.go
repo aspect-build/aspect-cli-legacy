@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Aspect Build Systems, Inc.
+ * Copyright 2023 Aspect Build Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,14 +70,14 @@ type Filesystem struct {
 
 // NewDefault creates a new default Filesystem
 func NewDefault() Filesystem {
-	osUtils := Filesystem{}
-	osUtils.TimeSince = timeSince
-	osUtils.TimeUnix = timeUnix
-	osUtils.IoutilTempDir = ioutilTempDir
-	osUtils.OsMkdirAll = osMkdirAll
-	osUtils.OsRename = osRename
-	osUtils.OsExecCommand = osExecCommand
-	osUtils.OsStat = osStat
+	osUtils := Filesystem{
+		TimeSince:     timeSince,
+		TimeUnix:      timeUnix,
+		IoutilTempDir: ioutilTempDir,
+		OsMkdirAll:    osMkdirAll,
+		OsRename:      osRename,
+		OsExecCommand: osExecCommand,
+		OsStat:        osStat}
 	return osUtils
 }
 

@@ -94,13 +94,8 @@ func setupGoRoot() {
 	position, _, _ := strings.Cut(raw, ": ")
 
 	// Strip the trailing ":line:col" from "<path>:<line>:<col>"
-	location := position
-	if i := strings.LastIndex(location, ":"); i > 0 {
-		location = location[:i]
-	}
-	if i := strings.LastIndex(location, ":"); i > 0 {
-		location = location[:i]
-	}
+	location, _, _ := strings.CutLast(position, ":")
+	location, _, _ = strings.CutLast(location, ":")
 
 	// GOROOT is the go_sdk root — the grandparent of bin/go
 	goroot := filepath.Dir(filepath.Dir(location))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Aspect Build Systems, Inc.
+ * Copyright 2023 Aspect Build Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/aspect-build/aspect-cli-legacy/bazel/analysis"
@@ -155,9 +156,9 @@ func getLastLine(input string) string {
 	lines := strings.Split(input, "\n")
 
 	// Return the last non-empty line
-	for i := len(lines) - 1; i >= 0; i-- {
-		if lines[i] != "" {
-			return lines[i]
+	for _, line := range slices.Backward(lines) {
+		if line != "" {
+			return line
 		}
 	}
 
@@ -361,8 +362,7 @@ func (b *bazel) AQuery(query string, bazelFlags []string) (*analysis.ActionGraph
 	err := <-bazelErrs
 
 	if err != nil {
-		var exitErr *aspecterrors.ExitError
-		if errors.As(err, &exitErr) {
+		if _, ok := errors.AsType[*aspecterrors.ExitError](err); ok {
 			// Dump the `stderr` when Bazel executed and exited non-zero
 			return nil, fmt.Errorf("failed to run aquery: %w\nstderr:\n%s", err, stderr.String())
 		} else {
@@ -406,8 +406,7 @@ func (b *bazel) BazelDashDashVersion() (string, error) {
 	err := <-bazelErrs
 
 	if err != nil {
-		var exitErr *aspecterrors.ExitError
-		if errors.As(err, &exitErr) {
+		if _, ok := errors.AsType[*aspecterrors.ExitError](err); ok {
 			// Dump the `stderr` when Bazel executed and exited non-zero
 			return "", fmt.Errorf("failed to run bazel --version: %w\nstderr:\n%s", err, stderr.String())
 		} else {
@@ -481,8 +480,7 @@ func (b *bazel) BazelFlagsAsProto() ([]byte, error) {
 	err = <-bazelErrs
 
 	if err != nil {
-		var exitErr *aspecterrors.ExitError
-		if errors.As(err, &exitErr) {
+		if _, ok := errors.AsType[*aspecterrors.ExitError](err); ok {
 			// Dump the `stderr` when Bazel executed and exited non-zero
 			return nil, fmt.Errorf("failed to get bazel flags (running in %s): %w\nstderr:\n%s", tmpdir, err, stderr.String())
 		} else {
@@ -564,8 +562,8 @@ func ParseOutputs(agc *analysis.ActionGraphContainer) []Output {
 			segments := prefix(artifact.PathFragmentId)
 			var path strings.Builder
 			// Assemble in reverse order.
-			for i := len(segments) - 1; i >= 0; i-- {
-				path.WriteString(segments[i])
+			for i, segment := range slices.Backward(segments) {
+				path.WriteString(segment)
 				if i > 0 {
 					path.WriteString("/")
 				}

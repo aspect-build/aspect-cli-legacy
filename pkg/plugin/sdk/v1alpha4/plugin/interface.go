@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Aspect Build Systems, Inc.
+ * Copyright 2023 Aspect Build Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,7 +156,7 @@ type PluginCommandManager struct {
 // Save satisfies CommandManager.
 func (cm *PluginCommandManager) Save(commands []*Command) error {
 	for _, cmd := range commands {
-		cmdName := strings.SplitN(cmd.Use, " ", 2)[0]
+		cmdName, _, _ := strings.Cut(cmd.Use, " ")
 		if _, exists := cm.commands[cmdName]; exists {
 			return fmt.Errorf("command %q is declared more than once by plugin", cmdName)
 		}

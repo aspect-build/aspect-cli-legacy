@@ -16,7 +16,6 @@ require (
 	github.com/fatih/color v1.19.0
 	github.com/golang/mock v1.7.0-rc.1
 	github.com/golang/protobuf v1.5.4
-	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.6.1
 	github.com/hay-kot/scaffold v0.11.0
@@ -122,6 +121,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/google/btree v1.1.3 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
@@ -159,7 +159,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/psanford/memfs v0.0.0-20241019191636-4ef911798f9b // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/russross/blackfriday/v2 v2.1.0 // indirect; indirect	github.com/sagikazarmark/locafero v0.9.0 // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/sahilm/fuzzy v0.1.1 // indirect
 	github.com/sergi/go-diff v1.4.0 // indirect
