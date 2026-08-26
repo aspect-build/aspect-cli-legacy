@@ -20,8 +20,8 @@ npm.npm_translate_lock(
 )
 use_repo(npm, "npm")
 
-bazel_dep(name = "aspect_rules_lint", version = "2.3.0")
-bazel_dep(name = "bazel_features", version = "1.45.0")
+bazel_dep(name = "aspect_rules_lint", version = "2.8.0")
+bazel_dep(name = "bazel_features", version = "1.50.0")
 
 # Unused transitive dep (protobuf -> rules_jvm_external). Declared only to raise the
 # version: <= 0.6.x fails loading under Bazel 9 when the host has an Android SDK
@@ -31,7 +31,7 @@ bazel_dep(name = "bazel_skylib", version = "1.9.0")
 bazel_dep(name = "platforms", version = "1.1.0")
 bazel_dep(name = "protobuf", version = "34.0.bcr.1")
 bazel_dep(name = "rules_pkg", version = "1.2.0")
-bazel_dep(name = "rules_shell", version = "0.6.1")
+bazel_dep(name = "rules_shell", version = "0.8.0")
 
 # For integration testing.
 # In the future, consider using this to get them:
@@ -43,10 +43,10 @@ bazel_binary(name = "bazel_6_4_0")
 include("//bazel/include:go.MODULE.bazel")
 include("//bazel/include:bats.MODULE.bazel")
 
-bazel_dep(name = "llvm", version = "0.8.3")
+bazel_dep(name = "llvm", version = "0.8.18")
 
 # Exposes @rules_rs//rs/platforms/constraints:musl by apparent name for
 # //platforms (toolchains are registered transitively by @aspect_gazelle_js).
-bazel_dep(name = "rules_rs", version = "0.0.83")
+bazel_dep(name = "rules_rs", version = "0.0.102")
 
 register_toolchains("@llvm//toolchain:all")
