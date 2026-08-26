@@ -27,8 +27,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
@@ -223,14 +223,14 @@ func (ps *pluginSystem) hasBESPlugins() bool {
 }
 
 func determineBuildId(args []string) string {
-	return uuid.NewString()
+	return uuid.New().String()
 }
 
 func determineInvocationId(args []string) string {
 	if id := rootFlags.FindInvocationId(args); id != "" {
 		return id
 	}
-	return uuid.NewString()
+	return uuid.New().String()
 }
 
 func removeLastBesBackend(args []string) ([]string, string) {

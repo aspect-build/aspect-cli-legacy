@@ -31,6 +31,7 @@ import (
 	"strings"
 	"syscall"
 	"time"
+	"uuid"
 
 	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/root/flags"
 	"github.com/aspect-build/aspect-cli-legacy/pkg/bazel"
@@ -41,7 +42,6 @@ import (
 	"github.com/aspect-build/aspect-gazelle/runner/pkg/ibp"
 	watcher "github.com/aspect-build/aspect-gazelle/runner/pkg/watchman"
 	"github.com/fatih/color"
-	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
@@ -78,7 +78,7 @@ func ensureInvocationId(args []string) ([]string, string) {
 	if id := flags.FindInvocationId(args); id != "" {
 		return args, id
 	}
-	id := uuid.NewString()
+	id := uuid.New().String()
 	return flags.AddFlagToCommand(args, "--invocation_id="+id), id
 }
 

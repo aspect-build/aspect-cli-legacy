@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Aspect Build Systems, Inc.
+ * Copyright 2023 Aspect Build Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package interceptors
 
 import (
 	"context"
+	"slices"
 
 	"github.com/spf13/cobra"
 )
@@ -38,8 +39,8 @@ type Interceptor func(ctx context.Context, cmd *cobra.Command, args []string, ne
 func Run(interceptors []Interceptor, fn RunEContextFn) RunEFn {
 	return func(cmd *cobra.Command, args []string) error {
 		current := fn
-		for i := len(interceptors) - 1; i >= 0; i-- {
-			interceptor := interceptors[i]
+		for _, interceptor := range slices.Backward(interceptors) {
+
 			next := current
 			current = func(ctx context.Context, cmd *cobra.Command, args []string) error {
 				return interceptor(ctx, cmd, args, next)

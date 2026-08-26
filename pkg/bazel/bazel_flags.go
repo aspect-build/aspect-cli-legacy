@@ -161,7 +161,7 @@ func (b *bazel) AddBazelFlags(cmd *cobra.Command) error {
 
 	commands := make(map[string]*cobra.Command)
 	for _, c := range cmd.Commands() {
-		name := strings.SplitN(c.Use, " ", 2)[0]
+		name, _, _ := strings.Cut(c.Use, " ")
 		commands[name] = c
 	}
 

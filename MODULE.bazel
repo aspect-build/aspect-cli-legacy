@@ -5,7 +5,7 @@ module(
 
 bazel_dep(name = "bazel_lib", version = "3.2.2")
 bazel_dep(name = "bazelrc-preset.bzl", version = "1.9.2")
-bazel_dep(name = "aspect_gazelle_prebuilt", version = "0.0.11")
+bazel_dep(name = "aspect_gazelle_prebuilt", version = "0.0.25")
 bazel_dep(name = "buildifier_prebuilt", version = "8.5.1.2")
 bazel_dep(name = "aspect_rules_js", version = "3.0.3")
 

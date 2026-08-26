@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"uuid"
 
 	"github.com/golang/mock/gomock"
-	"github.com/google/uuid"
 	. "github.com/onsi/gomega"
 
 	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/run"

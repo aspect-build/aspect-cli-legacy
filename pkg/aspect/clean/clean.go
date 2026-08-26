@@ -497,7 +497,7 @@ func (runner *Clean) findBazelBaseDir() (string, string, error) {
 
 			normalizedPath := filepath.ToSlash(actualPath)
 			if strings.Contains(normalizedPath, "bazel") && strings.Contains(normalizedPath, "/execroot/") {
-				execrootBase := strings.Split(normalizedPath, "/execroot/")[0]
+				execrootBase, _, _ := strings.Cut(normalizedPath, "/execroot/")
 				execrootSplit := strings.Split(execrootBase, "/")
 				currentWorkingBase := execrootSplit[len(execrootSplit)-1]
 				bazelOutputBase := strings.Join(execrootSplit[:len(execrootSplit)-1], "/")

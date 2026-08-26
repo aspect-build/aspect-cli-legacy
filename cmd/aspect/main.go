@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Aspect Build Systems, Inc.
+ * Copyright 2023 Aspect Build Systems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,22 @@ func main() {
 				fmt.Fprintf(os.Stderr, "%s failed to close CPU profile file %s: %v", color.RedString("ERROR:"), cpuprofile, err)
 			} else {
 				fmt.Printf("%s cpuprofile %s COMPLETE\n", color.GreenString("INFO:"), cpuprofile)
+			}
+		}()
+	}
+
+	if leakprofile, exists := os.LookupEnv("ASPECT_CLI_GOROUTINELEAKPROFILE"); exists {
+		defer func() {
+			f, err := os.Create(leakprofile)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%s failed to create goroutine leak profile file %s: %v", color.RedString("ERROR:"), leakprofile, err)
+				return
+			}
+			defer f.Close()
+			if err := pprof.Lookup("goroutineleak").WriteTo(f, 0); err != nil {
+				fmt.Fprintf(os.Stderr, "%s failed to write goroutine leak profile %s: %v", color.RedString("ERROR:"), leakprofile, err)
+			} else {
+				fmt.Printf("%s goroutineleakprofile %s COMPLETE\n", color.GreenString("INFO:"), leakprofile)
 			}
 		}()
 	}
