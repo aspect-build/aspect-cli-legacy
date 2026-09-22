@@ -20,42 +20,59 @@ import (
 	"strings"
 
 	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/lint/diagnostic"
-	"github.com/reviewdog/reviewdog/parser"
+	"github.com/haya14busa/go-sarif/sarif"
 	"github.com/sourcegraph/go-diff/diff"
 )
 
-func (handler *LintResultsFileHandler) sarifToDiagnostics(sarif parser.SarifJson, label string) []*diagnostic.Diagnostic {
+func (handler *LintResultsFileHandler) sarifToDiagnostics(report sarif.Sarif, label string) []*diagnostic.Diagnostic {
 	var diagnostics []*diagnostic.Diagnostic
-	for _, run := range sarif.Runs {
+	for _, run := range report.Runs {
+		toolName := run.Tool.Driver.Name
 		for _, result := range run.Results {
+			level := ""
+			if result.Level != nil {
+				level = string(*result.Level)
+			}
 			for _, location := range result.Locations {
-				rdfRange := location.PhysicalLocation.Region.GetRdfRange()
-				// TODO: The else case likely means it applies to the whole file. Need to account for that
-				if rdfRange != nil {
-					diagnostics = append(diagnostics, &diagnostic.Diagnostic{
-						Message:  result.Message.Text,
-						Severity: toSeverity(result.Level),
-						Source: &diagnostic.Diagnostic_SourceContent{
-							SourceContent: &diagnostic.SourceContent{
-								Name: determineRelativePath(location.PhysicalLocation.ArtifactLocation.URI, label),
-							},
-						},
-						Spans: []*diagnostic.Span{{
-							Offset: int32(location.PhysicalLocation.Region.GetRdfRange().Start.Line),
-						}},
-						Title: run.Tool.Driver.Name + " found an issue",
-						Type:  diagnostic.DiagnosticType_FILE,
-						Baggage: map[string]string{
-							"label":            label,
-							"lint_result_type": "annotation",
-						},
-					})
+				physical := location.PhysicalLocation
+				// TODO: A missing region likely means it applies to the whole file. Need to account for that
+				if physical == nil || physical.Region == nil || physical.Region.StartLine == nil {
+					continue
 				}
+				uri := ""
+				if physical.ArtifactLocation != nil {
+					uri = deref(physical.ArtifactLocation.URI)
+				}
+				diagnostics = append(diagnostics, &diagnostic.Diagnostic{
+					Message:  deref(result.Message.Text),
+					Severity: toSeverity(level),
+					Source: &diagnostic.Diagnostic_SourceContent{
+						SourceContent: &diagnostic.SourceContent{
+							Name: determineRelativePath(uri, label),
+						},
+					},
+					Spans: []*diagnostic.Span{{
+						Offset: int32(*physical.Region.StartLine),
+					}},
+					Title: toolName + " found an issue",
+					Type:  diagnostic.DiagnosticType_FILE,
+					Baggage: map[string]string{
+						"label":            label,
+						"lint_result_type": "annotation",
+					},
+				})
 			}
 		}
 	}
 
 	return diagnostics
+}
+
+func deref(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
 }
 
 func toSeverity(sarifLevel string) diagnostic.Severity {

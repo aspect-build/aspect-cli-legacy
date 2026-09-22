@@ -49,12 +49,12 @@ func TestSarif(t *testing.T) {
 		g.Expect(len(sarifJson.Runs)).To(Equal(1))
 		g.Expect(sarifJson.Runs[0].Tool.Driver.Name).To(Equal("ClangTidy"))
 		g.Expect(len(sarifJson.Runs[0].Results)).To(Equal(2))
-		g.Expect(sarifJson.Runs[0].Results[0].Message.Text).To(Equal("function is not thread safe [concurrency-mt-unsafe]"))
-		g.Expect(sarifJson.Runs[0].Results[1].Message.Text).To(Equal("function is not thread safe [concurrency-mt-unsafe]"))
-		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("speller/announce/announce.cc"))
-		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("speller/announce/announce.cc"))
-		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(19)))
-		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(19)))
+		g.Expect(sarifJson.Runs[0].Results[0].Message.Text).To(HaveValue(Equal("function is not thread safe [concurrency-mt-unsafe]")))
+		g.Expect(sarifJson.Runs[0].Results[1].Message.Text).To(HaveValue(Equal("function is not thread safe [concurrency-mt-unsafe]")))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(HaveValue(Equal("speller/announce/announce.cc")))
+		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(HaveValue(Equal("speller/announce/announce.cc")))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.StartLine).To(HaveValue(Equal(int64(19))))
+		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.StartLine).To(HaveValue(Equal(int64(19))))
 	})
 
 	t.Run("determineRelativePath: returns relative paths untouched", func(t *testing.T) {

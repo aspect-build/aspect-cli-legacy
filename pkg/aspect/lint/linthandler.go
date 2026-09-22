@@ -25,7 +25,7 @@ import (
 	"github.com/aspect-build/aspect-cli-legacy/pkg/aspect/lint/diagnostic"
 	"github.com/aspect-build/aspect-cli-legacy/pkg/ioutils"
 	"github.com/fatih/color"
-	"github.com/reviewdog/reviewdog/parser"
+	"github.com/haya14busa/go-sarif/sarif"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -63,7 +63,7 @@ func (handler *LintResultsFileHandler) Results(cmd *cobra.Command, results []*Li
 	resultOutput := processFlags(cmd)
 
 	allDiagnostics := &diagnostic.Diagnostics{}
-	var allSarif []parser.SarifJson
+	var allSarif []sarif.Sarif
 
 	for _, r := range results {
 		if len(r.Report) > 0 {

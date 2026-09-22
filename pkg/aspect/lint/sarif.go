@@ -18,16 +18,15 @@ package lint
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"log"
 	"regexp"
 	"strings"
 
+	"github.com/haya14busa/go-sarif/sarif"
 	"github.com/reviewdog/errorformat"
 	"github.com/reviewdog/errorformat/fmts"
 	"github.com/reviewdog/errorformat/writer"
-	"github.com/reviewdog/reviewdog/parser"
 )
 
 type testStruct struct {
@@ -163,12 +162,10 @@ func determineRelativePath(path string, label string) string {
 	return path
 }
 
-func (handler *LintResultsFileHandler) toSarifJson(sarifJsonString string) (sarifJson parser.SarifJson, err error) {
+func (handler *LintResultsFileHandler) toSarifJson(sarifJsonString string) (sarif.Sarif, error) {
 	if sarifJsonString == "" {
-		return parser.SarifJson{}, nil
+		return sarif.Sarif{}, nil
 	}
 
-	err = json.Unmarshal([]byte(sarifJsonString), &sarifJson)
-
-	return sarifJson, err
+	return sarif.UnmarshalSarif([]byte(sarifJsonString))
 }
