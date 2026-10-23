@@ -308,7 +308,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 
 		logger.Infof("initial --watch build: %v", initCmd.Args)
 
-		if err := runner.runCmd(initCtx, initCmd, "Run.Subscribe.Build"); err != nil {
+		if err := runner.runCmd(initCtx, initCmd, "Run.Init.Build"); err != nil {
 			return nil, nil, fmt.Errorf("initial bazel command failed: %w", err)
 		}
 
@@ -392,7 +392,7 @@ func (runner *Run) runWatch(ctx context.Context, bazelCmd []string, bzlCommandSt
 		}
 
 		// Init() with the full runfiles list
-		cctx, initCycleTrace := runner.tracer.Start(initCtx, "Run.Cycle")
+		cctx, initCycleTrace := runner.tracer.Start(initCtx, "Run.Init.Cycle")
 		defer func() {
 			if retErr != nil {
 				initCycleTrace.SetStatus(codes.Error, retErr.Error())
