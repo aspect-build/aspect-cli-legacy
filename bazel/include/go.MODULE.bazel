@@ -21,45 +21,45 @@ single_version_override(
     ],
 )
 
-bazel_dep(name = "aspect_treesitter_grammars", version = "0.0.0")
+bazel_dep(name = "aspect_go_treesitter_grammars", version = "0.0.0")
 archive_override(
-    module_name = "aspect_treesitter_grammars",
-    integrity = "sha256-KvBX7mRACN4wUj+/4fsjfaIUz83eSHNyEVsqNzzoykc=",
-    strip_prefix = "aspect-gazelle-bc31e757c65fdfa577012ba2ff62c4d634549952/treesitter",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/bc31e757c65fdfa577012ba2ff62c4d634549952.tar.gz"],
+    module_name = "aspect_go_treesitter_grammars",
+    integrity = "sha256-JgbG1eNz4ucdX57C19K70NQ1ltOgYuE7btViIm/yFd8=",
+    strip_prefix = "aspect-gazelle-decfe549e19fb8c5ec6344cd4b2e35c7cddd3429/treesitter",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/decfe549e19fb8c5ec6344cd4b2e35c7cddd3429.tar.gz"],
 )
 
 bazel_dep(name = "aspect_gazelle_js", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle_js",
-    integrity = "sha256-KvBX7mRACN4wUj+/4fsjfaIUz83eSHNyEVsqNzzoykc=",
-    strip_prefix = "aspect-gazelle-bc31e757c65fdfa577012ba2ff62c4d634549952/language/js",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/bc31e757c65fdfa577012ba2ff62c4d634549952.tar.gz"],
+    integrity = "sha256-JgbG1eNz4ucdX57C19K70NQ1ltOgYuE7btViIm/yFd8=",
+    strip_prefix = "aspect-gazelle-decfe549e19fb8c5ec6344cd4b2e35c7cddd3429/language/js",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/decfe549e19fb8c5ec6344cd4b2e35c7cddd3429.tar.gz"],
 )
 
 bazel_dep(name = "aspect_gazelle_orion", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle_orion",
-    integrity = "sha256-KvBX7mRACN4wUj+/4fsjfaIUz83eSHNyEVsqNzzoykc=",
-    strip_prefix = "aspect-gazelle-bc31e757c65fdfa577012ba2ff62c4d634549952/language/orion",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/bc31e757c65fdfa577012ba2ff62c4d634549952.tar.gz"],
+    integrity = "sha256-JgbG1eNz4ucdX57C19K70NQ1ltOgYuE7btViIm/yFd8=",
+    strip_prefix = "aspect-gazelle-decfe549e19fb8c5ec6344cd4b2e35c7cddd3429/language/orion",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/decfe549e19fb8c5ec6344cd4b2e35c7cddd3429.tar.gz"],
 )
 
 bazel_dep(name = "aspect_gazelle_runner", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle_runner",
-    integrity = "sha256-KvBX7mRACN4wUj+/4fsjfaIUz83eSHNyEVsqNzzoykc=",
-    strip_prefix = "aspect-gazelle-bc31e757c65fdfa577012ba2ff62c4d634549952/runner",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/bc31e757c65fdfa577012ba2ff62c4d634549952.tar.gz"],
+    integrity = "sha256-JgbG1eNz4ucdX57C19K70NQ1ltOgYuE7btViIm/yFd8=",
+    strip_prefix = "aspect-gazelle-decfe549e19fb8c5ec6344cd4b2e35c7cddd3429/runner",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/decfe549e19fb8c5ec6344cd4b2e35c7cddd3429.tar.gz"],
 )
 
 # Not direclty used but must be declared+overriden until aspect_gazelle_runner points to one published to BCR.
 bazel_dep(name = "aspect_gazelle_kotlin", version = "0.0.0")
 archive_override(
     module_name = "aspect_gazelle_kotlin",
-    integrity = "sha256-KvBX7mRACN4wUj+/4fsjfaIUz83eSHNyEVsqNzzoykc=",
-    strip_prefix = "aspect-gazelle-bc31e757c65fdfa577012ba2ff62c4d634549952/language/kotlin",
-    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/bc31e757c65fdfa577012ba2ff62c4d634549952.tar.gz"],
+    integrity = "sha256-JgbG1eNz4ucdX57C19K70NQ1ltOgYuE7btViIm/yFd8=",
+    strip_prefix = "aspect-gazelle-decfe549e19fb8c5ec6344cd4b2e35c7cddd3429/language/kotlin",
+    urls = ["https://github.com/aspect-build/aspect-gazelle/archive/decfe549e19fb8c5ec6344cd4b2e35c7cddd3429.tar.gz"],
 )
 
 # Go modules
@@ -86,7 +86,7 @@ go_deps.module_override(
 )
 go_deps.module_override(
     patch_strip = 1,
-    patches = ["@aspect_treesitter_grammars//patches:go-tree-sitter-abi15.patch"],
+    patches = ["@aspect_go_treesitter_grammars//patches:go-tree-sitter-abi15.patch"],
     path = "github.com/smacker/go-tree-sitter",
 )
 go_deps.gazelle_override(
