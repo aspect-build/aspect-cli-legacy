@@ -5,6 +5,7 @@ go_library(
     name = "outputs",
     srcs = [
         "hash.go",
+        "manifest.go",
         "outputs.go",
         "paths.go",
     ],
@@ -28,6 +29,7 @@ go_test(
     name = "outputs_test",
     srcs = [
         "hash_test.go",
+        "manifest_test.go",
         "outputs_test.go",
         "paths_test.go",
     ],

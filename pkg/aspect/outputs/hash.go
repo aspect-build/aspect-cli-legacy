@@ -20,7 +20,6 @@ package outputs
 // and causes the line ordering in the import to change.
 // So we just import it in a separate block.
 import (
-	"bufio"
 	"context"
 	"encoding/base64"
 	"errors"
@@ -42,6 +41,9 @@ import (
 
 const numConcurrentHashingThreads = 4
 
+// externalDir is the directory under the output base that holds external repositories.
+const externalDir = "external"
+
 // AddExecutableHash appends the exePath to hashFiles entry of the label
 func AddExecutableHash(hashFiles map[string][]string, label string, exePath string) {
 	_, err := os.Stat(exePath)
@@ -53,61 +55,31 @@ func AddExecutableHash(hashFiles map[string][]string, label string, exePath stri
 	hashFiles[label] = append(hashFiles[label], exePath)
 }
 
-// AddRunfilesHash iterates through the runfiles entries of the manifest, appending all files
-// contained (or files inside directories) to the hashFiles entry of the label
+// AddRunfilesHash appends the files backing each entry of the runfiles manifest (recursing into
+// directories) to the hashFiles entry of the label. A missing manifest is skipped with a warning.
+//
+// Empty-file entries are not hashed. Relative targets are unresolved symlinks; see
+// resolveManifestTarget for how they are handled.
 func AddRunfilesHash(hashFiles map[string][]string, label string, manifestPath string, outputBase string) error {
-	_, err := os.Stat(manifestPath)
-	if os.IsNotExist(err) {
+	manifest, err := readRunfilesManifest(manifestPath)
+	if errors.Is(err, fs.ErrNotExist) {
 		fmt.Fprintf(os.Stderr, "%s manifest %s is not on disk, did you build it? Skipping...\n", label, manifestPath)
 		return nil
 	}
-	runfiles, err := os.Open(manifestPath)
 	if err != nil {
-		return fmt.Errorf("failed to open runfiles manifest %s: %w\n", manifestPath, err)
+		return err
 	}
-	defer runfiles.Close()
 
-	fileScanner := bufio.NewScanner(runfiles)
-	fileScanner.Split(bufio.ScanLines)
-
-	for fileScanner.Scan() {
-		// Manifest entries are in the form
-		// path/in/runfiles /some/absolute/path/to/actual/file
-		// path/in/runfiles some/relative/path/to/actual/file
-		rawLine := fileScanner.Text()
-
-		// Trim spaces from start and end of string. We saw a case at a customer where there was an
-		// additional space before the start of the runfiles path:
-		// ' _main/external/rules_python~~pip~pypi_312_scipy/site-packages/scipy/io/tests/data/Transparent\sBusy.ani /mnt/ephemeral/output/dirt/__main__/external/rules_python~~pip~pypi_312_scipy/site-packages/scipy/io/tests/data/Transparent Busy.ani'
-		line := strings.TrimSpace(rawLine)
-
-		// Find the index of the first space
-		_, after, ok := strings.Cut(line, " ")
-		if !ok {
-			fmt.Fprintf(os.Stderr, "skipping invalid runfiles manifest entry: '%s'\n", rawLine)
+	for _, entry := range manifest.entries {
+		if entry.target == "" {
 			continue
 		}
-
-		// Actual path is everything after the first space including additional unescaped spaces
-		actualPath := unescape(after)
-
-		var fileinfo fs.FileInfo = nil
-
-		// As of Bazel 7.4.0, runfiles paths can be relative
-		if !strings.HasPrefix(actualPath, "/") {
-			maybeAbsPath := filepath.Join(outputBase, "external", actualPath)
-			if possibleFileinfo, err := os.Stat(maybeAbsPath); err == nil {
-				actualPath = maybeAbsPath
-				fileinfo = possibleFileinfo
-			}
-		}
-
-		if fileinfo == nil {
-			fileinfo, err = os.Stat(actualPath)
-		}
-
+		actualPath, fileinfo, err := resolveManifestTarget(manifest, entry, outputBase)
 		if err != nil {
-			return fmt.Errorf("failed to stat runfiles manifest entry %s: %w\n", actualPath, err)
+			return fmt.Errorf("failed to stat runfiles manifest entry %s: %w\n", entry.target, err)
+		}
+		if actualPath == "" {
+			continue
 		}
 
 		if fileinfo.IsDir() {
@@ -123,6 +95,46 @@ func AddRunfilesHash(hashFiles map[string][]string, label string, manifestPath s
 		}
 	}
 	return nil
+}
+
+// resolveManifestTarget returns the on-disk path and file info backing a non-empty manifest
+// entry, or an empty path if the entry should not be hashed on its own.
+//
+// An absolute target must exist. A relative target is an unresolved symlink. If it points at
+// another manifest entry (or a directory containing one) it is skipped, because that entry is
+// hashed itself. Otherwise the first existing candidate wins:
+//   - <outputBase>/external/<target>, if target doesn't escape that directory
+//   - the link resolved inside the runfiles tree on disk, if it stays inside the tree
+//   - <target> relative to the working directory, if target doesn't escape it
+//
+// A symlink that resolves to none of these is skipped with a warning.
+func resolveManifestTarget(m *runfilesManifest, entry manifestEntry, outputBase string) (string, fs.FileInfo, error) {
+	if filepath.IsAbs(entry.target) {
+		fi, err := os.Stat(entry.target)
+		return entry.target, fi, err
+	}
+	linked := entry.linkedRunfilesPath()
+	if m.covers(linked) {
+		return "", nil, nil
+	}
+	var candidates []string
+	local := filepath.IsLocal(entry.target)
+	if local {
+		candidates = append(candidates, filepath.Join(outputBase, externalDir, entry.target))
+	}
+	if dir := m.runfilesDir(); dir != "" && isWithinRunfilesTree(linked) {
+		candidates = append(candidates, filepath.Join(dir, filepath.FromSlash(linked)))
+	}
+	if local {
+		candidates = append(candidates, entry.target)
+	}
+	for _, c := range candidates {
+		if fi, err := os.Stat(c); err == nil {
+			return c, fi, nil
+		}
+	}
+	fmt.Fprintf(os.Stderr, "skipping unresolvable runfiles symlink %s -> %s\n", entry.runfilesPath, entry.target)
+	return "", nil, nil
 }
 
 // =================================================================================================
