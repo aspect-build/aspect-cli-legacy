@@ -103,9 +103,9 @@ func AddRunfilesHash(hashFiles map[string][]string, label string, manifestPath s
 // An absolute target must exist. A relative target is an unresolved symlink. If it points at
 // another manifest entry (or a directory containing one) it is skipped, because that entry is
 // hashed itself. Otherwise the first existing candidate wins:
-//   - <outputBase>/external/<target>
-//   - the link resolved inside the runfiles tree on disk
-//   - <target> relative to the working directory
+//   - <outputBase>/external/<target>, if target doesn't escape that directory
+//   - the link resolved inside the runfiles tree on disk, if it stays inside the tree
+//   - <target> relative to the working directory, if target doesn't escape it
 //
 // A symlink that resolves to none of these is skipped with a warning.
 func resolveManifestTarget(m *runfilesManifest, entry manifestEntry, outputBase string) (string, fs.FileInfo, error) {
@@ -117,11 +117,17 @@ func resolveManifestTarget(m *runfilesManifest, entry manifestEntry, outputBase 
 	if m.covers(linked) {
 		return "", nil, nil
 	}
-	candidates := []string{filepath.Join(outputBase, externalDir, entry.target)}
-	if dir := m.runfilesDir(); dir != "" {
+	var candidates []string
+	local := filepath.IsLocal(entry.target)
+	if local {
+		candidates = append(candidates, filepath.Join(outputBase, externalDir, entry.target))
+	}
+	if dir := m.runfilesDir(); dir != "" && isWithinRunfilesTree(linked) {
 		candidates = append(candidates, filepath.Join(dir, filepath.FromSlash(linked)))
 	}
-	candidates = append(candidates, entry.target)
+	if local {
+		candidates = append(candidates, entry.target)
+	}
 	for _, c := range candidates {
 		if fi, err := os.Stat(c); err == nil {
 			return c, fi, nil

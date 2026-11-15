@@ -108,11 +108,14 @@ func (m *runfilesManifest) runfilesDir() string {
 	return strings.TrimSuffix(m.path, runfilesManifestSuffix) + runfilesDirSuffix
 }
 
-// covers reports whether runfilesPath is within the runfiles tree and is a manifest entry or a
-// directory containing one.
+// covers reports whether runfilesPath is a manifest entry or a directory containing one. The
+// runfiles root (".") covers every entry; paths outside the tree cover none.
 func (m *runfilesManifest) covers(runfilesPath string) bool {
-	if runfilesPath == "." || runfilesPath == ".." || strings.HasPrefix(runfilesPath, "../") || path.IsAbs(runfilesPath) {
+	if !isWithinRunfilesTree(runfilesPath) {
 		return false
+	}
+	if runfilesPath == "." {
+		return len(m.sortedPaths) > 0
 	}
 	i := sort.SearchStrings(m.sortedPaths, runfilesPath)
 	if i < len(m.sortedPaths) && m.sortedPaths[i] == runfilesPath {
@@ -121,6 +124,12 @@ func (m *runfilesManifest) covers(runfilesPath string) bool {
 	prefix := runfilesPath + "/"
 	j := sort.SearchStrings(m.sortedPaths, prefix)
 	return j < len(m.sortedPaths) && strings.HasPrefix(m.sortedPaths[j], prefix)
+}
+
+// isWithinRunfilesTree reports whether a clean, slash-separated runfiles path stays inside the
+// runfiles tree.
+func isWithinRunfilesTree(runfilesPath string) bool {
+	return runfilesPath != ".." && !strings.HasPrefix(runfilesPath, "../") && !path.IsAbs(runfilesPath)
 }
 
 // linkedRunfilesPath returns the runfiles path a relative symlink target points at, resolved

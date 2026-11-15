@@ -163,6 +163,25 @@ func TestAddRunfilesHash(t *testing.T) {
 		g.Expect(hashFiles["//:tool"]).To(ConsistOf(target))
 	})
 
+	t.Run("never resolves symlinks outside the runfiles tree or external directory", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		tmp := t.TempDir()
+		outputBase := filepath.Join(tmp, "output_base")
+		manifest := filepath.Join(tmp, "bin", "tool.runfiles_manifest")
+		writeFiles(g, map[string]string{
+			filepath.Join(outputBase, "external", "keep"): "x",
+			filepath.Join(outputBase, "unrelated"):        "x",
+			filepath.Join(tmp, "bin", "unrelated"):        "x",
+			manifest: "top ..\n" +
+				"_main/up ../../unrelated\n" +
+				"_main/ext ../../output_base/unrelated\n",
+		})
+
+		hashFiles := make(map[string][]string)
+		g.Expect(AddRunfilesHash(hashFiles, "//:tool", manifest, outputBase)).To(Succeed())
+		g.Expect(hashFiles).To(BeEmpty())
+	})
+
 	t.Run("hashes directory targets recursively", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 		tmp := t.TempDir()

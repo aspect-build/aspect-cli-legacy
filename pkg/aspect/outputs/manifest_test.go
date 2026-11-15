@@ -80,6 +80,10 @@ func TestRunfilesDir(t *testing.T) {
 }
 
 func TestCovers(t *testing.T) {
+	t.Run("empty manifest covers nothing", func(t *testing.T) {
+		NewGomegaWithT(t).Expect((&runfilesManifest{}).covers(".")).To(BeFalse())
+	})
+
 	m := &runfilesManifest{sortedPaths: []string{"a/b/c", "a/bb", "d"}}
 	tests := []struct {
 		path    string
@@ -93,7 +97,7 @@ func TestCovers(t *testing.T) {
 		{"a/b/c/d", false},
 		{"a/ba", false},
 		{"e", false},
-		{".", false},
+		{".", true},
 		{"..", false},
 		{"../d", false},
 		{"/d", false},
@@ -110,4 +114,14 @@ func TestLinkedRunfilesPath(t *testing.T) {
 	g.Expect(manifestEntry{"r/venv/bin/python3", "../../../../py/bin/python3"}.linkedRunfilesPath()).To(Equal("../py/bin/python3"))
 	g.Expect(manifestEntry{"r/venv/bin/python3", "../../../py/bin/python3"}.linkedRunfilesPath()).To(Equal("py/bin/python3"))
 	g.Expect(manifestEntry{"r/bin/python", "python3"}.linkedRunfilesPath()).To(Equal("r/bin/python3"))
+}
+
+func TestIsWithinRunfilesTree(t *testing.T) {
+	g := NewGomegaWithT(t)
+	for _, p := range []string{".", "a", "a/b", "..a", "a/.."} {
+		g.Expect(isWithinRunfilesTree(p)).To(BeTrue(), p)
+	}
+	for _, p := range []string{"..", "../a", "/a"} {
+		g.Expect(isWithinRunfilesTree(p)).To(BeFalse(), p)
+	}
 }
