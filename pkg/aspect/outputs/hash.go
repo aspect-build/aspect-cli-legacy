@@ -28,6 +28,7 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -53,8 +54,49 @@ func AddExecutableHash(hashFiles map[string][]string, label string, exePath stri
 	hashFiles[label] = append(hashFiles[label], exePath)
 }
 
+// manifestEntry is a single parsed line of a runfiles manifest.
+type manifestEntry struct {
+	// runfilesPath is the path of the entry inside the runfiles tree.
+	runfilesPath string
+	// target is the file the entry points to. It is empty for empty files (e.g. generated
+	// __init__.py files) and, for unresolved symlinks created with ctx.actions.declare_symlink(),
+	// it is the raw link target, which is relative to the entry's directory in the runfiles tree.
+	target string
+}
+
+// parseManifestLine parses a runfiles manifest line. Lines are of the form
+//
+//	path/in/runfiles /some/absolute/path/to/actual/file
+//	path/in/runfiles some/relative/path/to/actual/file
+//	path/in/runfiles
+//
+// where the last form (trailing space, empty target) denotes an empty file. Since Bazel 7.4.0 a
+// line starting with a space has an escaped runfiles path (and target); see unescape.
+func parseManifestLine(rawLine string) (manifestEntry, bool) {
+	line := strings.TrimRight(rawLine, "\r")
+	escaped := strings.HasPrefix(line, " ")
+	if escaped {
+		line = line[1:]
+	}
+	runfilesPath, target, ok := strings.Cut(line, " ")
+	if !ok || runfilesPath == "" {
+		return manifestEntry{}, false
+	}
+	if escaped {
+		runfilesPath = unescape(runfilesPath)
+	}
+	// Everything after the first space is the target, including additional unescaped spaces.
+	return manifestEntry{runfilesPath: runfilesPath, target: unescape(target)}, true
+}
+
 // AddRunfilesHash iterates through the runfiles entries of the manifest, appending all files
-// contained (or files inside directories) to the hashFiles entry of the label
+// contained (or files inside directories) to the hashFiles entry of the label.
+//
+// Empty-file entries are skipped. Relative targets are resolved against outputBase/external,
+// then the working directory, and finally as unresolved symlinks relative to the entry's
+// directory in the runfiles tree. A symlink that points at another manifest entry (or a directory
+// containing manifest entries) is skipped since its target is hashed via that entry; one that
+// cannot be resolved at all is skipped with a warning rather than failing.
 func AddRunfilesHash(hashFiles map[string][]string, label string, manifestPath string, outputBase string) error {
 	_, err := os.Stat(manifestPath)
 	if os.IsNotExist(err) {
@@ -67,43 +109,43 @@ func AddRunfilesHash(hashFiles map[string][]string, label string, manifestPath s
 	}
 	defer runfiles.Close()
 
+	var entries []manifestEntry
+	runfilesPaths := make(map[string]struct{})
 	fileScanner := bufio.NewScanner(runfiles)
 	fileScanner.Split(bufio.ScanLines)
-
 	for fileScanner.Scan() {
-		// Manifest entries are in the form
-		// path/in/runfiles /some/absolute/path/to/actual/file
-		// path/in/runfiles some/relative/path/to/actual/file
 		rawLine := fileScanner.Text()
-
-		// Trim spaces from start and end of string. We saw a case at a customer where there was an
-		// additional space before the start of the runfiles path:
-		// ' _main/external/rules_python~~pip~pypi_312_scipy/site-packages/scipy/io/tests/data/Transparent\sBusy.ani /mnt/ephemeral/output/dirt/__main__/external/rules_python~~pip~pypi_312_scipy/site-packages/scipy/io/tests/data/Transparent Busy.ani'
-		line := strings.TrimSpace(rawLine)
-
-		// Find the index of the first space
-		_, after, ok := strings.Cut(line, " ")
+		entry, ok := parseManifestLine(rawLine)
 		if !ok {
 			fmt.Fprintf(os.Stderr, "skipping invalid runfiles manifest entry: '%s'\n", rawLine)
 			continue
 		}
+		entries = append(entries, entry)
+		runfilesPaths[entry.runfilesPath] = struct{}{}
+	}
+	if err := fileScanner.Err(); err != nil {
+		return fmt.Errorf("failed to read runfiles manifest %s: %w\n", manifestPath, err)
+	}
 
-		// Actual path is everything after the first space including additional unescaped spaces
-		actualPath := unescape(after)
+	runfilesDir := strings.TrimSuffix(manifestPath, "_manifest")
 
-		var fileinfo fs.FileInfo = nil
-
-		// As of Bazel 7.4.0, runfiles paths can be relative
-		if !strings.HasPrefix(actualPath, "/") {
-			maybeAbsPath := filepath.Join(outputBase, "external", actualPath)
-			if possibleFileinfo, err := os.Stat(maybeAbsPath); err == nil {
-				actualPath = maybeAbsPath
-				fileinfo = possibleFileinfo
-			}
+	for _, entry := range entries {
+		if entry.target == "" {
+			continue
 		}
-
-		if fileinfo == nil {
-			fileinfo, err = os.Stat(actualPath)
+		actualPath, fileinfo, err := statManifestTarget(entry.target, outputBase)
+		if err != nil && !filepath.IsAbs(entry.target) {
+			linked := path.Clean(path.Join(path.Dir(entry.runfilesPath), entry.target))
+			if isWithinRunfiles(linked) && coversManifestEntry(linked, runfilesPaths, entries) {
+				continue
+			}
+			inTree := filepath.Join(runfilesDir, filepath.FromSlash(linked))
+			if fi, treeErr := os.Stat(inTree); treeErr == nil {
+				actualPath, fileinfo, err = inTree, fi, nil
+			} else {
+				fmt.Fprintf(os.Stderr, "skipping unresolvable runfiles symlink %s -> %s\n", entry.runfilesPath, entry.target)
+				continue
+			}
 		}
 
 		if err != nil {
@@ -123,6 +165,41 @@ func AddRunfilesHash(hashFiles map[string][]string, label string, manifestPath s
 		}
 	}
 	return nil
+}
+
+// statManifestTarget stats a manifest target and returns the path it was found at. As of Bazel
+// 7.4.0 targets can be relative; those are tried under outputBase/external first, then relative
+// to the working directory.
+func statManifestTarget(target string, outputBase string) (string, fs.FileInfo, error) {
+	if !filepath.IsAbs(target) {
+		external := filepath.Join(outputBase, "external", target)
+		if fi, err := os.Stat(external); err == nil {
+			return external, fi, nil
+		}
+	}
+	fi, err := os.Stat(target)
+	return target, fi, err
+}
+
+// isWithinRunfiles reports whether a cleaned, slash-separated runfiles path stays inside the
+// runfiles tree.
+func isWithinRunfiles(p string) bool {
+	return p != "." && p != ".." && !strings.HasPrefix(p, "../") && !path.IsAbs(p)
+}
+
+// coversManifestEntry reports whether runfilesPath is itself a manifest entry or a directory
+// containing one.
+func coversManifestEntry(runfilesPath string, runfilesPaths map[string]struct{}, entries []manifestEntry) bool {
+	if _, ok := runfilesPaths[runfilesPath]; ok {
+		return true
+	}
+	prefix := runfilesPath + "/"
+	for _, e := range entries {
+		if strings.HasPrefix(e.runfilesPath, prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 // =================================================================================================

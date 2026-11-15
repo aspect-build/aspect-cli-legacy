@@ -18,6 +18,8 @@ package outputs
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -98,5 +100,61 @@ func TestHash(t *testing.T) {
 		result100, err := HashLabelFiles(hashFiles, 100, "some_salt")
 		g.Expect(err).To(BeNil())
 		g.Expect(resultSync).To(Equal(result100))
+	})
+}
+
+func TestAddRunfilesHash(t *testing.T) {
+	t.Run("handles empty files, escaped paths and declare_symlink entries", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		tmp := t.TempDir()
+		outputBase := filepath.Join(tmp, "output_base")
+		python := filepath.Join(outputBase, "external", "rules_python++python+python_3_11", "bin", "python3")
+		spaced := filepath.Join(tmp, "a b.txt")
+		for _, f := range []string{python, spaced} {
+			g.Expect(os.MkdirAll(filepath.Dir(f), 0o755)).To(Succeed())
+			g.Expect(os.WriteFile(f, []byte("x"), 0o644)).To(Succeed())
+		}
+
+		manifest := filepath.Join(tmp, "bin", "multirun.runfiles_manifest")
+		g.Expect(os.MkdirAll(filepath.Dir(manifest), 0o755)).To(Succeed())
+		g.Expect(os.WriteFile(manifest, []byte(
+			"__init__.py \n"+
+				"rules_multirun+/internal/__init__.py \n"+
+				" _main/a\\sb.txt "+spaced+"\n"+
+				"rules_python++python+python_3_11/bin/python3 rules_python++python+python_3_11/bin/python3\n"+
+				"rules_multirun+/internal/_multirun.venv/bin/python3 ../../../../rules_python++python+python_3_11/bin/python3\n"+
+				"rules_multirun+/internal/_multirun.venv/bin/python ../../../../rules_python++python+python_3_11/bin\n"+
+				"rules_multirun+/internal/_multirun.venv/bin/dangling ../missing\n",
+		), 0o644)).To(Succeed())
+
+		hashFiles := make(map[string][]string)
+		g.Expect(AddRunfilesHash(hashFiles, "//:multirun", manifest, outputBase)).To(Succeed())
+		g.Expect(hashFiles["//:multirun"]).To(ConsistOf(spaced, python))
+	})
+
+	t.Run("resolves declare_symlink entries via the runfiles tree", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		tmp := t.TempDir()
+		manifest := filepath.Join(tmp, "bin", "tool.runfiles_manifest")
+		target := filepath.Join(tmp, "bin", "tool.runfiles", "other", "file")
+		g.Expect(os.MkdirAll(filepath.Dir(target), 0o755)).To(Succeed())
+		g.Expect(os.WriteFile(target, []byte("x"), 0o644)).To(Succeed())
+		g.Expect(os.WriteFile(manifest, []byte("_main/link ../other/file\n"), 0o644)).To(Succeed())
+
+		hashFiles := make(map[string][]string)
+		g.Expect(AddRunfilesHash(hashFiles, "//:tool", manifest, filepath.Join(tmp, "ob"))).To(Succeed())
+		g.Expect(hashFiles["//:tool"]).To(ConsistOf(target))
+	})
+
+	t.Run("still fails on missing absolute targets", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		tmp := t.TempDir()
+		manifest := filepath.Join(tmp, "tool.runfiles_manifest")
+		g.Expect(os.WriteFile(manifest, []byte("_main/f "+filepath.Join(tmp, "nope")+"\n"), 0o644)).To(Succeed())
+
+		g.Expect(AddRunfilesHash(map[string][]string{}, "//:tool", manifest, tmp)).NotTo(Succeed())
 	})
 }
